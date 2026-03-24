@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #eef4ff 0%, #f8fafc 100%);
+      color: #1f2937;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb, #4f46e5);
+      color: white;
+      padding: 36px 20px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 1450px;
+      margin: 28px auto;
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr 1.2fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+
+    h2, h3, h4 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 6px;
+      margin-bottom: 14px;
+      border-radius: 12px;
+      border: 1px solid #dbe3ef;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.96;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, #0f766e, #0d9488);
+    }
+
+    .danger-btn {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .chat-btn {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .job-item, .application-item, .message-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    .job-item h3 {
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .job-actions button {
+      width: auto;
+      min-width: 140px;
+      margin-bottom: 0;
+    }
+
+    .empty {
+      color: #64748b;
+      text-align: center;
+      padding: 24px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 16px;
+      background: #f8fafc;
+    }
+
+    .status-box {
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .status-success {
+      display: block;
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-error {
+      display: block;
+      background: #fff1f2;
+      color: #b91c1c;
+      border: 1px solid #fecdd3;
+    }
+
+    .small-text {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: -6px;
+      margin-bottom: 12px;
+    }
+
+    .user-box {
+      padding: 14px;
+      border-radius: 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .chat-box {
+      max-height: 360px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px;
+      background: #f8fafc;
+      margin-bottom: 14px;
+    }
+
+    .message-item {
+      background: white;
+      margin-bottom: 10px;
+    }
+
+    .selected-job {
+      padding: 12px 14px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #3730a3;
+      font-weight: 600;
+    }
+
+    .top-note {
+      max-width: 1450px;
+      margin: 18px auto 0;
+      padding: 0 20px;
+    }
+
+    .hero-note {
+      background: white;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      color: #334155;
+    }
+
+    @media (max-width: 1300px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TursiMajstor</h1>
+    <p>Свързваме клиенти и изпълнители за ремонти, услуги и работа по обяви</p>
+  </header>
+
+  <div class="top-note">
+    <div class="hero-note">
+      Вече имаш работеща платформа с регистрация, вход, роли, кандидатстване, чат и рейтинг.
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="grid">
+      <div class="card">
+        <h2>Регистрация</h2>
+        <div id="registerStatus" class="status-box"></div>
+
+        <form id="registerForm">
+          <label for="registerName">Име</label>
+          <input type="text" id="registerName" required>
+
+          <label for="registerEmail">Имейл</label>
+          <input type="email" id="registerEmail" required>
+
+          <label for="registerPassword">Парола</label>
+          <input type="password" id="registerPassword" required>
+
+          <label for="registerRole">Роля</label>
+          <select id="registerRole" required>
+            <option value="">Избери роля</option>
+            <option value="client">Клиент</option>
+            <option value="worker">Изпълнител</option>
+          </select>
+
+          <button type="submit">Регистрирай се</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Вход</h2>
+        <div id="loginStatus" class="status-box"></div>
+        <div id="currentUserBox" class="user-box">Няма влязъл потребител.</div>
+
+        <form id="loginForm">
+          <label for="loginEmail">Имейл</label>
+          <input type="email" id="loginEmail" required>
+
+          <label for="loginPassword">Парола</label>
+          <input type="password" id="loginPassword" required>
+
+          <button type="submit">Влез</button>
+          <button type="button" class="danger-btn" onclick="logout()">Изход</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Публикувай обява</h2>
+        <div id="jobStatus" class="status-box"></div>
+        <div class="small-text">Само клиенти могат да публикуват обяви.</div>
+
+        <form id="jobForm">
+          <label for="title">Заглавие</label>
+          <input type="text" id="title" required>
+
+          <label for="description">Описание</label>
+          <textarea id="description" required></textarea>
+
+          <label for="city">Град</label>
+          <input type="text" id="city" required>
+
+          <label for="category">Категория</label>
+          <select id="category" required>
+            <option value="">Избери категория</option>
+            <option value="Ремонт">Ремонт</option>
+            <option value="Почистване">Почистване</option>
+            <option value="Строителство">Строителство</option>
+            <option value="Преместване">Преместване</option>
+            <option value="Електро услуги">Електро услуги</option>
+            <option value="ВиК">ВиК</option>
+            <option value="Друго">Друго</option>
+          </select>
+
+          <label for="budget">Бюджет</label>
+          <input type="number" id="budget">
+
+          <button type="submit">Публикувай</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Налични обяви</h2>
+        <div id="jobsList"></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;" class="grid">
+      <div class="card">
+        <h2>Кандидатури</h2>
+        <div class="small-text">Избери обява и натисни „Виж кандидатури“.</div>
+        <div id="applicationsStatus" class="status-box"></div>
+        <div id="applicationsList" class="empty">Все още няма заредени кандидатури.</div>
+      </div>
+
+      <div class="card" style="grid-column: span 3;">
+        <h2>Чат по обява</h2>
+        <div id="chatStatus" class="status-box"></div>
+        <div id="selectedJobBox" class="selected-job">Не е избрана обява за чат.</div>
+
+        <div id="chatMessages" class="chat-box">
+          <div class="empty">Все още няма заредени съобщения.</div>
+        </div>
+
+        <form id="chatForm">
+          <label for="chatText">Ново съобщение</label>
+          <textarea id="chatText" placeholder="Напиши съобщение..." required></textarea>
+          <button type="submit" class="chat-btn">Изпрати съобщение</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const registerForm = document.getElementById("registerForm");
+    const registerStatus = document.getElementById("registerStatus");
+
+    const loginForm = document.getElementById("loginForm");
+    const loginStatus = document.getElementById("loginStatus");
+    const currentUserBox = document.getElementById("currentUserBox");
+
+    const jobForm = document.getElementById("jobForm");
+    const jobsList = document.getElementById("jobsList");
+    const applicationsList = document.getElementById("applicationsList");
+    const jobStatus = document.getElementById("jobStatus");
+    const applicationsStatus = document.getElementById("applicationsStatus");
+
+    const chatForm = document.getElementById("chatForm");
+    const chatText = document.getElementById("chatText");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatStatus = document.getElementById("chatStatus");
+    const selectedJobBox = document.getElementById("selectedJobBox");
+
+    let selectedChatJobId = null;
+    let selectedChatJobTitle = "";
+
+    function showStatus(element, message, type = "success") {
+      element.className = "status-box " + (type === "success" ? "status-success" : "status-error");
+      element.textContent = message;
+    }
+
+    function clearStatus(element) {
+      element.className = "status-box";
+      element.textContent = "";
+    }
+
+    function roleLabel(role) {
+      if (role === "client") return "Клиент";
+      if (role === "worker") return "Изпълнител";
+      return role;
+    }
+
+    function getCurrentUser() {
+      const user = localStorage.getItem("currentUser");
+      return user ? JSON.parse(user) : null;
+    }
+
+    function updateCurrentUserUI() {
+      const user = getCurrentUser();
+
+      if (!user) {
+        currentUserBox.innerHTML = "Няма влязъл потребител.";
+        return;
+      }
+
+      currentUserBox.innerHTML = `
+        <div><strong>Влязъл:</strong> ${user.name}</div>
+        <div><strong>Имейл:</strong> ${user.email}</div>
+        <div><span class="role-badge">${roleLabel(user.role)}</span></div>
+      `;
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      updateCurrentUserUI();
+      showStatus(loginStatus, "Излезе от профила си.", "success");
+      clearStatus(jobStatus);
+      clearStatus(applicationsStatus);
+      clearStatus(chatStatus);
+      loadJobs();
+    }
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(registerStatus);
+
+      const user = {
+        name: document.getElementById("registerName").value.trim(),
+        email: document.getElementById("registerEmail").value.trim(),
+        password: document.getElementById("registerPassword").value.trim(),
+        role: document.getElementById("registerRole").value
+      };
+
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(registerStatus, data.message || "Грешка при регистрация.", "error");
+        return;
+      }
+
+      registerForm.reset();
+      showStatus(registerStatus, `Успешна регистрация за ${data.user.name} ✅`, "success");
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(loginStatus);
+
+      const loginData = {
+        email: document.getElementById("loginEmail").value.trim(),
+        password: document.getElementById("loginPassword").value.trim()
+      };
+
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(loginStatus, data.message || "Грешка при вход.", "error");
+        return;
+      }
+
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      updateCurrentUserUI();
+      loginForm.reset();
+      showStatus(loginStatus, `Добре дошъл, ${data.user.name} ✅`, "success");
+      loadJobs();
+    });
+
+    async function loadJobs() {
+      const res = await fetch("/jobs");
+      const data = await res.json();
+
+      jobsList.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        jobsList.innerHTML = '<div class="empty">Все още няма обяви.</div>';
+        return;
+      }
+
+      data.forEach(job => {
+        const currentUser = getCurrentUser();
+        const canApply = currentUser && currentUser.role === "worker";
+
+        const div = document.createElement("div");
+        div.className = "job-item";
+        div.innerHTML = `
+          <h3>${job.title}</h3>
+          <div class="meta">📍 ${job.city} | 🏷 ${job.category} | 💰 ${job.budget} лв</div>
+          <p>${job.description}</p>
+          <div class="job-actions">
+            <button onclick="apply(${job.id})" ${canApply ? "" : "disabled"}>Кандидатствай</button>
+            <button class="secondary-btn" onclick="viewApplications(${job.id}, '${job.title.replace(/'/g, "\\'")}')">Виж кандидатури</button>
+            <button class="chat-btn" onclick="openChat(${job.id}, '${job.title.replace(/'/g, "\\'")}')">Отвори чат</button>
+          </div>
+        `;
+        jobsList.appendChild(div);
+      });
+    }
+
+    jobForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(jobStatus);
+
+      const currentUser = getCurrentUser();
+
+      if (!currentUser) {
+        showStatus(jobStatus, "Трябва първо да влезеш в профила си.", "error");
+        return;
+      }
+
+      if (currentUser.role !== "client") {
+        showStatus(jobStatus, "Само потребител с роля Клиент може да публикува обяви.", "error");
+        return;
+      }
+
+      const job = {
+        title: document.getElementById("title").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        category: document.getElementById("category").value,
+        budget: document.getElementById("budget").value
+      };
+
+      const res = await fetch("/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(job)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(jobStatus, data.message || "Грешка при публикуване.", "error");
+        return;
+      }
+
+      jobForm.reset();
+      showStatus(jobStatus, "Обявата е публикувана успешно ✅", "success");
+      loadJobs();
+    });
+
+    async function apply(jobId) {
+      const currentUser = getCurrentUser();
+
+      if (!currentUser) {
+        alert("Трябва първо да влезеш в профила си.");
+        return;
+      }
+
+      if (currentUser.role !== "worker") {
+        alert("Само изпълнител може да кандидатства по обяви.");
+        return;
+      }
+
+      const message = prompt("Съобщение:");
+      const price = prompt("Предложена цена:");
+
+      if (!message) return;
+
+      const res = await fetch("/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: Number(jobId),
+          name: currentUser.name,
+          message: message.trim(),
+          price
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Грешка при кандидатстване.");
+        return;
+      }
+
+      alert("Кандидатства успешно!");
+    }
+
+    async function rateUser(workerName) {
+      const currentUser = getCurrentUser();
+
+      if (!currentUser || currentUser.role !== "client") {
+        alert("Само клиент може да оценява изпълнители.");
+        return;
+      }
+
+      const rating = prompt("Дай оценка от 1 до 5:");
+
+      if (!rating) return;
+
+      const num = Number(rating);
+
+      if (num < 1 || num > 5) {
+        alert("Оценката трябва да е между 1 и 5.");
+        return;
+      }
+
+      const res = await fetch("/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workerName,
+          rating: num
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Грешка при оценка.");
+        return;
+      }
+
+      alert("Оценката е записана ⭐");
+    }
+
+    async function viewApplications(jobId, jobTitle) {
+      clearStatus(applicationsStatus);
+
+      const res = await fetch(`/applications/${jobId}`);
+      const data = await res.json();
+
+      applicationsList.innerHTML = "";
+
+      if (!res.ok) {
+        showStatus(applicationsStatus, "Грешка при зареждане.", "error");
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        applicationsList.innerHTML = '<div class="empty">Няма кандидатури.</div>';
+        return;
+      }
+
+      for (const app of data) {
+        const ratingRes = await fetch(`/ratings/${app.name}`);
+        const ratingData = await ratingRes.json();
+
+        const div = document.createElement("div");
+        div.className = "application-item";
+
+        div.innerHTML = `
+          <h4>👤 ${app.name}</h4>
+          <div class="meta">💰 ${app.price} лв | ⭐ ${ratingData.average || 0} (${ratingData.count || 0})</div>
+          <p>💬 ${app.message}</p>
+          <button onclick="rateUser('${app.name.replace(/'/g, "\\'")}')">Оцени</button>
+        `;
+
+        applicationsList.appendChild(div);
+      }
+    }
+
+    async function openChat(jobId, jobTitle) {
+      selectedChatJobId = jobId;
+      selectedChatJobTitle = jobTitle;
+      selectedJobBox.textContent = `Чат за обява: ${jobTitle}`;
+      await loadMessages(jobId);
+    }
+
+    async function loadMessages(jobId) {
+      clearStatus(chatStatus);
+
+      try {
+        const res = await fetch(`/messages/${jobId}`);
+        const data = await res.json();
+
+        chatMessages.innerHTML = "";
+
+        if (!res.ok) {
+          showStatus(chatStatus, "Грешка при зареждане на съобщенията.", "error");
+          chatMessages.innerHTML = '<div class="empty">Неуспешно зареждане на чата.</div>';
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          chatMessages.innerHTML = '<div class="empty">Все още няма съобщения за тази обява.</div>';
+          return;
+        }
+
+        data.forEach(msg => {
+          const div = document.createElement("div");
+          div.className = "message-item";
+          div.innerHTML = `
+            <strong>${msg.senderName} (${roleLabel(msg.senderRole)})</strong>
+            <div class="meta">${msg.createdAt}</div>
+            <div>${msg.text}</div>
+          `;
+          chatMessages.appendChild(div);
+        });
+      } catch (error) {
+        console.error(error);
+        showStatus(chatStatus, "Стана грешка при отваряне на чата.", "error");
+        chatMessages.innerHTML = '<div class="empty">Възникна проблем при зареждането.</div>';
+      }
+    }
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(chatStatus);
+
+      const currentUser = getCurrentUser();
+
+      if (!currentUser) {
+        showStatus(chatStatus, "Трябва първо да влезеш в профила си.", "error");
+        return;
+      }
+
+      if (!selectedChatJobId) {
+        showStatus(chatStatus, "Първо избери обява с бутона „Отвори чат“.", "error");
+        return;
+      }
+
+      const text = chatText.value.trim();
+
+      if (!text) {
+        showStatus(chatStatus, "Напиши съобщение.", "error");
+        return;
+      }
+
+      const res = await fetch("/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: selectedChatJobId,
+          senderName: currentUser.name,
+          senderRole: currentUser.role,
+          text
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(chatStatus, data.message || "Грешка при изпращане.", "error");
+        return;
+      }
+
+      chatText.value = "";
+      showStatus(chatStatus, "Съобщението е изпратено ✅", "success");
+      await loadMessages(selectedChatJobId);
+    });
+
+    updateCurrentUserUI();
+    loadJobs();
+  </script>
+</body>
+</html>
