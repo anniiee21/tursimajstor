@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Обяви</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="navbar">
+        <h1 class="brand">TursiMajstor</h1>
+
+        <div class="nav-links">
+  <a class="active" href="/">Обяви</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/chat-page">Чат</a>
+</div>
+
+        <div class="user-menu">
+  <button id="userMenuBtn" class="user-chip">Вход</button>
+
+  <div id="userDropdown" class="user-dropdown hidden">
+    
+    <div id="userInfo"></div>
+
+    <div class="auth-tabs">
+  <button id="loginTabBtn" class="auth-tab active">Вход</button>
+  <button id="registerTabBtn" class="auth-tab">Регистрация</button>
+</div>
+
+<div id="loginFormBox" class="auth-box">
+  <input id="loginEmail" placeholder="Имейл">
+  <input id="loginPassword" type="password" placeholder="Парола">
+  <button onclick="login()">Влез</button>
+</div>
+
+<div id="registerFormBox" class="auth-box hidden">
+  <input id="regName" placeholder="Име">
+  <input id="regEmail" placeholder="Имейл">
+  <input id="regPassword" type="password" placeholder="Парола">
+  <select id="regRole">
+    <option value="client">Клиент</option>
+    <option value="worker">Изпълнител</option>
+  </select>
+  <button onclick="register()">Регистрация</button>
+</div>
+
+    <button onclick="logout()" class="danger-btn">Изход</button>
+
+  </div>
+</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid-2-wide">
+      <div id="publishJobCard" class="card">
+  <h2>Публикувай обява</h2>
+        <div id="jobStatus" class="status-box"></div>
+        <div class="small-text">Само клиенти могат да публикуват обяви.</div>
+
+        <form id="jobForm">
+          <label for="title">Заглавие</label>
+          <input type="text" id="title" required>
+
+          <label for="description">Описание</label>
+          <textarea id="description" required></textarea>
+
+          <label for="city">Град</label>
+          <input type="text" id="city" required>
+
+          <label for="category">Категория</label>
+          <select id="category" required>
+            <option value="">Избери категория</option>
+            <option value="Ремонт">Ремонт</option>
+            <option value="Почистване">Почистване</option>
+            <option value="Строителство">Строителство</option>
+            <option value="Преместване">Преместване</option>
+            <option value="Електро услуги">Електро услуги</option>
+            <option value="ВиК">ВиК</option>
+            <option value="Друго">Друго</option>
+          </select>
+
+          <label for="budget">Бюджет</label>
+          <input type="number" id="budget">
+
+          <button type="submit">Публикувай</button>
+        </form> 
+      </div>
+
+      <div class="card">
+        <h2>Налични обяви</h2>
+        <div id="jobsList" class="job-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    updateHeaderUser();
+
+  const jobForm = document.getElementById("jobForm");
+  const jobStatus = document.getElementById("jobStatus");
+  const jobsList = document.getElementById("jobsList");
+  const publishJobCard = document.getElementById("publishJobCard");
+
+  function updateJobsPageVisibility() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser || currentUser.role !== "client") {
+      publishJobCard.classList.add("hidden");
+    } else {
+      publishJobCard.classList.remove("hidden");
+    }
+  }
+
+  async function loadJobs() {
+    const res = await fetch("/jobs");
+    const data = await res.json();
+
+    jobsList.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      jobsList.innerHTML = '<div class="empty">Все още няма обяви.</div>';
+      return;
+    }
+
+    data.forEach(job => {
+     const currentUser = getCurrentUser();
+const isWorker = currentUser && currentUser.role === "worker";
+const isClient = currentUser && currentUser.role === "client";
+
+const applyButton = isWorker
+  ? `<button onclick="applyJob(${job.id})">Кандидатствай</button>`
+  : "";
+
+const applicationsButton = isClient
+  ? `<button class="secondary-btn" onclick="goApplications(${job.id})">Виж кандидатури</button>`
+  : "";
+
+const div = document.createElement("div");
+div.className = "job-item";
+div.innerHTML = ` 
+  <h3>${job.title}</h3>
+  <div class="meta">📍 ${job.city} | 🏷 ${job.category} | 💰 ${job.budget} лв</div>
+  <p>${job.description}</p>
+  <div class="job-actions">
+    ${applyButton}
+    ${applicationsButton}
+    <button class="chat-btn" onclick="goChat(${job.id}, '${job.title.replace(/'/g, "\\'")}')">Отвори чат</button>
+  </div>
+      `;
+      jobsList.appendChild(div);
+    });
+  }
+
+  async function applyJob(jobId) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва първо да влезеш.");
+      return;
+    }
+
+    if (currentUser.role !== "worker") {
+      alert("Само изпълнител може да кандидатства.");
+      return;
+    }
+
+    const message = prompt("Съобщение:");
+    const price = prompt("Предложена цена:");
+
+    if (!message) return;
+
+    const res = await fetch("/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jobId,
+        name: currentUser.name,
+        message,
+        price
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка.");
+      return;
+    }
+
+    alert("Кандидатства успешно!");
+  }
+
+  function goApplications(jobId) {
+    localStorage.setItem("selectedJobId", jobId);
+    location.href = "/applications-page";
+  }
+
+  function goChat(jobId, jobTitle) {
+    localStorage.setItem("selectedChatJobId", jobId);
+    localStorage.setItem("selectedChatJobTitle", jobTitle);
+    location.href = "/chat-page";
+  }
+
+  jobForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(jobStatus);
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      showStatus(jobStatus, "Трябва първо да влезеш.", "error");
+      return;
+    }
+
+    if (currentUser.role !== "client") {
+      showStatus(jobStatus, "Само клиент може да публикува обяви.", "error");
+      return;
+    }
+
+   const job = {
+  title: document.getElementById("title").value.trim(),
+  description: document.getElementById("description").value.trim(),
+  city: document.getElementById("city").value.trim(),
+  category: document.getElementById("category").value,
+  budget: document.getElementById("budget").value,
+  ownerEmail: currentUser.email
+};
+
+    const res = await fetch("/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(job)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(jobStatus, data.message || "Грешка.", "error");
+      return;
+    }
+
+    jobForm.reset();
+    showStatus(jobStatus, "Обявата е публикувана успешно ✅", "success");
+    loadJobs();
+  });
+
+  updateJobsPageVisibility();
+  loadJobs();
+
+
+
+  </script>
+</body>
+</html>

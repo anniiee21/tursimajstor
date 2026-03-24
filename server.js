@@ -3,7 +3,7 @@ const path = require("path");
 const app = express();
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
 let jobs = [
   {
@@ -12,7 +12,8 @@ let jobs = [
     description: "Търся човек за боядисване на офис.",
     city: "Плевен",
     budget: 300,
-    category: "Ремонт"
+    category: "Ремонт",
+    ownerEmail: "client@example.com"
   }
 ];
 
@@ -22,7 +23,23 @@ let messages = [];
 let ratings = [];
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "jobs.html"));
+});
+
+app.get("/jobs-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "jobs.html"));
+});
+
+app.get("/applications-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "applications.html"));
+});
+
+app.get("/chat-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chat.html"));
+});
+
+app.get("/account", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "account.html"));
 });
 
 app.get("/jobs", (req, res) => {
@@ -30,9 +47,9 @@ app.get("/jobs", (req, res) => {
 });
 
 app.post("/jobs", (req, res) => {
-  const { title, description, city, budget, category } = req.body;
+  const { title, description, city, budget, category, ownerEmail } = req.body;
 
-  if (!title || !description || !city || !category) {
+  if (!title || !description || !city || !category || !ownerEmail) {
     return res.status(400).json({
       message: "Попълни всички задължителни полета."
     });
@@ -44,7 +61,8 @@ app.post("/jobs", (req, res) => {
     description,
     city,
     budget: budget ? Number(budget) : 0,
-    category
+    category,
+    ownerEmail
   };
 
   jobs.push(newJob);
@@ -81,6 +99,22 @@ app.post("/apply", (req, res) => {
 
 app.get("/applications/:jobId", (req, res) => {
   const jobId = Number(req.params.jobId);
+  const requesterEmail = req.query.email;
+
+  const job = jobs.find(j => j.id === jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  if (!requesterEmail || job.ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да виждаш тези кандидатури."
+    });
+  }
+
   const jobApplications = applications.filter(app => app.jobId === jobId);
   res.json(jobApplications);
 });
@@ -206,7 +240,6 @@ app.post("/rate", (req, res) => {
 
 app.get("/ratings/:workerName", (req, res) => {
   const workerName = req.params.workerName;
-
   const workerRatings = ratings.filter(r => r.workerName === workerName);
 
   if (workerRatings.length === 0) {
@@ -225,7 +258,6 @@ app.get("/ratings/:workerName", (req, res) => {
     count: workerRatings.length
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 

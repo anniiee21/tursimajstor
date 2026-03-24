@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Кандидатури</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="navbar">
+        <h1 class="brand">TursiMajstor</h1>
+
+        <div class="nav-links">
+  <a href="/">Обяви</a>
+  <a id="applicationsNavLink" class="active" href="/applications-page">Кандидатури</a>
+  <a href="/chat-page">Чат</a>
+</div>
+
+        <div class="user-menu">
+  <button id="userMenuBtn" class="user-chip">Вход</button>
+
+  <div id="userDropdown" class="user-dropdown hidden">
+    
+    <div id="userInfo"></div>
+
+   <div class="auth-tabs">
+  <button id="loginTabBtn" class="auth-tab active">Вход</button>
+  <button id="registerTabBtn" class="auth-tab">Регистрация</button>
+</div>
+
+<div id="loginFormBox" class="auth-box">
+  <input id="loginEmail" placeholder="Имейл">
+  <input id="loginPassword" type="password" placeholder="Парола">
+  <button onclick="login()">Влез</button>
+</div>
+
+<div id="registerFormBox" class="auth-box hidden">
+  <input id="regName" placeholder="Име">
+  <input id="regEmail" placeholder="Имейл">
+  <input id="regPassword" type="password" placeholder="Парола">
+  <select id="regRole">
+    <option value="client">Клиент</option>
+    <option value="worker">Изпълнител</option>
+  </select>
+  <button onclick="register()">Регистрация</button>
+</div>
+
+    <button onclick="logout()" class="danger-btn">Изход</button>
+
+  </div>
+</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Кандидатури</h2>
+      <div id="applicationsStatus" class="status-box"></div>
+      <div id="applicationsList" class="application-list"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+   updateHeaderUser();
+updateRoleVisibility();
+
+const applicationsStatus = document.getElementById("applicationsStatus");
+const applicationsList = document.getElementById("applicationsList");
+
+const currentUser = getCurrentUser();
+
+if (!currentUser || currentUser.role !== "client") {
+  applicationsList.innerHTML = '<div class="empty">Само клиент може да вижда кандидатурите.</div>';
+  throw new Error("Access denied");
+}
+
+  async function rateUser(workerName) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser || currentUser.role !== "client") {
+      alert("Само клиент може да оценява.");
+      return;
+    }
+
+    const rating = prompt("Дай оценка от 1 до 5:");
+    if (!rating) return;
+
+    const num = Number(rating);
+    if (num < 1 || num > 5) {
+      alert("Оценката трябва да е между 1 и 5.");
+      return;
+    }
+
+    const res = await fetch("/rate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workerName, rating: num })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || "Грешка.");
+      return;
+    }
+
+    alert("Оценката е записана ⭐");
+    loadApplications();
+  }
+
+  async function loadApplications() {
+    const jobId = localStorage.getItem("selectedJobId");
+    applicationsList.innerHTML = "";
+
+    if (!jobId) {
+      applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+
+if (!currentUser || currentUser.role !== "client") {
+  applicationsList.innerHTML = '<div class="empty">Само клиент може да вижда кандидатурите.</div>';
+  return;
+}
+
+const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
+
+
+
+    const data = await res.json();
+
+    if (!res.ok || !data.length) {
+      applicationsList.innerHTML = '<div class="empty">Няма кандидатури.</div>';
+      return;
+    }
+
+    for (const app of data) {
+      const ratingRes = await fetch(`/ratings/${app.name}`);
+      const ratingData = await ratingRes.json();
+
+      const div = document.createElement("div");
+      div.className = "application-item";
+      div.innerHTML = `
+        <h4>👤 ${app.name}</h4>
+        <div class="meta">💰 ${app.price} лв | ⭐ ${ratingData.average || 0} (${ratingData.count || 0})</div>
+        <p>💬 ${app.message}</p>
+        <button onclick="rateUser('${app.name.replace(/'/g, "\\'")}')">Оцени</button>
+      `;
+      applicationsList.appendChild(div);
+    }
+  }
+
+  loadApplications();
+  </script>
+</body>
+</html>

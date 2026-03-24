@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Акаунт</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="navbar">
+        <h1 class="brand">TursiMajstor</h1>
+
+       <div class="nav-links">
+  <a href="/">Обяви</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/chat-page">Чат</a>
+</div>
+
+        <div class="user-menu">
+  <button id="userMenuBtn" class="user-chip">Вход</button>
+
+  <div id="userDropdown" class="user-dropdown hidden">
+    
+    <div id="userInfo"></div>
+
+    <div class="auth-tabs">
+  <button id="loginTabBtn" class="auth-tab active">Вход</button>
+  <button id="registerTabBtn" class="auth-tab">Регистрация</button>
+</div>
+
+<div id="loginFormBox" class="auth-box">
+  <input id="loginEmail" placeholder="Имейл">
+  <input id="loginPassword" type="password" placeholder="Парола">
+  <button onclick="login()">Влез</button>
+</div>
+
+<div id="registerFormBox" class="auth-box hidden">
+  <input id="regName" placeholder="Име">
+  <input id="regEmail" placeholder="Имейл">
+  <input id="regPassword" type="password" placeholder="Парола">
+  <select id="regRole">
+    <option value="client">Клиент</option>
+    <option value="worker">Изпълнител</option>
+  </select>
+  <button onclick="register()">Регистрация</button>
+</div>
+
+    <button onclick="logout()" class="danger-btn">Изход</button>
+
+  </div>
+</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Регистрация</h2>
+        <div id="registerStatus" class="status-box"></div>
+
+        <form id="registerForm">
+          <label for="registerName">Име</label>
+          <input type="text" id="registerName" required>
+
+          <label for="registerEmail">Имейл</label>
+          <input type="email" id="registerEmail" required>
+
+          <label for="registerPassword">Парола</label>
+          <input type="password" id="registerPassword" required>
+
+          <label for="registerRole">Роля</label>
+          <select id="registerRole" required>
+            <option value="">Избери роля</option>
+            <option value="client">Клиент</option>
+            <option value="worker">Изпълнител</option>
+          </select>
+
+          <button type="submit">Регистрирай се</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Вход</h2>
+        <div id="loginStatus" class="status-box"></div>
+        <div id="currentUserBox" class="user-box">Няма влязъл потребител.</div>
+
+        <form id="loginForm">
+          <label for="loginEmail">Имейл</label>
+          <input type="email" id="loginEmail" required>
+
+          <label for="loginPassword">Парола</label>
+          <input type="password" id="loginPassword" required>
+
+          <button type="submit">Влез</button>
+          <button type="button" class="danger-btn" onclick="logout()">Изход</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    updateHeaderUser();
+
+    const registerForm = document.getElementById("registerForm");
+    const registerStatus = document.getElementById("registerStatus");
+    const loginForm = document.getElementById("loginForm");
+    const loginStatus = document.getElementById("loginStatus");
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(registerStatus);
+
+      const user = {
+        name: document.getElementById("registerName").value.trim(),
+        email: document.getElementById("registerEmail").value.trim(),
+        password: document.getElementById("registerPassword").value.trim(),
+        role: document.getElementById("registerRole").value
+      };
+
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(registerStatus, data.message || "Грешка при регистрация.", "error");
+        return;
+      }
+
+      registerForm.reset();
+      showStatus(registerStatus, `Успешна регистрация за ${data.user.name} ✅`, "success");
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus(loginStatus);
+
+      const loginData = {
+        email: document.getElementById("loginEmail").value.trim(),
+        password: document.getElementById("loginPassword").value.trim()
+      };
+
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(loginStatus, data.message || "Грешка при вход.", "error");
+        return;
+      }
+
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      updateHeaderUser();
+      loginForm.reset();
+      showStatus(loginStatus, `Добре дошъл, ${data.user.name} ✅`, "success");
+    });
+  </script>
+</body>
+</html>
