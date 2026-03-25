@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Известия</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+  <a href="/">Начало</a>
+  <a href="/jobs-page">Обяви</a>
+  <a href="/my-jobs-page">Моите обяви</a>
+  <a href="/inbox-page">Поща</a>
+  <a href="/notifications-page">Известия</a>
+    <a href="/favorites-page">Любими</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/feed-page">Новини</a>
+</div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="top-tabs">
+      <button id="allNotificationsBtn" class="top-tab active" type="button">Всички</button>
+      <button id="unreadNotificationsBtn" class="top-tab" type="button">Непрочетени</button>
+    </div>
+
+    <div class="section-head" style="margin-top: 18px;">
+      <div>
+        <h2>Известия</h2>
+        <div class="small-text">
+          Тук ще виждаш нови съобщения, кандидатури, промени по кандидатури и активност по публикациите.
+        </div>
+      </div>
+
+      <div class="application-action-buttons">
+        <div id="notificationsCount" class="results-info"></div>
+        <button id="markAllReadBtn" type="button" class="job-card-btn secondary">Маркирай всички</button>
+      </div>
+    </div>
+
+    <div id="notificationsList" class="application-cards-list"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const allNotificationsBtn = document.getElementById("allNotificationsBtn");
+  const unreadNotificationsBtn = document.getElementById("unreadNotificationsBtn");
+  const notificationsList = document.getElementById("notificationsList");
+  const notificationsCount = document.getElementById("notificationsCount");
+  const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+  let notificationMode = "all";
+  let loadedNotifications = [];
+
+  function getNotificationTypeLabel(type) {
+    if (type === "message_new") return "Ново съобщение";
+    if (type === "application_new") return "Нова кандидатура";
+    if (type === "application_status") return "Промяна по кандидатура";
+    if (type === "post_like") return "Нов лайк";
+    if (type === "post_comment") return "Нов коментар";
+    return "Известие";
+  }
+
+  function switchMode(mode) {
+    notificationMode = mode;
+
+    if (mode === "all") {
+      allNotificationsBtn.classList.add("active");
+      unreadNotificationsBtn.classList.remove("active");
+    } else {
+      unreadNotificationsBtn.classList.add("active");
+      allNotificationsBtn.classList.remove("active");
+    }
+
+    renderNotifications();
+  }
+
+  allNotificationsBtn.addEventListener("click", () => switchMode("all"));
+  unreadNotificationsBtn.addEventListener("click", () => switchMode("unread"));
+
+  async function markNotificationRead(notificationId) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return;
+
+    const res = await fetch(`/notifications/${notificationId}/read`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterEmail: currentUser.email
+      })
+    });
+
+    await res.json();
+    await loadNotifications();
+  }
+
+  async function markAllRead() {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return;
+
+    const res = await fetch(`/notifications/read-all/${encodeURIComponent(currentUser.email)}`, {
+      method: "PUT"
+    });
+
+    await res.json();
+    await loadNotifications();
+  }
+
+  markAllReadBtn.addEventListener("click", markAllRead);
+
+  function buildNotificationCard(item) {
+    const unreadClass = !item.isRead ? "pending-card" : "";
+    const badgeClass = !item.isRead ? "status-pending" : "status-approved";
+
+    return `
+      <div class="application-status-card ${unreadClass}">
+        <div class="application-card-top">
+          <div>
+            <h3 class="application-card-title">${item.title || "Известие"}</h3>
+            <div class="application-card-meta">
+              <span>${getNotificationTypeLabel(item.type)}</span>
+              <span>📅 ${item.createdAt || ""}</span>
+            </div>
+          </div>
+
+          <span class="application-status-badge ${badgeClass}">
+            ${item.isRead ? "Прочетено" : "Ново"}
+          </span>
+        </div>
+
+        <div class="application-card-body">
+          <p>${item.text || ""}</p>
+        </div>
+
+        <div class="application-card-actions-row">
+          <div class="application-action-buttons">
+            ${
+              item.link
+                ? `<a href="${item.link}" class="job-card-btn">Отвори</a>`
+                : ""
+            }
+            ${
+              !item.isRead
+                ? `<button type="button" onclick="markNotificationRead(${item.id})">Маркирай като прочетено</button>`
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderNotifications() {
+    const filtered = notificationMode === "unread"
+      ? loadedNotifications.filter(item => !item.isRead)
+      : loadedNotifications;
+
+    notificationsCount.textContent = `${filtered.length} известия`;
+
+    if (!filtered.length) {
+      notificationsList.innerHTML = `<div class="empty">${
+        notificationMode === "unread"
+          ? "Нямаш непрочетени известия."
+          : "Все още няма известия."
+      }</div>`;
+      return;
+    }
+
+    notificationsList.innerHTML = filtered.map(buildNotificationCard).join("");
+  }
+
+  async function loadNotifications() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      notificationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш известията си.</div>';
+      notificationsCount.textContent = "";
+      return;
+    }
+
+    const res = await fetch(`/notifications/${encodeURIComponent(currentUser.email)}`);
+    const data = await res.json();
+
+    loadedNotifications = data || [];
+    renderNotifications();
+
+    if (typeof updateNotificationBadge === "function") {
+      updateNotificationBadge({ silent: true });
+    }
+  }
+
+  loadNotifications();
+</script>
+</body>
+</html>

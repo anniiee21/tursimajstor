@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TursiMajstor - Обяви</title>
+  <title>TursiMajstor - Моите обяви</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -32,8 +32,14 @@
 
 <div class="container">
   <div class="card">
-    <h2>Обяви</h2>
-    <div id="jobsList" class="job-cards-grid"></div>
+    <div class="section-head">
+      <div>
+        <h2>Моите обяви</h2>
+        <div class="small-text">Управлявай публикуваните от теб обяви.</div>
+      </div>
+      <div id="myJobsCount" class="results-info"></div>
+    </div>
+    <div id="myJobsList" class="job-cards-grid"></div>
   </div>
 </div>
 
@@ -42,21 +48,32 @@
 updateHeaderUser();
 updateRoleVisibility();
 
+const myJobsList = document.getElementById("myJobsList");
+const myJobsCount = document.getElementById("myJobsCount");
+
 function getJobTypeText(type) {
   return type === "service" ? "Предлагам услуга" : "Търся човек";
 }
 
-async function loadJobs() {
-  const res = await fetch("/jobs");
-  const data = await res.json();
-  const jobsList = document.getElementById("jobsList");
+async function loadMyJobs() {
+  const currentUser = getCurrentUser();
 
-  if (!data.length) {
-    jobsList.innerHTML = '<div class="empty">Все още няма обяви.</div>';
+  if (!currentUser) {
+    myJobsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш своите обяви.</div>';
     return;
   }
 
-  jobsList.innerHTML = data.map(job => `
+  const res = await fetch(`/my-jobs/${encodeURIComponent(currentUser.email)}`);
+  const data = await res.json();
+
+  myJobsCount.textContent = `${data.length} обяви`;
+
+  if (!data.length) {
+    myJobsList.innerHTML = '<div class="empty">Все още нямаш публикувани обяви.</div>';
+    return;
+  }
+
+  myJobsList.innerHTML = data.map(job => `
     <div class="job-market-card">
       <div class="job-market-top">
         <div>
@@ -65,9 +82,9 @@ async function loadJobs() {
             <span>📍 ${job.city || "Без град"}</span>
             <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
             <span>📌 ${getJobTypeText(job.type)}</span>
+            ${job.budget ? `<span>💰 ${job.budget} лв</span>` : ""}
           </div>
         </div>
-        ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
       </div>
 
       ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
@@ -75,13 +92,18 @@ async function loadJobs() {
 
       <div class="job-card-actions">
         <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-        <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж профила</a>
+        <button type="button" class="job-card-btn secondary" onclick="openApplications(${job.id})">Кандидатури</button>
       </div>
     </div>
   `).join("");
 }
 
-loadJobs();
+function openApplications(jobId) {
+  localStorage.setItem("selectedJobId", String(jobId));
+  window.location.href = "/applications-page";
+}
+
+loadMyJobs();
 </script>
 </body>
 </html>

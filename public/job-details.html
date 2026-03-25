@@ -16,12 +16,15 @@
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-        <a href="/">Начало</a>
-        <a class="active" href="/jobs-page">Обяви</a>
-        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-        <a href="/chat-page">Чат</a>
-        <a href="/feed-page">Новини</a>
-      </div>
+  <a href="/">Начало</a>
+  <a href="/jobs-page">Обяви</a>
+  <a href="/my-jobs-page">Моите обяви</a>
+  <a href="/inbox-page">Поща</a>
+  <a href="/notifications-page">Известия</a>
+    <a href="/favorites-page">Любими</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/feed-page">Новини</a>
+</div>
 
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
@@ -45,7 +48,34 @@
       </div>
 
       <div class="card">
-        <h3 id="applyTitle">Кандидатствай</h3>
+        <h3>Запитване / Контакт</h3>
+        <div id="contactStatus" class="status-box"></div>
+
+        <div id="contactGuestBox" class="publish-guest-box hidden">
+          <div class="publish-guest-inner">
+            <h3>Трябва да имаш профил</h3>
+            <p id="contactGuestText">Създай профил, за да изпратиш запитване към автора на обявата.</p>
+
+            <div class="publish-guest-actions">
+              <a id="contactRegisterBtn" href="/account-page" class="landing-main-btn">Създай профил</a>
+              <a href="/jobs-page" class="landing-secondary-btn">Назад към обявите</a>
+            </div>
+          </div>
+        </div>
+
+        <form id="contactForm" class="apply-form">
+          <label for="contactSubject">Тема</label>
+          <input id="contactSubject" placeholder="Пример: Интерес към обявата">
+
+          <label for="contactMessage">Съобщение</label>
+          <textarea id="contactMessage" placeholder="Напиши кратко запитване към автора..." required></textarea>
+
+          <button type="submit" class="publish-main-btn">Изпрати запитване</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Кандидатствай</h3>
         <div id="applyStatus" class="status-box"></div>
 
         <div id="applyGuestBox" class="publish-guest-box hidden">
@@ -115,17 +145,25 @@
   const jobDetailsCard = document.getElementById("jobDetailsCard");
   const authorCard = document.getElementById("authorCard");
   const relatedJobs = document.getElementById("relatedJobs");
+  const favoriteBtn = document.getElementById("favoriteBtn");
+
   const applyForm = document.getElementById("applyForm");
   const applyStatus = document.getElementById("applyStatus");
   const applyMessage = document.getElementById("applyMessage");
   const applyCvFile = document.getElementById("applyCvFile");
-  const favoriteBtn = document.getElementById("favoriteBtn");
-  const applyTitle = document.getElementById("applyTitle");
+  const applyTitle = document.querySelector("#applyForm")?.previousElementSibling;
   const applyMessageLabel = document.getElementById("applyMessageLabel");
   const applySubmitBtn = document.getElementById("applySubmitBtn");
   const applyGuestBox = document.getElementById("applyGuestBox");
   const applyRegisterBtn = document.getElementById("applyRegisterBtn");
   const applyGuestText = document.getElementById("applyGuestText");
+
+  const contactForm = document.getElementById("contactForm");
+  const contactStatus = document.getElementById("contactStatus");
+  const contactSubject = document.getElementById("contactSubject");
+  const contactMessage = document.getElementById("contactMessage");
+  const contactGuestBox = document.getElementById("contactGuestBox");
+  const contactRegisterBtn = document.getElementById("contactRegisterBtn");
 
   let loadedJob = null;
 
@@ -157,16 +195,14 @@
   function getApplyText(type) {
     if (type === "service") {
       return {
-        title: "Заяви услугата",
         messageLabel: "Съобщение към услугата",
         messagePlaceholder: "Опиши от какво имаш нужда, за кога и какво очакваш...",
-        submit: "Изпрати запитване",
+        submit: "Изпрати заявка",
         guestText: "За да заявиш услуга, създай личен профил или фирмен профил."
       };
     }
 
     return {
-      title: "Кандидатствай",
       messageLabel: "Съобщение към кандидатурата",
       messagePlaceholder: "Напиши кратко представяне, опит, умения и защо си подходящ...",
       submit: "Кандидатствай",
@@ -196,7 +232,6 @@
 
   function updateApplyAccess() {
     const currentUser = getCurrentUser();
-
     if (!loadedJob) return;
 
     const applyText = getApplyText(loadedJob.type);
@@ -207,9 +242,16 @@
       applyForm.classList.add("hidden");
       applyRegisterBtn.href = `/account-page?role=${redirectRole}`;
       applyGuestText.textContent = applyText.guestText;
+
+      contactGuestBox.classList.remove("hidden");
+      contactForm.classList.add("hidden");
+      contactRegisterBtn.href = `/account-page?role=${redirectRole}`;
     } else {
       applyGuestBox.classList.add("hidden");
       applyForm.classList.remove("hidden");
+
+      contactGuestBox.classList.add("hidden");
+      contactForm.classList.remove("hidden");
     }
   }
 
@@ -267,15 +309,9 @@
       const isOwner = currentUser && currentUser.email === job.ownerEmail;
 
       const applyText = getApplyText(job.type);
-
-      applyTitle.textContent = applyText.title;
       applyMessageLabel.textContent = applyText.messageLabel;
       applyMessage.placeholder = applyText.messagePlaceholder;
       applySubmitBtn.textContent = applyText.submit;
-
-      localStorage.setItem("selectedJobId", String(job.id));
-      localStorage.setItem("selectedChatJobId", String(job.id));
-      localStorage.setItem("selectedChatJobTitle", job.title || "Без заглавие");
 
       jobDetailsCard.innerHTML = `
         <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
@@ -303,8 +339,8 @@
         </div>
 
         <div class="job-detail-actions">
-          <a href="/chat-page" class="job-card-btn">Пиши съобщение</a>
           <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж автора</a>
+          <a href="/inbox-page" class="job-card-btn secondary">Отвори поща</a>
           ${
             isOwner
               ? `<a href="/applications-page" class="job-card-btn secondary">Виж кандидатурите</a>`
@@ -360,6 +396,62 @@
       relatedJobs.innerHTML = '<div class="empty">Стана грешка при зареждане.</div>';
     }
   }
+
+  contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(contactStatus);
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      const redirectRole = loadedJob ? getApplyRedirectRole(loadedJob.type) : "personal";
+      window.location.href = `/account-page?role=${redirectRole}`;
+      return;
+    }
+
+    if (!loadedJob) {
+      showStatus(contactStatus, "Обявата не е заредена.", "error");
+      return;
+    }
+
+    if (currentUser.email === loadedJob.ownerEmail) {
+      showStatus(contactStatus, "Не можеш да изпратиш запитване до себе си.", "error");
+      return;
+    }
+
+    const subject = contactSubject.value.trim() || `Запитване за обява: ${loadedJob.title}`;
+    const text = contactMessage.value.trim();
+
+    if (!text) {
+      showStatus(contactStatus, "Напиши съобщение.", "error");
+      return;
+    }
+
+    const res = await fetch("/messages/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        jobId: loadedJob.id,
+        senderEmail: currentUser.email,
+        senderName: currentUser.name,
+        receiverEmail: loadedJob.ownerEmail,
+        subject,
+        text
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(contactStatus, data.message || "Грешка при изпращане.", "error");
+      return;
+    }
+
+    contactForm.reset();
+    showStatus(contactStatus, "Запитването е изпратено успешно ✅", "success");
+  });
 
   applyForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -423,12 +515,10 @@
     }
 
     applyForm.reset();
-    localStorage.setItem("selectedJobId", String(loadedJob.id));
-
     showStatus(
       applyStatus,
       loadedJob.type === "service"
-        ? "Запитването е изпратено успешно ✅"
+        ? "Заявката е изпратена успешно ✅"
         : "Кандидатурата е изпратена успешно ✅",
       "success"
     );

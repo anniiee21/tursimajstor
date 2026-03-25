@@ -18,7 +18,11 @@
       <div id="navLinks" class="nav-links">
         <a class="active" href="/">Начало</a>
         <a href="/jobs-page">Обяви</a>
-        <a href="/account-page">Регистрация</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
         <a href="/feed-page">Новини</a>
       </div>
 
@@ -32,15 +36,24 @@
 
 <div class="container">
 
-  <section class="landing-hero card">
+  <section class="landing-hero card landing-hero-rich">
     <div class="landing-hero-grid">
       <div>
         <div class="landing-badge">Платформа за услуги, работа и професионални профили</div>
-        <h1 class="landing-title">Избери как искаш да използваш платформата</h1>
+
+        <h1 class="landing-title">
+          Намери работа, услуга или професионалист на едно място
+        </h1>
+
         <p class="landing-text">
-          Публикувай услуга, търси професионалист, кандидатствай по интересна възможност или създай фирмен профил.
-          Още от началото те насочваме към правилния път.
+          Публикувай обява, представи бизнеса си, кандидатствай по интересни възможности
+          или открий точния човек за твоята задача.
         </p>
+
+        <div class="landing-search-box">
+          <input id="homeSearchInput" type="text" placeholder="Търси услуга, категория, град...">
+          <button id="homeSearchBtn" type="button">Търси</button>
+        </div>
 
         <div class="landing-hero-actions">
           <a href="/jobs-page" class="landing-main-btn">Разгледай обявите</a>
@@ -54,57 +67,111 @@
           <div>✔ Публикувай услуга или търсене</div>
           <div>✔ Представи професията си</div>
           <div>✔ Намери специалист или проект</div>
-          <div>✔ Създай личен, професионален или фирмен профил</div>
-          <div>✔ Кандидатствай и комуникирай директно</div>
+          <div>✔ Управлявай своите обяви</div>
+          <div>✔ Получавай съобщения, известия и любими</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="landing-actions-grid">
-    <a href="/jobs-page?mode=browse&type=job" class="landing-action-card">
-      <div class="landing-action-icon">🔎</div>
-      <h2>Търся работа / услуга</h2>
-      <p>Разгледай активните обяви и намери подходяща възможност или услуга.</p>
-      <span class="landing-action-link">Отвори обявите →</span>
-    </a>
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Избери как искаш да започнеш</h2>
+        <div class="small-text">Бързи входни точки според това какво търсиш.</div>
+      </div>
+    </div>
 
-    <a href="/jobs-page?mode=publish&type=service&redirectRole=freelancer" class="landing-action-card">
-      <div class="landing-action-icon">🛠</div>
-      <h2>Предлагам услуга</h2>
-      <p>Създай service обява и представи професията, уменията и услугите си.</p>
-      <span class="landing-action-link">Публикувай услуга →</span>
-    </a>
+    <div class="home-cta-grid">
+      <a href="/jobs-page" class="home-cta-card">
+        <div class="home-cta-icon">🔎</div>
+        <h3>Търся работа / услуга</h3>
+        <p>Разгледай публикуваните обяви и намери подходяща възможност.</p>
+      </a>
 
-    <a href="/jobs-page?mode=publish&type=job&redirectRole=personal" class="landing-action-card">
-      <div class="landing-action-icon">👤</div>
-      <h2>Търся професионалист</h2>
-      <p>Пусни обява, ако търсиш майстор, специалист, партньор или помощ по проект.</p>
-      <span class="landing-action-link">Публикувай търсене →</span>
-    </a>
+      <a href="/jobs-page" class="home-cta-card">
+        <div class="home-cta-icon">🛠</div>
+        <h3>Предлагам услуга</h3>
+        <p>Покажи какво правиш и се рекламирай пред повече хора.</p>
+      </a>
 
-    <a href="/account-page?role=company" class="landing-action-card landing-action-card-accent">
-      <div class="landing-action-icon">🏢</div>
-      <h2>Регистрирай фирма</h2>
-      <p>Създай фирмен профил с описание, контактно лице, ЕИК и представителна информация.</p>
-      <span class="landing-action-link">Създай фирмен профил →</span>
-    </a>
+      <a href="/jobs-page" class="home-cta-card">
+        <div class="home-cta-icon">👨‍🔧</div>
+        <h3>Търся професионалист</h3>
+        <p>Намери майстор, специалист, фирма или свободна практика.</p>
+      </a>
+
+      <a href="/account-page?role=company" class="home-cta-card">
+        <div class="home-cta-icon">🏢</div>
+        <h3>Регистрирай фирма</h3>
+        <p>Създай фирмен профил и публикувай обяви и новини.</p>
+      </a>
+    </div>
   </section>
 
-  <section class="landing-info-grid">
-    <div class="card landing-info-card">
-      <h3>Личен профил</h3>
-      <p>Подходящ за хора, които искат да разглеждат, кандидатстват и публикуват по-общи обяви.</p>
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Популярни категории</h2>
+        <div class="small-text">Най-често търсените области в платформата.</div>
+      </div>
     </div>
 
-    <div class="card landing-info-card">
-      <h3>Свободна практика</h3>
-      <p>Подходящо за професионалисти, които искат да рекламират услуги и да намират клиенти.</p>
+    <div class="home-category-grid">
+      <a href="/jobs-page" class="home-category-card">Строителство</a>
+      <a href="/jobs-page" class="home-category-card">IT сектор</a>
+      <a href="/jobs-page" class="home-category-card">Услуги</a>
+      <a href="/jobs-page" class="home-category-card">Образование</a>
+      <a href="/jobs-page" class="home-category-card">Преводи</a>
+      <a href="/jobs-page" class="home-category-card">Ремонтни дейности</a>
+      <a href="/jobs-page" class="home-category-card">Логистика</a>
+      <a href="/jobs-page" class="home-category-card">Сезонна работа</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Нови обяви</h2>
+        <div class="small-text">Последно публикуваните обяви в платформата.</div>
+      </div>
+      <a href="/jobs-page" class="see-all-link">Виж всички</a>
     </div>
 
-    <div class="card landing-info-card">
-      <h3>Фирма</h3>
-      <p>Подходящо за компании, които искат представителен профил, публикации и фирмени обяви.</p>
+    <div id="homeLatestJobs" class="job-cards-grid"></div>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Защо да използваш TursiMajstor?</h2>
+      </div>
+    </div>
+
+    <div class="home-benefits-grid">
+      <div class="home-benefit-card">
+        <div class="home-benefit-icon">⚡</div>
+        <h3>Лесно публикуване</h3>
+        <p>Създаваш обява бързо и я показваш веднага пред останалите.</p>
+      </div>
+
+      <div class="home-benefit-card">
+        <div class="home-benefit-icon">👤</div>
+        <h3>Умни профили</h3>
+        <p>Личен профил, свободна практика или фирма — според нуждите ти.</p>
+      </div>
+
+      <div class="home-benefit-card">
+        <div class="home-benefit-icon">💬</div>
+        <h3>Вътрешна поща</h3>
+        <p>Получаваш запитвания и отговаряш по-лесно вътре в платформата.</p>
+      </div>
+
+      <div class="home-benefit-card">
+        <div class="home-benefit-icon">⭐</div>
+        <h3>Любими и известия</h3>
+        <p>Запазваш важните обяви и следиш активността по профила си.</p>
+      </div>
     </div>
   </section>
 
@@ -114,6 +181,84 @@
 <script>
   updateHeaderUser();
   updateRoleVisibility();
+
+  const homeSearchInput = document.getElementById("homeSearchInput");
+  const homeSearchBtn = document.getElementById("homeSearchBtn");
+  const homeLatestJobs = document.getElementById("homeLatestJobs");
+
+  function getJobTypeLabel(type) {
+    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
+  }
+
+  function getJobTypeText(type) {
+    return type === "service" ? "Предлагам услуга" : "Търся човек";
+  }
+
+  function goToJobsSearch() {
+    const value = homeSearchInput.value.trim();
+
+    if (!value) {
+      window.location.href = "/jobs-page";
+      return;
+    }
+
+    window.location.href = `/jobs-page?search=${encodeURIComponent(value)}`;
+  }
+
+  homeSearchBtn.addEventListener("click", goToJobsSearch);
+
+  homeSearchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      goToJobsSearch();
+    }
+  });
+
+  async function loadLatestJobs() {
+    try {
+      const res = await fetch("/jobs");
+      const data = await res.json();
+
+      const latest = [...(data || [])].reverse().slice(0, 4);
+
+      if (!latest.length) {
+        homeLatestJobs.innerHTML = '<div class="empty">Все още няма публикувани обяви.</div>';
+        return;
+      }
+
+      homeLatestJobs.innerHTML = latest.map(job => `
+        <div class="job-market-card">
+          <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
+
+          <div class="job-market-top">
+            <div>
+              <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+              <div class="job-market-meta">
+                <span>📍 ${job.city || "Без град"}</span>
+                <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+                <span>📌 ${getJobTypeText(job.type)}</span>
+              </div>
+            </div>
+            ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+          </div>
+
+          ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+
+          <p class="job-market-desc">${job.description || ""}</p>
+
+          <div class="job-card-actions">
+            <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+            <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж автора</a>
+          </div>
+        </div>
+      `).join("");
+    } catch (error) {
+      console.error("HOME JOBS ERROR:", error);
+      homeLatestJobs.innerHTML = '<div class="empty">Грешка при зареждане на обявите.</div>';
+    }
+  }
+
+  loadLatestJobs();
 </script>
 </body>
 </html>

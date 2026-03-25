@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Любими</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a class="active" href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="section-head">
+      <div>
+        <h2>Любими обяви</h2>
+        <div class="small-text">Запазените от теб обяви, с филтри, табове и сортиране.</div>
+      </div>
+      <div id="favoritesCount" class="results-info"></div>
+    </div>
+
+    <div class="favorites-quick-tabs">
+      <button id="favoritesTabAll" class="favorites-quick-tab active" type="button">Всички</button>
+      <button id="favoritesTabJobs" class="favorites-quick-tab" type="button">Само работа</button>
+      <button id="favoritesTabServices" class="favorites-quick-tab" type="button">Само услуги</button>
+    </div>
+
+    <div class="favorites-filters">
+      <div class="favorites-filters-grid">
+        <input id="favoriteSearchInput" type="text" placeholder="Търси по заглавие или описание...">
+        <input id="favoriteCityFilter" type="text" placeholder="Град">
+
+        <select id="favoriteCategoryFilter">
+          <option value="">Всички категории</option>
+        </select>
+
+        <select id="favoriteSortFilter">
+          <option value="newest">Най-нови</option>
+          <option value="oldest">Най-стари</option>
+          <option value="budgetAsc">Бюджет: нисък към висок</option>
+          <option value="budgetDesc">Бюджет: висок към нисък</option>
+          <option value="cityAsc">Град: А-Я</option>
+        </select>
+      </div>
+
+      <div class="active-filter-row">
+        <div id="favoriteResultsInfo" class="active-filter-badge">Зареждане...</div>
+        <button id="clearFavoriteFiltersBtn" class="clear-filter-btn" type="button">Изчисти филтрите</button>
+      </div>
+    </div>
+
+    <div id="favoritesList" class="job-cards-grid"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const favoritesList = document.getElementById("favoritesList");
+  const favoritesCount = document.getElementById("favoritesCount");
+  const favoriteResultsInfo = document.getElementById("favoriteResultsInfo");
+
+  const favoriteSearchInput = document.getElementById("favoriteSearchInput");
+  const favoriteCityFilter = document.getElementById("favoriteCityFilter");
+  const favoriteCategoryFilter = document.getElementById("favoriteCategoryFilter");
+  const favoriteSortFilter = document.getElementById("favoriteSortFilter");
+  const clearFavoriteFiltersBtn = document.getElementById("clearFavoriteFiltersBtn");
+
+  const favoritesTabAll = document.getElementById("favoritesTabAll");
+  const favoritesTabJobs = document.getElementById("favoritesTabJobs");
+  const favoritesTabServices = document.getElementById("favoritesTabServices");
+
+  let loadedFavorites = [];
+  let activeTypeTab = "all";
+
+  function getJobTypeLabel(type) {
+    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
+  }
+
+  function getJobTypeText(type) {
+    return type === "service" ? "Предлагам услуга" : "Търся човек";
+  }
+
+  function fillCategoryOptions(items) {
+    const categories = [...new Set(
+      items.map(item => item.category || "").filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "bg"));
+
+    favoriteCategoryFilter.innerHTML = '<option value="">Всички категории</option>';
+
+    categories.forEach(category => {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      favoriteCategoryFilter.appendChild(option);
+    });
+  }
+
+  function setActiveTab(tab) {
+    activeTypeTab = tab;
+
+    favoritesTabAll.classList.remove("active");
+    favoritesTabJobs.classList.remove("active");
+    favoritesTabServices.classList.remove("active");
+
+    if (tab === "all") favoritesTabAll.classList.add("active");
+    if (tab === "job") favoritesTabJobs.classList.add("active");
+    if (tab === "service") favoritesTabServices.classList.add("active");
+
+    renderFavorites();
+  }
+
+  favoritesTabAll.addEventListener("click", () => setActiveTab("all"));
+  favoritesTabJobs.addEventListener("click", () => setActiveTab("job"));
+  favoritesTabServices.addEventListener("click", () => setActiveTab("service"));
+
+  async function removeFromFavorites(jobId) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва да си влязъл.");
+      return;
+    }
+
+    const res = await fetch("/favorites/toggle", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userEmail: currentUser.email,
+        jobId
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка.");
+      return;
+    }
+
+    await loadFavorites();
+  }
+
+  function buildFavoriteCard(job) {
+    return `
+      <div class="job-market-card">
+        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${job.city || "Без град"}</span>
+              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📌 ${getJobTypeText(job.type)}</span>
+            </div>
+          </div>
+          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+
+        <p class="job-market-desc">${job.description || ""}</p>
+
+        <div class="job-card-actions">
+          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж автора</a>
+          <button type="button" class="danger-btn small-danger-btn" onclick="removeFromFavorites(${job.id})">Премахни</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function sortFavorites(items) {
+    const sortValue = favoriteSortFilter.value;
+
+    const sorted = [...items];
+
+    if (sortValue === "newest") {
+      sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
+    } else if (sortValue === "oldest") {
+      sorted.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } else if (sortValue === "budgetAsc") {
+      sorted.sort((a, b) => (Number(a.budget) || 0) - (Number(b.budget) || 0));
+    } else if (sortValue === "budgetDesc") {
+      sorted.sort((a, b) => (Number(b.budget) || 0) - (Number(a.budget) || 0));
+    } else if (sortValue === "cityAsc") {
+      sorted.sort((a, b) => (a.city || "").localeCompare((b.city || ""), "bg"));
+    }
+
+    return sorted;
+  }
+
+  function renderFavorites() {
+    const searchValue = favoriteSearchInput.value.trim().toLowerCase();
+    const cityValue = favoriteCityFilter.value.trim().toLowerCase();
+    const categoryValue = favoriteCategoryFilter.value;
+
+    let filtered = loadedFavorites.filter(job => {
+      const title = (job.title || "").toLowerCase();
+      const description = (job.description || "").toLowerCase();
+      const city = (job.city || "").toLowerCase();
+      const category = job.category || "";
+      const type = job.type || "job";
+
+      const matchesSearch =
+        !searchValue ||
+        title.includes(searchValue) ||
+        description.includes(searchValue);
+
+      const matchesCity =
+        !cityValue || city.includes(cityValue);
+
+      const matchesCategory =
+        !categoryValue || category === categoryValue;
+
+      const matchesTab =
+        activeTypeTab === "all" || type === activeTypeTab;
+
+      return matchesSearch && matchesCity && matchesCategory && matchesTab;
+    });
+
+    filtered = sortFavorites(filtered);
+
+    favoritesCount.textContent = `${loadedFavorites.length} любими`;
+    favoriteResultsInfo.textContent = `${filtered.length} намерени резултата`;
+
+    if (!loadedFavorites.length) {
+      favoritesList.innerHTML = '<div class="empty">Все още нямаш запазени любими обяви.</div>';
+      return;
+    }
+
+    if (!filtered.length) {
+      favoritesList.innerHTML = '<div class="empty">Няма съвпадения по избраните филтри.</div>';
+      return;
+    }
+
+    favoritesList.innerHTML = filtered.map(buildFavoriteCard).join("");
+  }
+
+  async function loadFavorites() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      favoritesList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш любимите си обяви.</div>';
+      favoritesCount.textContent = "";
+      favoriteResultsInfo.textContent = "Няма активни данни";
+      return;
+    }
+
+    const res = await fetch(`/favorites/${encodeURIComponent(currentUser.email)}`);
+    const data = await res.json();
+
+    loadedFavorites = data || [];
+    fillCategoryOptions(loadedFavorites);
+    renderFavorites();
+  }
+
+  favoriteSearchInput.addEventListener("input", renderFavorites);
+  favoriteCityFilter.addEventListener("input", renderFavorites);
+  favoriteCategoryFilter.addEventListener("change", renderFavorites);
+  favoriteSortFilter.addEventListener("change", renderFavorites);
+
+  clearFavoriteFiltersBtn.addEventListener("click", () => {
+    favoriteSearchInput.value = "";
+    favoriteCityFilter.value = "";
+    favoriteCategoryFilter.value = "";
+    favoriteSortFilter.value = "newest";
+    setActiveTab("all");
+    renderFavorites();
+  });
+
+  loadFavorites();
+</script>
+</body>
+</html>

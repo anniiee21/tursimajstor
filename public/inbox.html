@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Поща</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+  <a href="/">Начало</a>
+  <a href="/jobs-page">Обяви</a>
+  <a href="/my-jobs-page">Моите обяви</a>
+  <a href="/inbox-page">Поща</a>
+  <a href="/notifications-page">Известия</a>
+    <a href="/favorites-page">Любими</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/feed-page">Новини</a>
+</div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="top-tabs">
+      <button id="inboxTabBtn" class="top-tab active" type="button">Входящи</button>
+      <button id="sentTabBtn" class="top-tab" type="button">Изпратени</button>
+    </div>
+
+    <div class="section-head" style="margin-top: 18px;">
+      <div>
+        <h2>Вътрешна поща</h2>
+        <div class="small-text">Тук виждаш запитванията по обяви и изпратените от теб съобщения.</div>
+      </div>
+      <div id="mailCount" class="results-info"></div>
+    </div>
+
+    <div id="mailList" class="application-cards-list"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const inboxTabBtn = document.getElementById("inboxTabBtn");
+  const sentTabBtn = document.getElementById("sentTabBtn");
+  const mailList = document.getElementById("mailList");
+  const mailCount = document.getElementById("mailCount");
+
+  let activeTab = "inbox";
+
+  function switchTab(tab) {
+    activeTab = tab;
+
+    if (tab === "inbox") {
+      inboxTabBtn.classList.add("active");
+      sentTabBtn.classList.remove("active");
+    } else {
+      sentTabBtn.classList.add("active");
+      inboxTabBtn.classList.remove("active");
+    }
+
+    loadMessages();
+  }
+
+  inboxTabBtn.addEventListener("click", () => switchTab("inbox"));
+  sentTabBtn.addEventListener("click", () => switchTab("sent"));
+
+  async function markAsRead(messageId) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) return;
+
+    const res = await fetch(`/messages/${messageId}/read`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterEmail: currentUser.email
+      })
+    });
+
+    await res.json();
+    loadMessages();
+  }
+
+  function buildMailCard(item, mode) {
+    const unreadClass = mode === "inbox" && !item.isRead ? "pending-card" : "";
+    const topLabel = mode === "inbox"
+      ? `От: ${item.senderName} (${item.senderEmail})`
+      : `До: ${item.receiverEmail}`;
+
+    return `
+      <div class="application-status-card ${unreadClass}">
+        <div class="application-card-top">
+          <div>
+            <h3 class="application-card-title">${item.subject || "Без тема"}</h3>
+            <div class="application-card-meta">
+              <span>${topLabel}</span>
+              <span>📌 Обява: ${item.jobTitle || "Неизвестна обява"}</span>
+              <span>📅 ${item.createdAt || ""}</span>
+            </div>
+          </div>
+
+          ${
+            mode === "inbox"
+              ? `<span class="application-status-badge ${item.isRead ? "status-approved" : "status-pending"}">
+                  ${item.isRead ? "Прочетено" : "Ново"}
+                </span>`
+              : ""
+          }
+        </div>
+
+        <div class="application-card-body">
+          <p>${item.text || ""}</p>
+        </div>
+
+        <div class="application-card-actions-row">
+          <div class="application-action-buttons">
+            <a href="/job/${item.jobId}" class="job-card-btn">Виж обявата</a>
+            ${
+              mode === "inbox" && !item.isRead
+                ? `<button type="button" onclick="markAsRead(${item.id})">Маркирай като прочетено</button>`
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadMessages() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      mailList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш пощата си.</div>';
+      mailCount.textContent = "";
+      return;
+    }
+
+    const url = activeTab === "inbox"
+      ? `/messages/inbox/${encodeURIComponent(currentUser.email)}`
+      : `/messages/sent/${encodeURIComponent(currentUser.email)}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    mailCount.textContent = `${data.length} съобщения`;
+
+    if (!data.length) {
+      mailList.innerHTML = `<div class="empty">${activeTab === "inbox" ? "Нямаш входящи съобщения." : "Нямаш изпратени съобщения."}</div>`;
+      return;
+    }
+
+    mailList.innerHTML = data.map(item => buildMailCard(item, activeTab)).join("");
+  }
+
+  loadMessages();
+</script>
+</body>
+</html>

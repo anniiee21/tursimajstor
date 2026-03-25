@@ -7,22 +7,21 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  
 <header>
   <div class="header-inner">
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
-
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
-
       <div id="navLinks" class="nav-links">
-        <a href="/">Начало</a>
-        <a href="/jobs-page">Обяви</a>
-        <a id="applicationsNavLink" class="active" href="/applications-page">Кандидатури</a>
-        <a href="/chat-page">Чат</a>
-        <a href="/feed-page">Новини</a>
-      </div>
-
+  <a href="/">Начало</a>
+  <a href="/jobs-page">Обяви</a>
+  <a href="/my-jobs-page">Моите обяви</a>
+  <a href="/inbox-page">Поща</a>
+  <a href="/notifications-page">Известия</a>
+    <a href="/favorites-page">Любими</a>
+  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+  <a href="/feed-page">Новини</a>
+</div>
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
@@ -33,118 +32,71 @@
 
 <div class="container">
   <div class="card">
-    <h2>Кандидатури по избраната обява</h2>
-    <div id="applicationsList" class="application-list"></div>
+    <h2>Кандидатури</h2>
+    <div id="applicationsList" class="application-cards-list"></div>
   </div>
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
+updateHeaderUser();
+updateRoleVisibility();
 
-  const applicationsList = document.getElementById("applicationsList");
+const applicationsList = document.getElementById("applicationsList");
 
+async function loadApplications() {
   const currentUser = getCurrentUser();
+  const jobId = localStorage.getItem("selectedJobId");
 
   if (!currentUser) {
-    applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш кандидатурите.</div>';
-    throw new Error("Access denied");
+    applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл.</div>';
+    return;
   }
 
-  async function rateUser(workerName) {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      alert("Трябва да си влязъл.");
-      return;
-    }
-
-    const rating = prompt("Дай оценка от 1 до 5:");
-    if (!rating) return;
-
-    const num = Number(rating);
-    if (num < 1 || num > 5) {
-      alert("Оценката трябва да е между 1 и 5.");
-      return;
-    }
-
-    const res = await fetch("/rate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workerName, rating: num })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || "Грешка.");
-      return;
-    }
-
-    alert("Оценката е записана ⭐");
-    loadApplications();
+  if (!jobId) {
+    applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
+    return;
   }
 
-  async function loadApplications() {
-    const jobId = localStorage.getItem("selectedJobId");
-    applicationsList.innerHTML = "";
+  const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
+  const data = await res.json();
 
-    if (!jobId) {
-      applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
-      return;
-    }
+  if (!res.ok) {
+    applicationsList.innerHTML = `<div class="empty">${data.message || "Грешка."}</div>`;
+    return;
+  }
 
-    const currentUser = getCurrentUser();
+  if (!data.length) {
+    applicationsList.innerHTML = '<div class="empty">Няма кандидатури.</div>';
+    return;
+  }
 
-    if (!currentUser) {
-      applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш кандидатурите.</div>';
-      return;
-    }
-
-    const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
-    const data = await res.json();
-
-    if (!res.ok) {
-      applicationsList.innerHTML = `<div class="empty">${data.message || "Нямаш достъп до кандидатурите за тази обява."}</div>`;
-      return;
-    }
-
-    if (!data.length) {
-      applicationsList.innerHTML = '<div class="empty">Няма кандидатури.</div>';
-      return;
-    }
-
-    for (const app of data) {
-      const ratingRes = await fetch(`/ratings/${encodeURIComponent(app.name)}`);
-      const ratingData = await ratingRes.json();
-
-      const div = document.createElement("div");
-      div.className = "application-item";
-      div.innerHTML = `
-        <h4>👤 ${app.name}</h4>
-        <div class="meta">
-          ${app.email ? `📧 ${app.email} | ` : ""}
-          ⭐ ${ratingData.average || 0} (${ratingData.count || 0})
+  applicationsList.innerHTML = data.map(app => `
+    <div class="application-status-card pending-card">
+      <div class="application-card-top">
+        <div>
+          <h3 class="application-card-title">👤 ${app.name}</h3>
+          <div class="application-card-meta">
+            <span>📧 ${app.email || ""}</span>
+            <span>📅 ${app.createdAt || ""}</span>
+          </div>
         </div>
-        <div class="meta">📅 ${app.createdAt || ""}</div>
-        <div class="meta">📌 Статус: ${app.status || "Чака одобрение"}</div>
-        <p>💬 ${app.message}</p>
+      </div>
 
-        ${
-          app.cvUrl
-            ? `<a href="${app.cvUrl}" target="_blank" class="job-card-btn secondary">Виж CV</a>`
-            : `<div class="small-text">Няма прикачено CV</div>`
-        }
+      <div class="application-card-body">
+        <p>${app.message || ""}</p>
+      </div>
 
-        <div style="margin-top: 12px;">
-          <button onclick="rateUser('${app.name.replace(/'/g, "\\'")}')">Оцени</button>
+      <div class="application-card-actions-row">
+        <div class="application-action-buttons">
+          ${app.cvUrl ? `<a href="${app.cvUrl}" target="_blank" class="job-card-btn secondary">Виж CV</a>` : ""}
         </div>
-      `;
-      applicationsList.appendChild(div);
-    }
-  }
+      </div>
+    </div>
+  `).join("");
+}
 
-  loadApplications();
+loadApplications();
 </script>
 </body>
 </html>

@@ -26,11 +26,40 @@ function getCurrentUser() {
 
 function logout() {
   localStorage.removeItem("currentUser");
-  updateHeaderUser();
+  localStorage.removeItem("lastNotificationCount");
   location.reload();
 }
 
 function renderAuthDropdown() {
+  const currentUser = getCurrentUser();
+
+  if (currentUser) {
+    return `
+      <div id="userInfo"></div>
+
+      <div id="dropdownNotificationPreview" class="dropdown-message-preview hidden">
+        <div class="dropdown-preview-head">
+          <strong>Нови известия</strong>
+        </div>
+        <div id="dropdownPreviewList"></div>
+        <a href="/notifications-page" class="dropdown-preview-link">Виж всички известия</a>
+      </div>
+
+      <div class="header-user-actions">
+        <a href="/profile/${encodeURIComponent(currentUser.email)}" class="header-action-link">Моят профил</a>
+        <a href="/my-jobs-page" class="header-action-link">Моите обяви</a>
+        <a href="/favorites-page" class="header-action-link">Любими</a>
+        <a href="/inbox-page" class="header-action-link">Поща</a>
+        <a href="/notifications-page" class="header-action-link inbox-link-wrapper">
+          Известия
+          <span id="dropdownNotificationBadge" class="inbox-badge hidden">0</span>
+        </a>
+        <button type="button" id="headerEditProfileBtn" class="header-action-btn">Редактирай профил</button>
+        <button type="button" onclick="logout()" class="danger-btn">Изход</button>
+      </div>
+    `;
+  }
+
   return `
     <div id="userInfo"></div>
 
@@ -71,8 +100,6 @@ function renderAuthDropdown() {
 
       <button type="button" onclick="register()">Регистрация</button>
     </div>
-
-    <button type="button" onclick="logout()" class="danger-btn">Изход</button>
   `;
 }
 
@@ -131,17 +158,162 @@ function bindRegisterRoleChange() {
   regRole.onchange = () => renderRegisterFields(regRole.value || "personal");
 }
 
+function bindHeaderEditProfileButton() {
+  const btn = document.getElementById("headerEditProfileBtn");
+  const currentUser = getCurrentUser();
+
+  if (btn && currentUser) {
+    btn.onclick = () => {
+      window.location.href = `/profile/${encodeURIComponent(currentUser.email)}?edit=1`;
+    };
+  }
+}
+
+function ensureToastContainer() {
+  let container = document.getElementById("toastContainer");
+
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  return container;
+}
+
+function showToast(message, type = "info") {
+  const container = ensureToastContainer();
+  const toast = document.createElement("div");
+  toast.className = `app-toast app-toast-${type}`;
+  toast.innerHTML = `
+    <div class="app-toast-title">${type === "success" ? "Ново известие" : "Информация"}</div>
+    <div class="app-toast-text">${message}</div>
+  `;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 250);
+  }, 3500);
+}
+
+function renderNotificationPreviewItem(item) {
+  return `
+    <a href="${item.link || "/notifications-page"}" class="dropdown-preview-item">
+      <div class="dropdown-preview-title">${item.title || "Известие"}</div>
+      <div class="dropdown-preview-meta">${item.text || ""}</div>
+      <div class="dropdown-preview-date">${item.createdAt || ""}</div>
+    </a>
+  `;
+}
+
+function setNotificationCountInStorage(count) {
+  localStorage.setItem("lastNotificationCount", String(count));
+}
+
+function getNotificationCountFromStorage() {
+  return Number(localStorage.getItem("lastNotificationCount") || "0");
+}
+
+async function updateNotificationBadge({ silent = false } = {}) {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+
+  try {
+    const [countRes, latestRes] = await Promise.all([
+      fetch(`/notifications/unread-count/${encodeURIComponent(currentUser.email)}`),
+      fetch(`/notifications/latest/${encodeURIComponent(currentUser.email)}?limit=3`)
+    ]);
+
+    const countData = await countRes.json();
+    const latestData = await latestRes.json();
+
+    const unreadCount = Number(countData.unreadCount || 0);
+    const previousCount = getNotificationCountFromStorage();
+
+    const dropdownBadge = document.getElementById("dropdownNotificationBadge");
+    if (dropdownBadge) {
+      if (unreadCount > 0) {
+        dropdownBadge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+        dropdownBadge.classList.remove("hidden");
+      } else {
+        dropdownBadge.textContent = "0";
+        dropdownBadge.classList.add("hidden");
+      }
+    }
+
+    const notificationLinks = document.querySelectorAll('#navLinks a[href="/notifications-page"]');
+    notificationLinks.forEach(link => {
+      const oldBadge = link.querySelector(".nav-inbox-badge");
+      if (oldBadge) oldBadge.remove();
+
+      if (unreadCount > 0) {
+        const badge = document.createElement("span");
+        badge.className = "nav-inbox-badge";
+        badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+        link.appendChild(badge);
+      }
+    });
+
+    const previewWrap = document.getElementById("dropdownNotificationPreview");
+    const previewList = document.getElementById("dropdownPreviewList");
+
+    if (previewWrap && previewList) {
+      if (latestData && latestData.length) {
+        previewWrap.classList.remove("hidden");
+        previewList.innerHTML = latestData.map(renderNotificationPreviewItem).join("");
+      } else {
+        previewWrap.classList.add("hidden");
+        previewList.innerHTML = "";
+      }
+    }
+
+    if (!silent && unreadCount > previousCount) {
+      const diff = unreadCount - previousCount;
+      showToast(
+        diff === 1
+          ? "Имаш 1 ново известие."
+          : `Имаш ${diff} нови известия.`,
+        "success"
+      );
+    }
+
+    setNotificationCountInStorage(unreadCount);
+  } catch (error) {
+    console.error("NOTIFICATION BADGE ERROR:", error);
+  }
+}
+
+let notificationsPollingStarted = false;
+
+function startNotificationsPolling() {
+  const currentUser = getCurrentUser();
+  if (!currentUser || notificationsPollingStarted) return;
+
+  notificationsPollingStarted = true;
+
+  setTimeout(() => {
+    updateNotificationBadge({ silent: true });
+  }, 1000);
+
+  setInterval(() => {
+    updateNotificationBadge({ silent: false });
+  }, 10000);
+}
+
 function updateHeaderUser() {
   const userMenuBtn = document.getElementById("userMenuBtn");
   const userDropdown = document.getElementById("userDropdown");
 
   if (!userMenuBtn || !userDropdown) return;
 
-  if (!userDropdown.innerHTML.trim()) {
-    userDropdown.innerHTML = renderAuthDropdown();
-  }
-
-  bindRegisterRoleChange();
+  userDropdown.innerHTML = renderAuthDropdown();
 
   const userInfo = document.getElementById("userInfo");
   const loginFormBox = document.getElementById("loginFormBox");
@@ -161,6 +333,7 @@ function updateHeaderUser() {
     if (registerTabBtn) registerTabBtn.classList.remove("active");
 
     bindAuthTabs();
+    bindRegisterRoleChange();
     return;
   }
 
@@ -176,10 +349,9 @@ function updateHeaderUser() {
     `;
   }
 
-  if (loginFormBox) loginFormBox.classList.add("hidden");
-  if (registerFormBox) registerFormBox.classList.add("hidden");
-  if (loginTabBtn) loginTabBtn.classList.remove("active");
-  if (registerTabBtn) registerTabBtn.classList.remove("active");
+  bindHeaderEditProfileButton();
+  updateNotificationBadge({ silent: true });
+  startNotificationsPolling();
 }
 
 async function login() {
@@ -200,33 +372,29 @@ async function login() {
   }
 
   localStorage.setItem("currentUser", JSON.stringify(data.user));
-  updateHeaderUser();
-
-  const userDropdown = document.getElementById("userDropdown");
-  if (userDropdown) userDropdown.classList.add("hidden");
-
+  localStorage.removeItem("lastNotificationCount");
   location.reload();
 }
 
 async function register() {
   try {
-    const role = document.getElementById("regRole")?.value || "personal";
     const name = document.getElementById("regName")?.value.trim() || "";
     const email = document.getElementById("regEmail")?.value.trim() || "";
     const password = document.getElementById("regPassword")?.value.trim() || "";
+    const role = document.getElementById("regRole")?.value || "personal";
     const description = document.getElementById("regDescription")?.value.trim() || "";
     const phone = document.getElementById("regPhone")?.value.trim() || "";
     const showPhone = document.getElementById("regShowPhone")?.checked || false;
     const profileImageInput = document.getElementById("regProfileImage");
-    const profileImage = profileImageInput && profileImageInput.files ? profileImageInput.files[0] : null;
+    const profileImage = profileImageInput?.files?.[0] || null;
 
     const contactName = document.getElementById("regContactName")?.value.trim() || "";
     const companyId = document.getElementById("regCompanyId")?.value.trim() || "";
     const manager = document.getElementById("regManager")?.value.trim() || "";
     const profession = document.getElementById("regProfession")?.value.trim() || "";
 
-    if (!name || !email || !password || !role) {
-      alert("Попълни име, имейл, парола и тип профил.");
+    if (!name || !email || !password) {
+      alert("Попълни име, имейл и парола.");
       return;
     }
 
@@ -260,9 +428,10 @@ async function register() {
     }
 
     alert("Регистрацията е успешна ✅");
+    location.reload();
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    alert("Стана грешка при регистрацията.");
+    console.error(error);
+    alert("Стана грешка.");
   }
 }
 

@@ -43,9 +43,27 @@ let jobs = [
 
 let applications = [];
 let users = [];
-let messages = [];
 let ratings = [];
 let posts = [];
+let inboxMessages = [];
+let notifications = [];
+let favorites = [];
+
+// ===== HELPERS =====
+function createNotification({ userEmail, type, title, text, link }) {
+  if (!userEmail) return;
+
+  notifications.unshift({
+    id: notifications.length + 1,
+    userEmail,
+    type: type || "general",
+    title: title || "Ново известие",
+    text: text || "",
+    link: link || "/notifications-page",
+    isRead: false,
+    createdAt: new Date().toLocaleString("bg-BG")
+  });
+}
 
 // ===== PAGES =====
 app.get("/", (req, res) => {
@@ -64,12 +82,24 @@ app.get("/applications-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "applications.html"));
 });
 
-app.get("/chat-page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "chat.html"));
-});
-
 app.get("/feed-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "feed.html"));
+});
+
+app.get("/my-jobs-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "my-jobs.html"));
+});
+
+app.get("/inbox-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "inbox.html"));
+});
+
+app.get("/notifications-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "notifications.html"));
+});
+
+app.get("/favorites-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "favorites.html"));
 });
 
 app.get("/profile/:email", (req, res) => {
@@ -83,6 +113,12 @@ app.get("/job/:id", (req, res) => {
 // ===== JOBS =====
 app.get("/jobs", (req, res) => {
   res.json(jobs);
+});
+
+app.get("/my-jobs/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+  const myJobs = jobs.filter(job => job.ownerEmail === email);
+  res.json(myJobs);
 });
 
 app.post("/jobs", upload.single("image"), (req, res) => {
@@ -146,6 +182,162 @@ app.get("/api/jobs/:id", (req, res) => {
     job,
     owner,
     related
+  });
+});
+
+app.put("/api/jobs/:id", upload.single("image"), (req, res) => {
+  const jobId = Number(req.params.id);
+  const {
+    requesterEmail,
+    title,
+    description,
+    city,
+    budget,
+    category,
+    subcategory,
+    type
+  } = req.body;
+
+  const job = jobs.find(j => j.id === jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  if (!requesterEmail || job.ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да редактираш тази обява."
+    });
+  }
+
+  if (!title || !description || !city || !category) {
+    return res.status(400).json({
+      message: "Попълни всички задължителни полета."
+    });
+  }
+
+  job.title = title;
+  job.description = description;
+  job.city = city;
+  job.budget = budget ? Number(budget) : 0;
+  job.category = category;
+  job.subcategory = subcategory || "";
+  job.type = type || "job";
+
+  if (req.file) {
+    job.imageUrl = `/uploads/${req.file.filename}`;
+  }
+
+  res.json({
+    message: "Обявата е обновена успешно ✅",
+    job
+  });
+});
+
+app.delete("/api/jobs/:id", (req, res) => {
+  const jobId = Number(req.params.id);
+  const requesterEmail = req.query.email;
+
+  const jobIndex = jobs.findIndex(j => j.id === jobId);
+
+  if (jobIndex === -1) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  if (!requesterEmail || jobs[jobIndex].ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да изтриеш тази обява."
+    });
+  }
+
+  const deletedJob = jobs[jobIndex];
+  jobs.splice(jobIndex, 1);
+
+  applications = applications.filter(app => app.jobId !== jobId);
+  inboxMessages = inboxMessages.filter(msg => msg.jobId !== jobId);
+  favorites = favorites.filter(item => item.jobId !== jobId);
+
+  res.json({
+    message: "Обявата е изтрита успешно ✅",
+    job: deletedJob
+  });
+});
+
+// ===== FAVORITES =====
+app.get("/favorites/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const userFavorites = favorites
+    .filter(item => item.userEmail === email)
+    .map(item => {
+      const job = jobs.find(j => j.id === item.jobId);
+      return job ? job : null;
+    })
+    .filter(Boolean);
+
+  res.json(userFavorites);
+});
+
+app.get("/favorites/check", (req, res) => {
+  const userEmail = req.query.email;
+  const jobId = Number(req.query.jobId);
+
+  if (!userEmail || !jobId) {
+    return res.status(400).json({
+      message: "Липсват данни."
+    });
+  }
+
+  const exists = favorites.some(
+    item => item.userEmail === userEmail && item.jobId === jobId
+  );
+
+  res.json({ isFavorite: exists });
+});
+
+app.post("/favorites/toggle", (req, res) => {
+  const { userEmail, jobId } = req.body;
+
+  if (!userEmail || !jobId) {
+    return res.status(400).json({
+      message: "Липсват данни."
+    });
+  }
+
+  const job = jobs.find(j => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  const existingIndex = favorites.findIndex(
+    item => item.userEmail === userEmail && item.jobId === Number(jobId)
+  );
+
+  if (existingIndex >= 0) {
+    favorites.splice(existingIndex, 1);
+    return res.json({
+      message: "Обявата е премахната от любими 💔",
+      isFavorite: false
+    });
+  }
+
+  favorites.push({
+    id: favorites.length + 1,
+    userEmail,
+    jobId: Number(jobId),
+    createdAt: new Date().toLocaleString("bg-BG")
+  });
+
+  return res.json({
+    message: "Обявата е добавена в любими ❤️",
+    isFavorite: true
   });
 });
 
@@ -213,6 +405,16 @@ app.post("/posts/:id/like", (req, res) => {
     post.likedBy = post.likedBy.filter(email => email !== userEmail);
   } else {
     post.likedBy.push(userEmail);
+
+    if (post.authorEmail && post.authorEmail !== userEmail) {
+      createNotification({
+        userEmail: post.authorEmail,
+        type: "post_like",
+        title: "Нов лайк по публикация",
+        text: `${userEmail} хареса твоя публикация.`,
+        link: "/feed-page"
+      });
+    }
   }
 
   post.likes = post.likedBy.length;
@@ -255,6 +457,16 @@ app.post("/posts/:id/comments", (req, res) => {
   };
 
   post.comments.push(newComment);
+
+  if (post.authorEmail && post.authorEmail !== authorEmail) {
+    createNotification({
+      userEmail: post.authorEmail,
+      type: "post_comment",
+      title: "Нов коментар по публикация",
+      text: `${authorName} коментира твоя публикация.`,
+      link: "/feed-page"
+    });
+  }
 
   res.status(201).json({
     message: "Коментарът е добавен ✅",
@@ -312,6 +524,14 @@ app.post("/apply", upload.single("cvFile"), (req, res) => {
 
   applications.push(application);
 
+  createNotification({
+    userEmail: job.ownerEmail,
+    type: "application_new",
+    title: "Нова кандидатура",
+    text: `${name} кандидатства по "${job.title}".`,
+    link: "/applications-page"
+  });
+
   res.json({
     message: "Кандидатурата е изпратена ✅",
     application
@@ -338,6 +558,259 @@ app.get("/applications/:jobId", (req, res) => {
 
   const jobApplications = applications.filter(app => app.jobId === jobId);
   res.json(jobApplications);
+});
+
+app.put("/applications/:applicationId/status", (req, res) => {
+  const applicationId = Number(req.params.applicationId);
+  const { requesterEmail, status } = req.body;
+
+  const validStatuses = ["Чака одобрение", "Одобрен", "Отказан"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Невалиден статус." });
+  }
+
+  const application = applications.find(app => app.id === applicationId);
+  if (!application) {
+    return res.status(404).json({ message: "Кандидатурата не е намерена." });
+  }
+
+  const job = jobs.find(j => j.id === application.jobId);
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  if (!requesterEmail || requesterEmail !== job.ownerEmail) {
+    return res.status(403).json({ message: "Нямаш право да сменяш статуса." });
+  }
+
+  application.status = status;
+
+  if (application.email) {
+    createNotification({
+      userEmail: application.email,
+      type: "application_status",
+      title: "Промяна по кандидатура",
+      text: `Кандидатурата ти по "${job.title}" е със статус: ${status}.`,
+      link: `/job/${job.id}`
+    });
+  }
+
+  res.json({
+    message: "Статусът е обновен успешно ✅",
+    application
+  });
+});
+
+// ===== MY APPLICATIONS =====
+app.get("/my-applications/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const userApplications = applications.filter(app => app.email === email);
+
+  const enriched = userApplications.map(app => {
+    const job = jobs.find(j => j.id === app.jobId);
+
+    return {
+      id: app.id,
+      jobId: job?.id || app.jobId,
+      jobTitle: job?.title || "Неизвестна обява",
+      jobCity: job?.city || "",
+      jobCategory: job?.category || "",
+      jobSubcategory: job?.subcategory || "",
+      jobType: job?.type || "job",
+      message: app.message || "",
+      cvUrl: app.cvUrl || "",
+      createdAt: app.createdAt || ""
+    };
+  });
+
+  res.json(enriched);
+});
+
+// ===== INTERNAL MESSAGES / INBOX =====
+app.post("/messages/contact", (req, res) => {
+  const {
+    jobId,
+    senderEmail,
+    senderName,
+    receiverEmail,
+    subject,
+    text
+  } = req.body;
+
+  if (!jobId || !senderEmail || !senderName || !receiverEmail || !text) {
+    return res.status(400).json({
+      message: "Липсват данни за запитването."
+    });
+  }
+
+  if (senderEmail === receiverEmail) {
+    return res.status(400).json({
+      message: "Не можеш да изпратиш запитване до себе си."
+    });
+  }
+
+  const job = jobs.find(j => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  const newMessage = {
+    id: inboxMessages.length + 1,
+    jobId: Number(jobId),
+    senderEmail,
+    senderName,
+    receiverEmail,
+    subject: subject || `Запитване за обява: ${job.title}`,
+    text,
+    isRead: false,
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  inboxMessages.unshift(newMessage);
+
+  createNotification({
+    userEmail: receiverEmail,
+    type: "message_new",
+    title: "Ново съобщение",
+    text: `${senderName} ти изпрати запитване за "${job.title}".`,
+    link: "/inbox-page"
+  });
+
+  res.status(201).json({
+    message: "Запитването е изпратено успешно ✅",
+    inboxMessage: newMessage
+  });
+});
+
+app.get("/messages/inbox/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const items = inboxMessages.filter(msg => msg.receiverEmail === email);
+
+  const enriched = items.map(msg => {
+    const job = jobs.find(j => j.id === msg.jobId);
+
+    return {
+      ...msg,
+      jobTitle: job?.title || "Неизвестна обява"
+    };
+  });
+
+  res.json(enriched);
+});
+
+app.get("/messages/sent/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const items = inboxMessages.filter(msg => msg.senderEmail === email);
+
+  const enriched = items.map(msg => {
+    const job = jobs.find(j => j.id === msg.jobId);
+
+    return {
+      ...msg,
+      jobTitle: job?.title || "Неизвестна обява"
+    };
+  });
+
+  res.json(enriched);
+});
+
+app.put("/messages/:id/read", (req, res) => {
+  const messageId = Number(req.params.id);
+  const { requesterEmail } = req.body;
+
+  const message = inboxMessages.find(msg => msg.id === messageId);
+
+  if (!message) {
+    return res.status(404).json({
+      message: "Съобщението не е намерено."
+    });
+  }
+
+  if (!requesterEmail || requesterEmail !== message.receiverEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да маркираш това съобщение."
+    });
+  }
+
+  message.isRead = true;
+
+  res.json({
+    message: "Съобщението е маркирано като прочетено ✅",
+    inboxMessage: message
+  });
+});
+
+// ===== NOTIFICATIONS =====
+app.get("/notifications/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+  const items = notifications.filter(n => n.userEmail === email);
+  res.json(items);
+});
+
+app.get("/notifications/unread-count/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+  const unreadCount = notifications.filter(
+    n => n.userEmail === email && !n.isRead
+  ).length;
+
+  res.json({ unreadCount });
+});
+
+app.get("/notifications/latest/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+  const limit = Number(req.query.limit || 3);
+
+  const items = notifications
+    .filter(n => n.userEmail === email && !n.isRead)
+    .slice(0, limit);
+
+  res.json(items);
+});
+
+app.put("/notifications/:id/read", (req, res) => {
+  const notificationId = Number(req.params.id);
+  const { requesterEmail } = req.body;
+
+  const notification = notifications.find(n => n.id === notificationId);
+
+  if (!notification) {
+    return res.status(404).json({
+      message: "Известието не е намерено."
+    });
+  }
+
+  if (!requesterEmail || notification.userEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да маркираш това известие."
+    });
+  }
+
+  notification.isRead = true;
+
+  res.json({
+    message: "Известието е маркирано като прочетено ✅",
+    notification
+  });
+});
+
+app.put("/notifications/read-all/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  notifications.forEach(item => {
+    if (item.userEmail === email) {
+      item.isRead = true;
+    }
+  });
+
+  res.json({
+    message: "Всички известия са маркирани като прочетени ✅"
+  });
 });
 
 // ===== USERS =====
@@ -448,10 +921,16 @@ app.post("/login", (req, res) => {
 });
 
 app.put("/api/profile/:email", upload.single("profileImage"), (req, res) => {
-  const email = decodeURIComponent(req.params.email);
-  const { description, phone, showPhone } = req.body;
+  const currentEmail = decodeURIComponent(req.params.email);
+  const {
+    name,
+    email,
+    description,
+    phone,
+    showPhone
+  } = req.body;
 
-  const user = users.find(u => u.email === email);
+  const user = users.find(u => u.email === currentEmail);
 
   if (!user) {
     return res.status(404).json({
@@ -459,6 +938,46 @@ app.put("/api/profile/:email", upload.single("profileImage"), (req, res) => {
     });
   }
 
+  if (email && email !== currentEmail) {
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Вече има потребител с този имейл."
+      });
+    }
+
+    users.forEach(u => {
+      if (u.email === currentEmail) u.email = email;
+    });
+
+    jobs.forEach(job => {
+      if (job.ownerEmail === currentEmail) job.ownerEmail = email;
+    });
+
+    posts.forEach(post => {
+      if (post.authorEmail === currentEmail) post.authorEmail = email;
+    });
+
+    applications.forEach(app => {
+      if (app.email === currentEmail) app.email = email;
+    });
+
+    inboxMessages.forEach(msg => {
+      if (msg.senderEmail === currentEmail) msg.senderEmail = email;
+      if (msg.receiverEmail === currentEmail) msg.receiverEmail = email;
+    });
+
+    notifications.forEach(item => {
+      if (item.userEmail === currentEmail) item.userEmail = email;
+    });
+
+    favorites.forEach(item => {
+      if (item.userEmail === currentEmail) item.userEmail = email;
+    });
+  }
+
+  user.name = name || user.name;
+  user.email = email || user.email;
   user.description = description || "";
   user.phone = phone || "";
   user.showPhone = showPhone === "true" || showPhone === true;
@@ -524,39 +1043,6 @@ app.get("/api/profile/:email", (req, res) => {
     posts: userPosts,
     jobs: userJobs,
     rating: ratingInfo
-  });
-});
-
-// ===== CHAT =====
-app.get("/messages/:jobId", (req, res) => {
-  const jobId = Number(req.params.jobId);
-  const jobMessages = messages.filter(msg => msg.jobId === jobId);
-  res.json(jobMessages);
-});
-
-app.post("/messages", (req, res) => {
-  const { jobId, senderName, senderRole, text } = req.body;
-
-  if (!jobId || !senderName || !senderRole || !text) {
-    return res.status(400).json({
-      message: "Липсват данни за съобщението."
-    });
-  }
-
-  const newMessage = {
-    id: messages.length + 1,
-    jobId: Number(jobId),
-    senderName,
-    senderRole,
-    text,
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  messages.push(newMessage);
-
-  res.status(201).json({
-    message: "Съобщението е изпратено ✅",
-    chatMessage: newMessage
   });
 });
 
