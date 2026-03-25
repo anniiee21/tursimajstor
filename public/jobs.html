@@ -7,157 +7,484 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <div class="navbar">
-        <h1 class="brand">TursiMajstor</h1>
 
-        <div class="nav-links">
-  <a class="active" href="/">Обяви</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/chat-page">Чат</a>
-</div>
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
 
-        <div class="user-menu">
-  <button id="userMenuBtn" class="user-chip">Вход</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
-  <div id="userDropdown" class="user-dropdown hidden">
-    
-    <div id="userInfo"></div>
+      <div id="navLinks" class="nav-links">
+        <a href="/">Начало</a>
+        <a class="active" href="/jobs-page">Обяви</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/chat-page">Чат</a>
+        <a href="/feed-page">Новини</a>
+      </div>
 
-    <div class="auth-tabs">
-  <button id="loginTabBtn" class="auth-tab active">Вход</button>
-  <button id="registerTabBtn" class="auth-tab">Регистрация</button>
-</div>
-
-<div id="loginFormBox" class="auth-box">
-  <input id="loginEmail" placeholder="Имейл">
-  <input id="loginPassword" type="password" placeholder="Парола">
-  <button onclick="login()">Влез</button>
-</div>
-
-<div id="registerFormBox" class="auth-box hidden">
-  <input id="regName" placeholder="Име">
-  <input id="regEmail" placeholder="Имейл">
-  <input id="regPassword" type="password" placeholder="Парола">
-  <select id="regRole">
-    <option value="client">Клиент</option>
-    <option value="worker">Изпълнител</option>
-  </select>
-  <button onclick="register()">Регистрация</button>
-</div>
-
-    <button onclick="logout()" class="danger-btn">Изход</button>
-
-  </div>
-</div>
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <div class="container">
-    <div class="grid-2-wide">
-      <div id="publishJobCard" class="card">
-  <h2>Публикувай обява</h2>
-        <div id="jobStatus" class="status-box"></div>
-        <div class="small-text">Само клиенти могат да публикуват обяви.</div>
+<div class="container">
 
-        <form id="jobForm">
-          <label for="title">Заглавие</label>
-          <input type="text" id="title" required>
+  <div class="marketplace-layout">
 
-          <label for="description">Описание</label>
-          <textarea id="description" required></textarea>
+    <aside class="marketplace-sidebar card">
+      <div class="sidebar-header">
+        <h2>Категории</h2>
+        <p>Избери услуга, работа или сектор</p>
+      </div>
 
-          <label for="city">Град</label>
-          <input type="text" id="city" required>
+      <div id="categorySidebar" class="category-sidebar-list"></div>
+    </aside>
 
-          <label for="category">Категория</label>
-          <select id="category" required>
-            <option value="">Избери категория</option>
-            <option value="Ремонт">Ремонт</option>
-            <option value="Почистване">Почистване</option>
-            <option value="Строителство">Строителство</option>
-            <option value="Преместване">Преместване</option>
-            <option value="Електро услуги">Електро услуги</option>
-            <option value="ВиК">ВиК</option>
-            <option value="Друго">Друго</option>
-          </select>
+    <main class="marketplace-main">
 
-          <label for="budget">Бюджет</label>
-          <input type="number" id="budget">
+      <div class="card hero-marketplace">
+        <div class="hero-marketplace-top">
+          <div>
+            <h2 class="hero-marketplace-title">Намери услуга, проект или професионалист</h2>
+            <p class="hero-marketplace-text">
+              Всеки потребител може да публикува обяви, да рекламира дейността си и да кандидатства по интересни възможности.
+            </p>
+          </div>
+        </div>
 
-          <button type="submit">Публикувай</button>
-        </form> 
+        <div class="top-tabs">
+          <button id="tabLatestBtn" class="top-tab active" type="button">Нови обяви</button>
+          <button id="tabPublishBtn" class="top-tab" type="button">Публикувай обява</button>
+        </div>
+
+        <div id="latestPanel" class="tab-panel active">
+          <div class="marketplace-filters">
+            <div class="filters-grid filters-grid-3">
+              <input id="searchInput" placeholder="Търси по заглавие или описание...">
+              <input id="cityFilter" placeholder="Град">
+              <select id="typeFilter">
+                <option value="">Всички типове</option>
+                <option value="job">Търся човек</option>
+                <option value="service">Предлагам услуга</option>
+              </select>
+            </div>
+
+            <div class="active-filter-row">
+              <div id="activeCategoryLabel" class="active-filter-badge">Категория: Всички</div>
+              <button id="clearFiltersBtn" class="clear-filter-btn" type="button">Изчисти филтрите</button>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <h3>Последно публикувани</h3>
+            <div id="resultsInfo" class="results-info">Зареждане...</div>
+          </div>
+
+          <div id="latestJobsPreview" class="job-cards-grid"></div>
+        </div>
+
+        <div id="publishPanel" class="tab-panel hidden">
+          <div class="publish-shell">
+            <div class="publish-intro">
+              <h3>Публикувай нова обява</h3>
+              <p>
+                Независимо дали си с личен профил, свободна практика или фирма, можеш да публикуваш обява и да покажеш какво търсиш или предлагаш.
+              </p>
+            </div>
+
+            <form id="jobForm" class="publish-form-clean">
+              <div>
+                <label for="type">Тип обява</label>
+                <select id="type" required>
+                  <option value="job">Търся човек</option>
+                  <option value="service">Предлагам услуга</option>
+                </select>
+              </div>
+
+              <div class="form-row-2">
+                <div>
+                  <label for="title">Заглавие</label>
+                  <input id="title" placeholder="Пример: Боядисване на апартамент в Плевен" required>
+                </div>
+
+                <div>
+                  <label for="city">Град</label>
+                  <input id="city" placeholder="Пример: София" required>
+                </div>
+              </div>
+
+              <div>
+                <label for="description">Описание</label>
+                <textarea id="description" placeholder="Опиши услугата, срока, опита, условията и всичко важно..." required></textarea>
+              </div>
+
+              <div class="form-row-3">
+                <div>
+                  <label for="category">Категория</label>
+                  <select id="category" required>
+                    <option value="">Избери категория</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="subcategory">Подкатегория</label>
+                  <select id="subcategory">
+                    <option value="">Избери подкатегория</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="budget">Бюджет</label>
+                  <input id="budget" type="number" placeholder="Пример: 300">
+                </div>
+              </div>
+
+              <div>
+                <label for="jobImage">Снимка към обявата</label>
+                <input id="jobImage" type="file" accept="image/*">
+              </div>
+
+              <button type="submit" class="publish-main-btn">Публикувай обявата</button>
+            </form>
+          </div>
+        </div>
       </div>
 
       <div class="card">
-        <h2>Налични обяви</h2>
-        <div id="jobsList" class="job-list"></div>
+        <div class="section-head">
+          <h3>Всички обяви</h3>
+          <div id="allResultsInfo" class="results-info"></div>
+        </div>
+
+        <div id="jobsList" class="job-cards-grid"></div>
       </div>
-    </div>
+
+    </main>
   </div>
+</div>
 
-  <script src="/app.js"></script>
-  <script>
-    updateHeaderUser();
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
 
-  const jobForm = document.getElementById("jobForm");
-  const jobStatus = document.getElementById("jobStatus");
+  const categories = {
+    "Всички": [],
+    "Строителство": [
+      "Боядисване",
+      "Смяна на паркет",
+      "Къртене на плочки",
+      "Шпакловка",
+      "Гипсокартон",
+      "Покриви",
+      "Дограма"
+    ],
+    "Икономика": [
+      "Счетоводство",
+      "Маркетинг",
+      "Реклама",
+      "Бизнес консултации"
+    ],
+    "IT сектор": [
+      "Web",
+      "Графичен дизайн",
+      "Поддръжка",
+      "SEO",
+      "Софтуерни услуги"
+    ],
+    "Логистика": [
+      "Транспорт",
+      "Леки товари",
+      "Тежки товари",
+      "Куриерски услуги"
+    ],
+    "Образование": [
+      "Частни уроци",
+      "Езици",
+      "Подготовка за изпити",
+      "Онлайн обучение"
+    ],
+    "Услуги": [
+      "Фризьор",
+      "Гримьор",
+      "Фото",
+      "DIY",
+      "Меденки",
+      "Свещи",
+      "Ръчна изработка"
+    ],
+    "Ремонтни дейности": [
+      "Ремонт на телефон",
+      "Ремонт на телевизор",
+      "Ремонт на техника",
+      "Ремонт на битова техника"
+    ],
+    "Преводи": [
+      "Писмени преводи",
+      "Устни преводи",
+      "Легализация"
+    ],
+    "Сезонна работа": [
+      "Летни позиции",
+      "Зимни позиции",
+      "Почасова работа"
+    ]
+  };
+
+  let selectedCategory = "";
+  let selectedSubcategory = "";
+
+  const categorySidebar = document.getElementById("categorySidebar");
+  const activeCategoryLabel = document.getElementById("activeCategoryLabel");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const searchInput = document.getElementById("searchInput");
+  const cityFilter = document.getElementById("cityFilter");
+  const typeFilter = document.getElementById("typeFilter");
   const jobsList = document.getElementById("jobsList");
-  const publishJobCard = document.getElementById("publishJobCard");
+  const latestJobsPreview = document.getElementById("latestJobsPreview");
+  const resultsInfo = document.getElementById("resultsInfo");
+  const allResultsInfo = document.getElementById("allResultsInfo");
 
-  function updateJobsPageVisibility() {
-    const currentUser = getCurrentUser();
+  const categorySelect = document.getElementById("category");
+  const subcategorySelect = document.getElementById("subcategory");
+  const jobTypeSelect = document.getElementById("type");
+  const jobImageInput = document.getElementById("jobImage");
+  const jobForm = document.getElementById("jobForm");
 
-    if (!currentUser || currentUser.role !== "client") {
-      publishJobCard.classList.add("hidden");
+  const tabLatestBtn = document.getElementById("tabLatestBtn");
+  const tabPublishBtn = document.getElementById("tabPublishBtn");
+  const latestPanel = document.getElementById("latestPanel");
+  const publishPanel = document.getElementById("publishPanel");
+
+  function switchTab(tabName) {
+    if (tabName === "latest") {
+      tabLatestBtn.classList.add("active");
+      tabPublishBtn.classList.remove("active");
+      latestPanel.classList.remove("hidden");
+      publishPanel.classList.add("hidden");
     } else {
-      publishJobCard.classList.remove("hidden");
+      tabLatestBtn.classList.remove("active");
+      tabPublishBtn.classList.add("active");
+      latestPanel.classList.add("hidden");
+      publishPanel.classList.remove("hidden");
     }
   }
 
-  async function loadJobs() {
-    const res = await fetch("/jobs");
-    const data = await res.json();
+  function applyLandingFlowFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    const type = params.get("type");
 
-    jobsList.innerHTML = "";
-
-    if (!data || data.length === 0) {
-      jobsList.innerHTML = '<div class="empty">Все още няма обяви.</div>';
-      return;
+    if (type === "service" || type === "job") {
+      jobTypeSelect.value = type;
+      typeFilter.value = type;
     }
 
-    data.forEach(job => {
-     const currentUser = getCurrentUser();
-const isWorker = currentUser && currentUser.role === "worker";
-const isClient = currentUser && currentUser.role === "client";
+    if (mode === "publish") {
+      switchTab("publish");
+    } else {
+      switchTab("latest");
+    }
+  }
 
-const applyButton = isWorker
-  ? `<button onclick="applyJob(${job.id})">Кандидатствай</button>`
-  : "";
+  tabLatestBtn.addEventListener("click", () => switchTab("latest"));
+  tabPublishBtn.addEventListener("click", () => switchTab("publish"));
 
-const applicationsButton = isClient
-  ? `<button class="secondary-btn" onclick="goApplications(${job.id})">Виж кандидатури</button>`
-  : "";
+  function populateCategorySelect() {
+    categorySelect.innerHTML = '<option value="">Избери категория</option>';
+    subcategorySelect.innerHTML = '<option value="">Избери подкатегория</option>';
 
-const div = document.createElement("div");
-div.className = "job-item";
-div.innerHTML = ` 
-  <h3>${job.title}</h3>
-  <div class="meta">📍 ${job.city} | 🏷 ${job.category} | 💰 ${job.budget} лв</div>
-  <p>${job.description}</p>
-  <div class="job-actions">
-    ${applyButton}
-    ${applicationsButton}
-    <button class="chat-btn" onclick="goChat(${job.id}, '${job.title.replace(/'/g, "\\'")}')">Отвори чат</button>
-  </div>
-      `;
-      jobsList.appendChild(div);
+    Object.keys(categories).forEach(categoryName => {
+      if (categoryName === "Всички") return;
+
+      const option = document.createElement("option");
+      option.value = categoryName;
+      option.textContent = categoryName;
+      categorySelect.appendChild(option);
     });
   }
 
-  async function applyJob(jobId) {
+  function populateSubcategorySelect(categoryName) {
+    subcategorySelect.innerHTML = '<option value="">Избери подкатегория</option>';
+
+    if (!categoryName || !categories[categoryName]) return;
+
+    categories[categoryName].forEach(sub => {
+      const option = document.createElement("option");
+      option.value = sub;
+      option.textContent = sub;
+      subcategorySelect.appendChild(option);
+    });
+  }
+
+  categorySelect.addEventListener("change", () => {
+    populateSubcategorySelect(categorySelect.value);
+  });
+
+  function renderSidebarCategories() {
+    categorySidebar.innerHTML = "";
+
+    Object.keys(categories).forEach(categoryName => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "sidebar-category-btn";
+      button.textContent = categoryName;
+
+      if (
+        (categoryName === "Всички" && !selectedCategory) ||
+        categoryName === selectedCategory
+      ) {
+        button.classList.add("active");
+      }
+
+      button.addEventListener("click", () => {
+        if (categoryName === "Всички") {
+          selectedCategory = "";
+          selectedSubcategory = "";
+        } else {
+          selectedCategory = categoryName;
+          selectedSubcategory = "";
+        }
+
+        updateActiveCategoryLabel();
+        renderSidebarCategories();
+        loadJobs();
+      });
+
+      categorySidebar.appendChild(button);
+    });
+  }
+
+  function updateActiveCategoryLabel() {
+    activeCategoryLabel.textContent = `Категория: ${selectedCategory || "Всички"}`;
+  }
+
+  clearFiltersBtn.addEventListener("click", () => {
+    selectedCategory = "";
+    selectedSubcategory = "";
+    searchInput.value = "";
+    cityFilter.value = "";
+    typeFilter.value = "";
+    updateActiveCategoryLabel();
+    renderSidebarCategories();
+    loadJobs();
+  });
+
+  searchInput.addEventListener("input", loadJobs);
+  cityFilter.addEventListener("input", loadJobs);
+  typeFilter.addEventListener("change", loadJobs);
+
+  function getTypeLabel(type) {
+    return type === "service" ? "🟢 Услуга" : "🔵 Търся";
+  }
+
+  function getTypeText(type) {
+    return type === "service" ? "Предлагам услуга" : "Търся човек";
+  }
+
+  function buildJobCard(job, compact = false) {
+    return `
+      <div class="job-market-card ${compact ? "job-market-card-compact" : ""}">
+        <div class="job-type-badge">${getTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${job.city || "Без град"}</span>
+              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📌 ${getTypeText(job.type)}</span>
+            </div>
+          </div>
+          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+
+        <p class="job-market-desc">${job.description || ""}</p>
+
+        <div class="job-market-footer">
+          <span class="job-owner-chip">${job.ownerEmail || "Потребител"}</span>
+        </div>
+
+        <div class="job-card-actions">
+          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж профила</a>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadJobs() {
+    try {
+      const res = await fetch("/jobs");
+      const data = await res.json();
+
+      const searchValue = searchInput.value.trim().toLowerCase();
+      const cityValue = cityFilter.value.trim().toLowerCase();
+      const selectedType = typeFilter.value;
+
+      const filtered = data.filter(job => {
+        const title = (job.title || "").toLowerCase();
+        const description = (job.description || "").toLowerCase();
+        const city = (job.city || "").toLowerCase();
+        const category = job.category || "";
+        const subcategory = job.subcategory || "";
+
+        const matchesSearch =
+          !searchValue ||
+          title.includes(searchValue) ||
+          description.includes(searchValue);
+
+        const matchesCity =
+          !cityValue || city.includes(cityValue);
+
+        const matchesCategory =
+          !selectedCategory || category === selectedCategory;
+
+        const matchesSubcategory =
+          !selectedSubcategory || subcategory === selectedSubcategory;
+
+        const matchesType =
+          !selectedType || (job.type || "job") === selectedType;
+
+        return matchesSearch && matchesCity && matchesCategory && matchesSubcategory && matchesType;
+      });
+
+      const latest = [...filtered].reverse().slice(0, 4);
+
+      resultsInfo.textContent = `${latest.length} нови обяви`;
+      allResultsInfo.textContent = `${filtered.length} намерени обяви`;
+
+      latestJobsPreview.innerHTML = "";
+      jobsList.innerHTML = "";
+
+      if (!latest.length) {
+        latestJobsPreview.innerHTML = '<div class="empty">Все още няма нови обяви по тези филтри.</div>';
+      } else {
+        latestJobsPreview.innerHTML = latest.map(job => buildJobCard(job, true)).join("");
+      }
+
+      if (!filtered.length) {
+        jobsList.innerHTML = '<div class="empty">Няма намерени обяви.</div>';
+        return;
+      }
+
+      jobsList.innerHTML = filtered.map(job => buildJobCard(job)).join("");
+    } catch (error) {
+      console.error("LOAD JOBS ERROR:", error);
+      latestJobsPreview.innerHTML = '<div class="empty">Грешка при зареждане.</div>';
+      jobsList.innerHTML = '<div class="empty">Грешка при зареждане на обявите.</div>';
+    }
+  }
+
+  jobForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
@@ -165,96 +492,45 @@ div.innerHTML = `
       return;
     }
 
-    if (currentUser.role !== "worker") {
-      alert("Само изпълнител може да кандидатства.");
-      return;
+    const formData = new FormData();
+    formData.append("title", document.getElementById("title").value.trim());
+    formData.append("description", document.getElementById("description").value.trim());
+    formData.append("city", document.getElementById("city").value.trim());
+    formData.append("budget", document.getElementById("budget").value.trim());
+    formData.append("category", categorySelect.value);
+    formData.append("subcategory", subcategorySelect.value);
+    formData.append("type", jobTypeSelect.value);
+    formData.append("ownerEmail", currentUser.email);
+
+    if (jobImageInput.files[0]) {
+      formData.append("image", jobImageInput.files[0]);
     }
-
-    const message = prompt("Съобщение:");
-    const price = prompt("Предложена цена:");
-
-    if (!message) return;
-
-    const res = await fetch("/apply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jobId,
-        name: currentUser.name,
-        message,
-        price
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Грешка.");
-      return;
-    }
-
-    alert("Кандидатства успешно!");
-  }
-
-  function goApplications(jobId) {
-    localStorage.setItem("selectedJobId", jobId);
-    location.href = "/applications-page";
-  }
-
-  function goChat(jobId, jobTitle) {
-    localStorage.setItem("selectedChatJobId", jobId);
-    localStorage.setItem("selectedChatJobTitle", jobTitle);
-    location.href = "/chat-page";
-  }
-
-  jobForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    clearStatus(jobStatus);
-
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      showStatus(jobStatus, "Трябва първо да влезеш.", "error");
-      return;
-    }
-
-    if (currentUser.role !== "client") {
-      showStatus(jobStatus, "Само клиент може да публикува обяви.", "error");
-      return;
-    }
-
-   const job = {
-  title: document.getElementById("title").value.trim(),
-  description: document.getElementById("description").value.trim(),
-  city: document.getElementById("city").value.trim(),
-  category: document.getElementById("category").value,
-  budget: document.getElementById("budget").value,
-  ownerEmail: currentUser.email
-};
 
     const res = await fetch("/jobs", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(job)
+      body: formData
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      showStatus(jobStatus, data.message || "Грешка.", "error");
+      alert(data.message || "Грешка при публикуване.");
       return;
     }
 
     jobForm.reset();
-    showStatus(jobStatus, "Обявата е публикувана успешно ✅", "success");
+    populateSubcategorySelect("");
+    jobTypeSelect.value = "job";
+    switchTab("latest");
     loadJobs();
+    alert("Обявата е публикувана успешно ✅");
   });
 
-  updateJobsPageVisibility();
+  populateCategorySelect();
+  renderSidebarCategories();
+  updateActiveCategoryLabel();
+  applyLandingFlowFromQuery();
   loadJobs();
-
-
-
-  </script>
+</script>
 </body>
 </html>

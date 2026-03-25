@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Новини</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a href="/">Обяви</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/chat-page">Чат</a>
+        <a class="active" href="/feed-page">Новини</a>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid-2-wide">
+    <div class="card">
+      <h2>Нова публикация</h2>
+      <div class="small-text">
+        Всеки регистриран потребител може да публикува новини, продукти, услуги, постижения и каквото иска да покаже.
+      </div>
+
+      <div id="postStatus" class="status-box"></div>
+
+      <label for="postText">Какво искаш да споделиш?</label>
+      <textarea
+        id="postText"
+        placeholder="Пример: Нова услуга / нови продукти / участие в събитие / промоция..."
+      ></textarea>
+
+      <label for="postImage">Снимка (по желание)</label>
+      <input type="file" id="postImage" accept="image/*">
+
+      <button onclick="createPost()">Публикувай</button>
+    </div>
+
+    <div class="card">
+      <h2>Новини</h2>
+      <div id="postsList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const postStatus = document.getElementById("postStatus");
+  const postsList = document.getElementById("postsList");
+  const postText = document.getElementById("postText");
+  const postImage = document.getElementById("postImage");
+
+  async function createPost() {
+    try {
+      clearStatus(postStatus);
+
+      const currentUser = getCurrentUser();
+
+      if (!currentUser) {
+        showStatus(postStatus, "Трябва да си влязъл, за да публикуваш.", "error");
+        return;
+      }
+
+      const text = postText.value.trim();
+
+      if (!text) {
+        showStatus(postStatus, "Напиши текст за публикацията.", "error");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("authorName", currentUser.name);
+      formData.append("authorEmail", currentUser.email);
+      formData.append("text", text);
+
+      if (postImage.files[0]) {
+        formData.append("image", postImage.files[0]);
+      }
+
+      const res = await fetch("/posts", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(postStatus, data.message || "Грешка при публикуване.", "error");
+        return;
+      }
+
+      postText.value = "";
+      postImage.value = "";
+      showStatus(postStatus, "Публикацията е създадена успешно ✅", "success");
+      loadPosts();
+    } catch (error) {
+      console.error("POST ERROR:", error);
+      showStatus(postStatus, "Стана грешка при публикуването.", "error");
+    }
+  }
+
+  async function likePost(postId) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва да си влязъл, за да харесваш публикации.");
+      return;
+    }
+
+    const res = await fetch(`/posts/${postId}/like`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userEmail: currentUser.email
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка при харесване.");
+      return;
+    }
+
+    loadPosts();
+  }
+
+  async function addComment(postId) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва да си влязъл, за да коментираш.");
+      return;
+    }
+
+    const commentInput = document.getElementById(`commentInput-${postId}`);
+    const text = commentInput.value.trim();
+
+    if (!text) {
+      alert("Напиши коментар.");
+      return;
+    }
+
+    const res = await fetch(`/posts/${postId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        authorName: currentUser.name,
+        authorEmail: currentUser.email,
+        text
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка при коментиране.");
+      return;
+    }
+
+    commentInput.value = "";
+    loadPosts();
+  }
+
+  async function loadPosts() {
+    try {
+      const res = await fetch("/posts");
+      const data = await res.json();
+
+      postsList.innerHTML = "";
+
+      if (!data || !data.length) {
+        postsList.innerHTML = '<div class="empty">Все още няма публикации.</div>';
+        return;
+      }
+
+      data.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+
+        const currentUser = getCurrentUser();
+        const liked =
+          currentUser &&
+          post.likedBy &&
+          post.likedBy.includes(currentUser.email);
+
+        const commentsHtml = post.comments && post.comments.length
+          ? post.comments.map(comment => `
+              <div class="comment-item">
+                <strong>
+                  <a href="/profile/${encodeURIComponent(comment.authorEmail)}" class="author-link">
+                    ${comment.authorName}
+                  </a>
+                </strong>
+                <div class="meta">${comment.createdAt}</div>
+                <div>${comment.text}</div>
+              </div>
+            `).join("")
+          : '<div class="empty small-empty">Все още няма коментари.</div>';
+
+        div.innerHTML = `
+          <strong>
+            <a href="/profile/${encodeURIComponent(post.authorEmail)}" class="author-link">
+              ${post.authorName}
+            </a>
+          </strong>
+          <div class="meta">${post.createdAt}</div>
+          <p>${post.text}</p>
+          ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
+
+          <div class="post-actions">
+            <button class="like-btn" onclick="likePost(${post.id})">
+              ${liked ? "💔 Премахни лайк" : "❤️ Харесай"}
+            </button>
+            <span class="like-count">❤️ ${post.likes || 0}</span>
+          </div>
+
+          <div class="comments-section">
+            <h4>Коментари</h4>
+            <div class="comments-list">
+              ${commentsHtml}
+            </div>
+
+            <div class="comment-form">
+              <textarea id="commentInput-${post.id}" placeholder="Напиши коментар..."></textarea>
+              <button class="comment-btn" onclick="addComment(${post.id})">Публикувай коментар</button>
+            </div>
+          </div>
+        `;
+
+        postsList.appendChild(div);
+      });
+    } catch (error) {
+      console.error("LOAD POSTS ERROR:", error);
+      postsList.innerHTML = '<div class="empty">Грешка при зареждане на публикациите.</div>';
+    }
+  }
+
+  loadPosts();
+</script>
+</body>
+</html>

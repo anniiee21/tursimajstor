@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Детайл на обява</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a class="active" href="/">Обяви</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/chat-page">Чат</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="details-layout">
+
+    <main class="details-main">
+
+      <div id="jobDetailsCard" class="card">
+        <div class="empty">Зареждане...</div>
+      </div>
+
+      <div class="card">
+        <button id="favoriteBtn" class="job-card-btn secondary" type="button">❤️ Запази</button>
+      </div>
+
+      <div class="card">
+        <h3 id="applyTitle">Изпрати оферта</h3>
+        <div id="applyStatus" class="status-box"></div>
+
+        <form id="applyForm" class="apply-form">
+          <label for="applyMessage" id="applyMessageLabel">Съобщение</label>
+          <textarea id="applyMessage" placeholder="Опиши офертата си..." required></textarea>
+
+          <label for="applyPrice" id="applyPriceLabel">Цена (по желание)</label>
+          <input id="applyPrice" type="number" placeholder="Пример: 250">
+
+          <button type="submit" id="applySubmitBtn">Изпрати</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <h3>Подобни обяви</h3>
+        </div>
+        <div id="relatedJobs" class="job-cards-grid"></div>
+      </div>
+
+    </main>
+
+    <aside class="details-sidebar">
+
+      <div id="authorCard" class="card author-side-card">
+        <div class="empty">Зареждане на профила...</div>
+      </div>
+
+      <div class="card ad-banner-card">
+        <div class="ad-badge">Реклама</div>
+        <h3>Промотирай бизнеса си</h3>
+        <p>Покажи услугите си пред повече клиенти с по-видима обява и фирмен профил.</p>
+        <button type="button">Научи повече</button>
+      </div>
+
+      <div class="card ad-banner-card ad-banner-card-secondary">
+        <div class="ad-badge">Промо</div>
+        <h3>Седмична оферта</h3>
+        <p>Добави нова публикация, покажи нова услуга или качи промоция в твоя профил.</p>
+        <a href="/feed-page" class="ad-link-btn">Виж новините</a>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const jobDetailsCard = document.getElementById("jobDetailsCard");
+  const authorCard = document.getElementById("authorCard");
+  const relatedJobs = document.getElementById("relatedJobs");
+  const applyForm = document.getElementById("applyForm");
+  const applyStatus = document.getElementById("applyStatus");
+  const applyMessage = document.getElementById("applyMessage");
+  const applyPrice = document.getElementById("applyPrice");
+  const favoriteBtn = document.getElementById("favoriteBtn");
+  const applyTitle = document.getElementById("applyTitle");
+  const applyMessageLabel = document.getElementById("applyMessageLabel");
+  const applyPriceLabel = document.getElementById("applyPriceLabel");
+  const applySubmitBtn = document.getElementById("applySubmitBtn");
+
+  let loadedJob = null;
+
+  function getJobIdFromUrl() {
+    return Number(window.location.pathname.split("/job/")[1]);
+  }
+
+  function getJobTypeLabel(type) {
+    return type === "service" ? "🟢 Услуга" : "🔵 Търся";
+  }
+
+  function getJobTypeText(type) {
+    return type === "service" ? "Предлага услуга" : "Търси човек";
+  }
+
+  function getProfileTypeLabel(role) {
+    if (role === "personal") return "Личен профил";
+    if (role === "freelancer") return "Свободна практика";
+    if (role === "company") return "Фирма";
+    if (role === "client") return "Личен профил";
+    if (role === "worker") return "Свободна практика";
+    return "Потребител";
+  }
+
+  function getApplyText(type) {
+    if (type === "service") {
+      return {
+        title: "Заяви услугата",
+        messageLabel: "Съобщение към услугата",
+        messagePlaceholder: "Напиши какво точно търсиш, за кога ти трябва и допълнителни условия...",
+        priceLabel: "Предложена цена (по желание)",
+        submit: "Изпрати запитване"
+      };
+    }
+
+    return {
+      title: "Изпрати оферта",
+      messageLabel: "Съобщение",
+      messagePlaceholder: "Опиши офертата си, опит, срок и какво включва услугата...",
+      priceLabel: "Цена (по желание)",
+      submit: "Изпрати оферта"
+    };
+  }
+
+  function toggleFavorite(id) {
+    let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+    if (favs.includes(id)) {
+      favs = favs.filter(x => x !== id);
+    } else {
+      favs.push(id);
+    }
+
+    localStorage.setItem("favorites", JSON.stringify(favs));
+    updateFavBtn(id);
+  }
+
+  function updateFavBtn(id) {
+    const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+    favoriteBtn.textContent = favs.includes(id)
+      ? "💔 Премахни от любими"
+      : "❤️ Запази";
+  }
+
+  function buildRelatedCard(job) {
+    return `
+      <div class="job-market-card">
+        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${job.city || "Без град"}</span>
+              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📌 ${getJobTypeText(job.type)}</span>
+            </div>
+          </div>
+          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+
+        <p class="job-market-desc">${job.description || ""}</p>
+
+        <div class="job-card-actions">
+          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadJob() {
+    try {
+      const id = getJobIdFromUrl();
+
+      if (!id) {
+        jobDetailsCard.innerHTML = '<div class="empty">Невалидна обява.</div>';
+        return;
+      }
+
+      const res = await fetch(`/api/jobs/${id}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        jobDetailsCard.innerHTML = '<div class="empty">Обявата не е намерена.</div>';
+        authorCard.innerHTML = '<div class="empty">Няма информация за автора.</div>';
+        relatedJobs.innerHTML = '<div class="empty">Няма подобни обяви.</div>';
+        return;
+      }
+
+      const { job, owner, related } = data;
+      loadedJob = job;
+
+      const currentUser = getCurrentUser();
+      const isOwner = currentUser && currentUser.email === job.ownerEmail;
+
+      const applyText = getApplyText(job.type);
+
+      applyTitle.textContent = applyText.title;
+      applyMessageLabel.textContent = applyText.messageLabel;
+      applyMessage.placeholder = applyText.messagePlaceholder;
+      applyPriceLabel.textContent = applyText.priceLabel;
+      applySubmitBtn.textContent = applyText.submit;
+
+      localStorage.setItem("selectedJobId", String(job.id));
+      localStorage.setItem("selectedChatJobId", String(job.id));
+      localStorage.setItem("selectedChatJobTitle", job.title || "Без заглавие");
+
+      jobDetailsCard.innerHTML = `
+        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
+
+        <div class="job-details-top">
+          <div>
+            <div class="job-detail-category">
+              ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}
+            </div>
+            <h1 class="job-details-title">${job.title || "Без заглавие"}</h1>
+            <div class="job-details-meta">
+              <span>📍 ${job.city || "Без град"}</span>
+              ${job.budget ? `<span>💰 ${job.budget} лв</span>` : ""}
+              <span>📌 ${getJobTypeText(job.type)}</span>
+              <span>🆔 #${job.id}</span>
+            </div>
+          </div>
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+
+        <div class="job-detail-body">
+          <h3>Описание</h3>
+          <p>${job.description || "Няма описание."}</p>
+        </div>
+
+        <div class="job-detail-actions">
+          <a href="/chat-page" class="job-card-btn">Пиши съобщение</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж автора</a>
+          ${
+            isOwner
+              ? `<a href="/applications-page" class="job-card-btn secondary">Виж кандидатурите</a>`
+              : ""
+          }
+        </div>
+      `;
+
+      authorCard.innerHTML = `
+        <div class="author-card-top">
+          ${
+            owner && owner.profileImage
+              ? `<img src="${owner.profileImage}" alt="Профил" class="author-card-image">`
+              : `<div class="author-card-placeholder">👤</div>`
+          }
+
+          <div>
+            <h3>${owner?.name || "Потребител"}</h3>
+            <div class="author-role-badge">${getProfileTypeLabel(owner?.role)}</div>
+          </div>
+        </div>
+
+        <div class="author-card-content">
+          <p>${owner?.description || "Все още няма описание на профила."}</p>
+          <div class="author-mini-meta">
+            <div>📧 ${owner?.email || job.ownerEmail}</div>
+            ${owner?.profession ? `<div>💼 ${owner.profession}</div>` : ""}
+            ${owner?.companyId ? `<div>🏢 ЕИК: ${owner.companyId}</div>` : ""}
+            ${owner?.contactName ? `<div>👤 Контакт: ${owner.contactName}</div>` : ""}
+            ${owner?.manager ? `<div>📌 Представител: ${owner.manager}</div>` : ""}
+            <div>${owner?.showPhone && owner?.phone ? "📞 " + owner.phone : "📞 Телефонът е скрит"}</div>
+          </div>
+        </div>
+
+        <div class="author-card-actions">
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn">Виж профила</a>
+        </div>
+      `;
+
+      if (!related || !related.length) {
+        relatedJobs.innerHTML = '<div class="empty">Няма подобни обяви засега.</div>';
+      } else {
+        relatedJobs.innerHTML = related.map(buildRelatedCard).join("");
+      }
+
+      updateFavBtn(job.id);
+      favoriteBtn.onclick = () => toggleFavorite(job.id);
+    } catch (error) {
+      console.error("DETAILS ERROR:", error);
+      jobDetailsCard.innerHTML = '<div class="empty">Стана грешка при зареждане.</div>';
+      authorCard.innerHTML = '<div class="empty">Стана грешка при зареждане.</div>';
+      relatedJobs.innerHTML = '<div class="empty">Стана грешка при зареждане.</div>';
+    }
+  }
+
+  applyForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(applyStatus);
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      showStatus(applyStatus, "Трябва първо да влезеш.", "error");
+      return;
+    }
+
+    if (!loadedJob) {
+      showStatus(applyStatus, "Обявата не е заредена.", "error");
+      return;
+    }
+
+    if (currentUser.email === loadedJob.ownerEmail) {
+      showStatus(applyStatus, "Не можеш да кандидатстваш по собствената си обява.", "error");
+      return;
+    }
+
+    const message = applyMessage.value.trim();
+    const price = applyPrice.value.trim();
+
+    if (!message) {
+      showStatus(
+        applyStatus,
+        loadedJob.type === "service"
+          ? "Напиши съобщение към услугата."
+          : "Напиши съобщение към офертата.",
+        "error"
+      );
+      return;
+    }
+
+    const res = await fetch("/apply", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        jobId: loadedJob.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        message,
+        price
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(applyStatus, data.message || "Грешка при изпращане.", "error");
+      return;
+    }
+
+    applyForm.reset();
+    localStorage.setItem("selectedJobId", String(loadedJob.id));
+
+    showStatus(
+      applyStatus,
+      loadedJob.type === "service"
+        ? "Запитването е изпратено успешно ✅"
+        : "Офертата е изпратена успешно ✅",
+      "success"
+    );
+  });
+
+  loadJob();
+</script>
+</body>
+</html>

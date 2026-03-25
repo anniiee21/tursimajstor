@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Начало</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a class="active" href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/account-page">Регистрация</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <section class="landing-hero card">
+    <div class="landing-hero-grid">
+      <div>
+        <div class="landing-badge">Платформа за услуги, работа и професионални профили</div>
+        <h1 class="landing-title">Избери как искаш да използваш платформата</h1>
+        <p class="landing-text">
+          Публикувай услуга, търси професионалист, кандидатствай по интересна възможност или създай фирмен профил.
+          Всичко започва оттук.
+        </p>
+
+        <div class="landing-hero-actions">
+          <a href="/jobs-page" class="landing-main-btn">Разгледай обявите</a>
+          <a href="/account-page" class="landing-secondary-btn">Създай профил</a>
+        </div>
+      </div>
+
+      <div class="landing-highlight-card">
+        <h3>Какво можеш да правиш тук?</h3>
+        <div class="landing-mini-list">
+          <div>✔ Публикувай обява</div>
+          <div>✔ Рекламирай професия или фирма</div>
+          <div>✔ Кандидатствай по работа</div>
+          <div>✔ Създай професионален профил</div>
+          <div>✔ Използвай чат и вътрешна комуникация</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-actions-grid">
+    <a href="/jobs-page?mode=browse&type=job" class="landing-action-card">
+      <div class="landing-action-icon">🔎</div>
+      <h2>Търся работа / услуга</h2>
+      <p>Разгледай активните обяви и намери подходяща възможност или услуга.</p>
+      <span class="landing-action-link">Отвори обявите →</span>
+    </a>
+
+    <a href="/jobs-page?mode=publish&type=service" class="landing-action-card">
+      <div class="landing-action-icon">🛠</div>
+      <h2>Предлагам услуга</h2>
+      <p>Създай service обява и представи професията, уменията и услугите си.</p>
+      <span class="landing-action-link">Публикувай услуга →</span>
+    </a>
+
+    <a href="/jobs-page?mode=publish&type=job" class="landing-action-card">
+      <div class="landing-action-icon">👤</div>
+      <h2>Търся професионалист</h2>
+      <p>Пусни обява, ако търсиш майстор, специалист, партньор или помощ по проект.</p>
+      <span class="landing-action-link">Публикувай търсене →</span>
+    </a>
+
+    <a href="/account-page?role=company" class="landing-action-card landing-action-card-accent">
+      <div class="landing-action-icon">🏢</div>
+      <h2>Регистрирай фирма</h2>
+      <p>Създай фирмен профил с описание, контактно лице, ЕИК и представителна информация.</p>
+      <span class="landing-action-link">Създай фирмен профил →</span>
+    </a>
+  </section>
+
+  <section class="landing-info-grid">
+    <div class="card landing-info-card">
+      <h3>За лични профили</h3>
+      <p>Подходящо за хора, които искат да разглеждат, кандидатстват и публикуват по-общи обяви.</p>
+    </div>
+
+    <div class="card landing-info-card">
+      <h3>За свободна практика</h3>
+      <p>Подходящо за професионалисти, които искат да рекламират услуги и да намират клиенти.</p>
+    </div>
+
+    <div class="card landing-info-card">
+      <h3>За фирми</h3>
+      <p>Подходящо за компании, които искат представителен профил, публикации и фирмени обяви.</p>
+    </div>
+  </section>
+
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+</script>
+</body>
+</html>

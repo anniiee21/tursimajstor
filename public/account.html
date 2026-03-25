@@ -7,164 +7,361 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <div class="navbar">
-        <h1 class="brand">TursiMajstor</h1>
 
-       <div class="nav-links">
-  <a href="/">Обяви</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/chat-page">Чат</a>
-</div>
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
 
-        <div class="user-menu">
-  <button id="userMenuBtn" class="user-chip">Вход</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
-  <div id="userDropdown" class="user-dropdown hidden">
-    
-    <div id="userInfo"></div>
+      <div id="navLinks" class="nav-links">
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a class="active" href="/account-page">Регистрация</a>
+        <a href="/feed-page">Новини</a>
+      </div>
 
-    <div class="auth-tabs">
-  <button id="loginTabBtn" class="auth-tab active">Вход</button>
-  <button id="registerTabBtn" class="auth-tab">Регистрация</button>
-</div>
-
-<div id="loginFormBox" class="auth-box">
-  <input id="loginEmail" placeholder="Имейл">
-  <input id="loginPassword" type="password" placeholder="Парола">
-  <button onclick="login()">Влез</button>
-</div>
-
-<div id="registerFormBox" class="auth-box hidden">
-  <input id="regName" placeholder="Име">
-  <input id="regEmail" placeholder="Имейл">
-  <input id="regPassword" type="password" placeholder="Парола">
-  <select id="regRole">
-    <option value="client">Клиент</option>
-    <option value="worker">Изпълнител</option>
-  </select>
-  <button onclick="register()">Регистрация</button>
-</div>
-
-    <button onclick="logout()" class="danger-btn">Изход</button>
-
-  </div>
-</div>
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <div class="container">
-    <div class="grid-2">
-      <div class="card">
+<div class="container">
+  <div class="auth-page-layout">
+
+    <div class="card auth-hero-card">
+      <div class="auth-hero-badge">Профил в платформата</div>
+      <h1 class="auth-hero-title">Създай акаунт според начина, по който работиш</h1>
+      <p class="auth-hero-text">
+        Регистрирай се като личен профил, свободна практика или фирма. След това можеш да публикуваш обяви, да рекламираш дейността си и да кандидатстваш по интересни възможности.
+      </p>
+
+      <div class="auth-hero-points">
+        <div class="auth-point-card">
+          <h3>Личен профил</h3>
+          <p>За хора, които искат да разглеждат, кандидатстват и публикуват по-общи обяви.</p>
+        </div>
+
+        <div class="auth-point-card">
+          <h3>Свободна практика</h3>
+          <p>За специалисти, които предлагат услуги и искат да покажат професия, опит и дейности.</p>
+        </div>
+
+        <div class="auth-point-card">
+          <h3>Фирма</h3>
+          <p>За компании, които искат фирмен профил с представителни данни, контакт и по-силно присъствие.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-side-layout">
+      <div class="card auth-switch-card">
+        <div class="big-auth-tabs">
+          <button id="pageLoginTabBtn" class="big-auth-tab" type="button">Вход</button>
+          <button id="pageRegisterTabBtn" class="big-auth-tab active" type="button">Регистрация</button>
+        </div>
+      </div>
+
+      <div id="pageLoginCard" class="card hidden">
+        <h2>Вход</h2>
+        <div id="loginStatus" class="status-box"></div>
+
+        <form id="loginFormPage" class="page-auth-form">
+          <label for="pageLoginEmail">Имейл</label>
+          <input type="email" id="pageLoginEmail" placeholder="Въведи имейл" required>
+
+          <label for="pageLoginPassword">Парола</label>
+          <input type="password" id="pageLoginPassword" placeholder="Въведи парола" required>
+
+          <button type="submit">Влез в акаунта</button>
+        </form>
+      </div>
+
+      <div id="pageRegisterCard" class="card">
         <h2>Регистрация</h2>
         <div id="registerStatus" class="status-box"></div>
 
-        <form id="registerForm">
-          <label for="registerName">Име</label>
-          <input type="text" id="registerName" required>
-
-          <label for="registerEmail">Имейл</label>
-          <input type="email" id="registerEmail" required>
-
-          <label for="registerPassword">Парола</label>
-          <input type="password" id="registerPassword" required>
-
-          <label for="registerRole">Роля</label>
-          <select id="registerRole" required>
-            <option value="">Избери роля</option>
-            <option value="client">Клиент</option>
-            <option value="worker">Изпълнител</option>
+        <form id="registerFormPage" class="page-auth-form" enctype="multipart/form-data">
+          <label for="pageRegRole">Избери тип профил</label>
+          <select id="pageRegRole" required>
+            <option value="personal">Личен профил</option>
+            <option value="freelancer">Свободна практика</option>
+            <option value="company">Фирма</option>
           </select>
 
-          <button type="submit">Регистрирай се</button>
-        </form>
-      </div>
+          <div id="pageRoleIntro" class="role-intro-card"></div>
+          <div id="pageDynamicFields"></div>
 
-      <div class="card">
-        <h2>Вход</h2>
-        <div id="loginStatus" class="status-box"></div>
-        <div id="currentUserBox" class="user-box">Няма влязъл потребител.</div>
+          <div class="page-form-grid">
+            <div>
+              <label for="pageRegEmail">Имейл за връзка</label>
+              <input type="email" id="pageRegEmail" placeholder="Пример: name@email.com" required>
+            </div>
 
-        <form id="loginForm">
-          <label for="loginEmail">Имейл</label>
-          <input type="email" id="loginEmail" required>
+            <div>
+              <label for="pageRegPassword">Парола</label>
+              <input type="password" id="pageRegPassword" placeholder="Създай парола" required>
+            </div>
+          </div>
 
-          <label for="loginPassword">Парола</label>
-          <input type="password" id="loginPassword" required>
+          <div class="page-form-grid">
+            <div>
+              <label for="pageRegPhone">Телефон за връзка</label>
+              <input id="pageRegPhone" placeholder="Телефон за връзка">
+            </div>
 
-          <button type="submit">Влез</button>
-          <button type="button" class="danger-btn" onclick="logout()">Изход</button>
+            <div>
+              <label for="pageRegProfileImage">Снимка / Лого</label>
+              <input type="file" id="pageRegProfileImage" accept="image/*">
+            </div>
+          </div>
+
+          <label class="smart-checkbox">
+            <input type="checkbox" id="pageRegShowPhone">
+            Покажи телефона в профила
+          </label>
+
+          <button type="submit" class="auth-submit-btn">Създай профил</button>
         </form>
       </div>
     </div>
+
   </div>
+</div>
 
-  <script src="/app.js"></script>
-  <script>
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const pageLoginTabBtn = document.getElementById("pageLoginTabBtn");
+  const pageRegisterTabBtn = document.getElementById("pageRegisterTabBtn");
+  const pageLoginCard = document.getElementById("pageLoginCard");
+  const pageRegisterCard = document.getElementById("pageRegisterCard");
+
+  const pageRegRole = document.getElementById("pageRegRole");
+  const pageRoleIntro = document.getElementById("pageRoleIntro");
+  const pageDynamicFields = document.getElementById("pageDynamicFields");
+
+  const registerFormPage = document.getElementById("registerFormPage");
+  const registerStatus = document.getElementById("registerStatus");
+
+  const loginFormPage = document.getElementById("loginFormPage");
+  const loginStatus = document.getElementById("loginStatus");
+
+  function switchAuthPage(tab) {
+    if (tab === "login") {
+      pageLoginTabBtn.classList.add("active");
+      pageRegisterTabBtn.classList.remove("active");
+      pageLoginCard.classList.remove("hidden");
+      pageRegisterCard.classList.add("hidden");
+    } else {
+      pageRegisterTabBtn.classList.add("active");
+      pageLoginTabBtn.classList.remove("active");
+      pageRegisterCard.classList.remove("hidden");
+      pageLoginCard.classList.add("hidden");
+    }
+  }
+
+  pageLoginTabBtn.addEventListener("click", () => switchAuthPage("login"));
+  pageRegisterTabBtn.addEventListener("click", () => switchAuthPage("register"));
+
+  function renderRoleIntro(role) {
+    if (role === "company") {
+      pageRoleIntro.innerHTML = `
+        <h3>Фирмен профил</h3>
+        <p>Подходящ за компании, агенции и организации, които искат представителен профил с фирмени данни.</p>
+      `;
+      return;
+    }
+
+    if (role === "freelancer") {
+      pageRoleIntro.innerHTML = `
+        <h3>Свободна практика</h3>
+        <p>Подходящ за специалисти, които работят самостоятелно и искат да представят професия, услуги и опит.</p>
+      `;
+      return;
+    }
+
+    pageRoleIntro.innerHTML = `
+      <h3>Личен профил</h3>
+      <p>Подходящ за потребители, които искат да разглеждат, публикуват и кандидатстват без фирмен или професионален формат.</p>
+    `;
+  }
+
+  function renderPageRoleFields(role) {
+    renderRoleIntro(role);
+
+    if (role === "company") {
+      pageDynamicFields.innerHTML = `
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegName">Име на фирма</label>
+            <input id="pageRegName" placeholder="Име на фирма" required>
+          </div>
+
+          <div>
+            <label for="pageRegCompanyId">ЕИК</label>
+            <input id="pageRegCompanyId" placeholder="ЕИК / по желание">
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegContactName">Лице за контакт</label>
+            <input id="pageRegContactName" placeholder="Име на контактно лице">
+          </div>
+
+          <div>
+            <label for="pageRegManager">Представител / МОЛ</label>
+            <input id="pageRegManager" placeholder="Име на представител">
+          </div>
+        </div>
+
+        <label for="pageRegDescription">Описание на фирмата</label>
+        <textarea id="pageRegDescription" placeholder="Представи дейността, услугите и опита на фирмата"></textarea>
+      `;
+      return;
+    }
+
+    if (role === "freelancer") {
+      pageDynamicFields.innerHTML = `
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegName">Име и фамилия</label>
+            <input id="pageRegName" placeholder="Име и фамилия" required>
+          </div>
+
+          <div>
+            <label for="pageRegProfession">Професия / Специалност</label>
+            <input id="pageRegProfession" placeholder="Пример: Дизайнер, преводач, майстор">
+          </div>
+        </div>
+
+        <label for="pageRegDescription">Описание</label>
+        <textarea id="pageRegDescription" placeholder="Разкажи с какво се занимаваш, какво предлагаш и какъв е опитът ти"></textarea>
+      `;
+      return;
+    }
+
+    pageDynamicFields.innerHTML = `
+      <label for="pageRegName">Име и фамилия</label>
+      <input id="pageRegName" placeholder="Име и фамилия" required>
+
+      <label for="pageRegDescription">Кратко представяне</label>
+      <textarea id="pageRegDescription" placeholder="Няколко думи за теб"></textarea>
+    `;
+  }
+
+  function applyRoleFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get("role");
+
+    if (role === "company" || role === "freelancer" || role === "personal") {
+      pageRegRole.value = role;
+    }
+
+    switchAuthPage("register");
+    renderPageRoleFields(pageRegRole.value);
+  }
+
+  pageRegRole.addEventListener("change", () => {
+    renderPageRoleFields(pageRegRole.value);
+  });
+
+  renderPageRoleFields(pageRegRole.value);
+  applyRoleFromQuery();
+
+  registerFormPage.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(registerStatus);
+
+    const role = pageRegRole.value;
+    const name = document.getElementById("pageRegName")?.value.trim() || "";
+    const email = document.getElementById("pageRegEmail")?.value.trim() || "";
+    const password = document.getElementById("pageRegPassword")?.value.trim() || "";
+    const description = document.getElementById("pageRegDescription")?.value.trim() || "";
+    const phone = document.getElementById("pageRegPhone")?.value.trim() || "";
+    const showPhone = document.getElementById("pageRegShowPhone")?.checked || false;
+    const profileImage = document.getElementById("pageRegProfileImage")?.files?.[0] || null;
+
+    const contactName = document.getElementById("pageRegContactName")?.value.trim() || "";
+    const companyId = document.getElementById("pageRegCompanyId")?.value.trim() || "";
+    const manager = document.getElementById("pageRegManager")?.value.trim() || "";
+    const profession = document.getElementById("pageRegProfession")?.value.trim() || "";
+
+    if (!name || !email || !password || !role) {
+      showStatus(registerStatus, "Попълни всички задължителни полета.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", role);
+    formData.append("description", description);
+    formData.append("phone", phone);
+    formData.append("showPhone", showPhone);
+    formData.append("contactName", contactName);
+    formData.append("companyId", companyId);
+    formData.append("manager", manager);
+    formData.append("profession", profession);
+
+    if (profileImage) {
+      formData.append("profileImage", profileImage);
+    }
+
+    const res = await fetch("/register", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(registerStatus, data.message || "Грешка при регистрация.", "error");
+      return;
+    }
+
+    registerFormPage.reset();
+    pageRegRole.value = "personal";
+    renderPageRoleFields("personal");
+    showStatus(registerStatus, "Регистрацията е успешна ✅", "success");
+  });
+
+  loginFormPage.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(loginStatus);
+
+    const email = document.getElementById("pageLoginEmail").value.trim();
+    const password = document.getElementById("pageLoginPassword").value.trim();
+
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(loginStatus, data.message || "Грешка при вход.", "error");
+      return;
+    }
+
+    localStorage.setItem("currentUser", JSON.stringify(data.user));
     updateHeaderUser();
+    showStatus(loginStatus, `Добре дошъл, ${data.user.name} ✅`, "success");
 
-    const registerForm = document.getElementById("registerForm");
-    const registerStatus = document.getElementById("registerStatus");
-    const loginForm = document.getElementById("loginForm");
-    const loginStatus = document.getElementById("loginStatus");
-
-    registerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearStatus(registerStatus);
-
-      const user = {
-        name: document.getElementById("registerName").value.trim(),
-        email: document.getElementById("registerEmail").value.trim(),
-        password: document.getElementById("registerPassword").value.trim(),
-        role: document.getElementById("registerRole").value
-      };
-
-      const res = await fetch("/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showStatus(registerStatus, data.message || "Грешка при регистрация.", "error");
-        return;
-      }
-
-      registerForm.reset();
-      showStatus(registerStatus, `Успешна регистрация за ${data.user.name} ✅`, "success");
-    });
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearStatus(loginStatus);
-
-      const loginData = {
-        email: document.getElementById("loginEmail").value.trim(),
-        password: document.getElementById("loginPassword").value.trim()
-      };
-
-      const res = await fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showStatus(loginStatus, data.message || "Грешка при вход.", "error");
-        return;
-      }
-
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
-      updateHeaderUser();
-      loginForm.reset();
-      showStatus(loginStatus, `Добре дошъл, ${data.user.name} ✅`, "success");
-    });
-  </script>
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 600);
+  });
+</script>
 </body>
 </html>

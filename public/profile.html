@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Профил</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a href="/">Обяви</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/chat-page">Чат</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="profile-page-layout">
+
+    <main class="profile-main-column">
+      <div class="card profile-hero-card">
+        <div class="profile-hero-top">
+          <div id="profileImageWrap"></div>
+
+          <div class="profile-hero-main">
+            <div id="profileTypeBadge" class="profile-type-badge">Профил</div>
+            <h1 id="profileName" class="profile-hero-title">Профил</h1>
+            <div id="profileMeta" class="meta"></div>
+            <div id="profileRating" class="small-text"></div>
+            <div id="profilePhone" class="profile-phone"></div>
+
+            <div class="profile-hero-actions">
+              <button id="editProfileBtn" class="secondary-btn hidden" type="button">✏️ Редактирай профил</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="profileInfoCard" class="card">
+        <h2>Информация за профила</h2>
+        <div id="profileInfoSections"></div>
+      </div>
+
+      <div id="editProfileCard" class="card hidden">
+        <h2>Редакция на профил</h2>
+        <div id="profileEditStatus" class="status-box"></div>
+
+        <label for="editDescription">Описание</label>
+        <textarea id="editDescription" placeholder="Напиши кратко описание"></textarea>
+
+        <label for="editPhone">Телефон</label>
+        <input id="editPhone" placeholder="Телефон за връзка">
+
+        <label class="small-checkbox">
+          <input type="checkbox" id="editShowPhone">
+          Покажи телефона в профила
+        </label>
+
+        <label for="editProfileImage">Нова снимка / лого</label>
+        <input type="file" id="editProfileImage" accept="image/*">
+
+        <button type="button" onclick="saveProfile()">Запази промените</button>
+      </div>
+
+      <div class="grid-2-wide">
+        <div class="card">
+          <div class="section-head">
+            <h2>Публикации</h2>
+          </div>
+          <div id="profilePosts"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <h2>Обяви</h2>
+          </div>
+          <div id="profileJobs"></div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="profile-side-column">
+      <div class="card profile-side-card">
+        <h3>Контакт</h3>
+        <div id="profileContactCard"></div>
+      </div>
+
+      <div class="card profile-side-card">
+        <h3>Активност</h3>
+        <div id="profileStatsCard"></div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  updateHeaderUser();
+  updateRoleVisibility();
+
+  const profileName = document.getElementById("profileName");
+  const profileMeta = document.getElementById("profileMeta");
+  const profileRating = document.getElementById("profileRating");
+  const profilePhone = document.getElementById("profilePhone");
+  const profilePosts = document.getElementById("profilePosts");
+  const profileJobs = document.getElementById("profileJobs");
+  const profileImageWrap = document.getElementById("profileImageWrap");
+  const profileTypeBadge = document.getElementById("profileTypeBadge");
+  const profileInfoSections = document.getElementById("profileInfoSections");
+  const profileContactCard = document.getElementById("profileContactCard");
+  const profileStatsCard = document.getElementById("profileStatsCard");
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  const editProfileCard = document.getElementById("editProfileCard");
+  const profileEditStatus = document.getElementById("profileEditStatus");
+
+  const editDescription = document.getElementById("editDescription");
+  const editPhone = document.getElementById("editPhone");
+  const editShowPhone = document.getElementById("editShowPhone");
+  const editProfileImage = document.getElementById("editProfileImage");
+
+  let loadedProfileUser = null;
+  let loadedPosts = [];
+  let loadedJobs = [];
+
+  function getProfileTypeLabel(role) {
+    if (role === "personal") return "Личен профил";
+    if (role === "freelancer") return "Свободна практика";
+    if (role === "company") return "Фирма";
+    if (role === "client") return "Личен профил";
+    if (role === "worker") return "Свободна практика";
+    return "Потребител";
+  }
+
+  function buildInfoSections(user) {
+    const role = user.role || "personal";
+    const description = user.description || "Няма добавено описание.";
+
+    if (role === "company") {
+      return `
+        <div class="profile-info-grid">
+          <div class="profile-info-block">
+            <h3>За фирмата</h3>
+            <p>${description}</p>
+          </div>
+
+          <div class="profile-info-block">
+            <h3>Фирмени данни</h3>
+            <div class="profile-info-list">
+              <div><strong>Име:</strong> ${user.name || "—"}</div>
+              <div><strong>ЕИК:</strong> ${user.companyId || "—"}</div>
+              <div><strong>Представител:</strong> ${user.manager || "—"}</div>
+              <div><strong>Лице за контакт:</strong> ${user.contactName || "—"}</div>
+            </div>
+          </div>
+
+          <div class="profile-info-block profile-info-block-full">
+            <h3>Дейност</h3>
+            <p>${description}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    if (role === "freelancer") {
+      return `
+        <div class="profile-info-grid">
+          <div class="profile-info-block">
+            <h3>Представяне</h3>
+            <p>${description}</p>
+          </div>
+
+          <div class="profile-info-block">
+            <h3>Професионален профил</h3>
+            <div class="profile-info-list">
+              <div><strong>Име:</strong> ${user.name || "—"}</div>
+              <div><strong>Професия:</strong> ${user.profession || "—"}</div>
+              <div><strong>Тип профил:</strong> Свободна практика</div>
+            </div>
+          </div>
+
+          <div class="profile-info-block profile-info-block-full">
+            <h3>Услуги и дейности</h3>
+            <p>${description}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="profile-info-grid">
+        <div class="profile-info-block">
+          <h3>Кратко представяне</h3>
+          <p>${description}</p>
+        </div>
+
+        <div class="profile-info-block">
+          <h3>Основна информация</h3>
+          <div class="profile-info-list">
+            <div><strong>Име:</strong> ${user.name || "—"}</div>
+            <div><strong>Тип профил:</strong> Личен профил</div>
+            <div><strong>Имейл:</strong> ${user.email || "—"}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildContactCard(user) {
+    return `
+      <div class="profile-contact-list">
+        <div><strong>Имейл:</strong> ${user.email || "—"}</div>
+        <div><strong>Телефон:</strong> ${user.showPhone && user.phone ? user.phone : "Скрит"}</div>
+        ${user.contactName ? `<div><strong>Контакт:</strong> ${user.contactName}</div>` : ""}
+        ${user.manager ? `<div><strong>Представител:</strong> ${user.manager}</div>` : ""}
+      </div>
+    `;
+  }
+
+  function buildStatsCard(user, posts, jobs) {
+    const servicesCount = jobs.filter(job => job.type === "service").length;
+    const jobsCount = jobs.filter(job => job.type === "job").length;
+
+    return `
+      <div class="profile-stats-list">
+        <div class="profile-stat-item">
+          <span>Публикации</span>
+          <strong>${posts.length}</strong>
+        </div>
+        <div class="profile-stat-item">
+          <span>Обяви общо</span>
+          <strong>${jobs.length}</strong>
+        </div>
+        <div class="profile-stat-item">
+          <span>Услуги</span>
+          <strong>${servicesCount}</strong>
+        </div>
+        <div class="profile-stat-item">
+          <span>Търсения</span>
+          <strong>${jobsCount}</strong>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadProfile() {
+    const email = decodeURIComponent(window.location.pathname.split("/profile/")[1] || "");
+
+    if (!email) {
+      profileName.textContent = "Профилът не е намерен";
+      return;
+    }
+
+    const res = await fetch(`/api/profile/${encodeURIComponent(email)}`);
+    const data = await res.json();
+
+    const user = data.user;
+    loadedProfileUser = user;
+    loadedPosts = data.posts || [];
+    loadedJobs = data.jobs || [];
+
+    profileName.textContent = user.name || "Потребител";
+    profileMeta.textContent = `${user.email || ""} | ${getProfileTypeLabel(user.role || "personal")}`;
+    profileTypeBadge.textContent = getProfileTypeLabel(user.role || "personal");
+
+    if (user.profileImage) {
+      profileImageWrap.innerHTML = `<img src="${user.profileImage}" alt="Профилна снимка" class="profile-image-large">`;
+    } else {
+      profileImageWrap.innerHTML = `<div class="profile-placeholder">👤</div>`;
+    }
+
+    if (data.rating && Number(data.rating.count) > 0) {
+      profileRating.textContent = `⭐ Рейтинг: ${data.rating.average} (${data.rating.count} оценки)`;
+    } else {
+      profileRating.textContent = "Все още няма рейтинг.";
+    }
+
+    profilePhone.textContent =
+      user.showPhone && user.phone
+        ? `📞 Телефон: ${user.phone}`
+        : "Телефонът е скрит.";
+
+    profileInfoSections.innerHTML = buildInfoSections(user);
+    profileContactCard.innerHTML = buildContactCard(user);
+    profileStatsCard.innerHTML = buildStatsCard(user, loadedPosts, loadedJobs);
+
+    editDescription.value = user.description || "";
+    editPhone.value = user.phone || "";
+    editShowPhone.checked = !!user.showPhone;
+
+    const currentUser = getCurrentUser();
+    if (currentUser && currentUser.email === user.email) {
+      editProfileBtn.classList.remove("hidden");
+    } else {
+      editProfileBtn.classList.add("hidden");
+      editProfileCard.classList.add("hidden");
+    }
+
+    profilePosts.innerHTML = "";
+    if (!loadedPosts.length) {
+      profilePosts.innerHTML = '<div class="empty">Няма публикации.</div>';
+    } else {
+      loadedPosts.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+        div.innerHTML = `
+          <div class="meta">${post.createdAt}</div>
+          <p>${post.text}</p>
+          ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
+        `;
+        profilePosts.appendChild(div);
+      });
+    }
+
+    profileJobs.innerHTML = "";
+    if (!loadedJobs.length) {
+      profileJobs.innerHTML = '<div class="empty">Няма активни обяви.</div>';
+    } else {
+      loadedJobs.forEach(job => {
+        const div = document.createElement("div");
+        div.className = "job-item";
+        div.innerHTML = `
+          <h3>${job.title}</h3>
+          <div class="meta">
+            📍 ${job.city || "Без град"} |
+            🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""} |
+            📌 ${job.type === "service" ? "Предлагам услуга" : "Търся човек"}
+            ${job.budget ? `| 💰 ${job.budget} лв` : ""}
+          </div>
+          ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+          <p>${job.description || ""}</p>
+          <div class="job-card-actions">
+            <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+          </div>
+        `;
+        profileJobs.appendChild(div);
+      });
+    }
+  }
+
+  editProfileBtn.addEventListener("click", () => {
+    editProfileCard.classList.toggle("hidden");
+  });
+
+  async function saveProfile() {
+    clearStatus(profileEditStatus);
+
+    const currentUser = getCurrentUser();
+
+    if (!currentUser || !loadedProfileUser || currentUser.email !== loadedProfileUser.email) {
+      showStatus(profileEditStatus, "Нямаш право да редактираш този профил.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("description", editDescription.value.trim());
+    formData.append("phone", editPhone.value.trim());
+    formData.append("showPhone", editShowPhone.checked);
+
+    if (editProfileImage.files[0]) {
+      formData.append("profileImage", editProfileImage.files[0]);
+    }
+
+    const res = await fetch(`/api/profile/${encodeURIComponent(currentUser.email)}`, {
+      method: "PUT",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(profileEditStatus, data.message || "Грешка при обновяване на профила.", "error");
+      return;
+    }
+
+    localStorage.setItem("currentUser", JSON.stringify(data.user));
+    updateHeaderUser();
+    showStatus(profileEditStatus, "Профилът е обновен успешно ✅", "success");
+    editProfileImage.value = "";
+
+    await loadProfile();
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>
