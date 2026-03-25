@@ -2919,3 +2919,142 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.portfolio-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.portfolio-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.portfolio-placeholder {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  font-size: 52px;
+  color: #3730a3;
+}
+
+.portfolio-body {
+  padding: 16px;
+}
+
+.portfolio-body h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+}
+
+.portfolio-body p {
+  margin: 10px 0 0;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.portfolio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-gallery-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.job-gallery-thumb-preview {
+  width: 62px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.job-gallery-more {
+  width: 62px;
+  height: 62px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.job-details-gallery {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+.job-main-gallery-image {
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  display: block;
+}
+
+.job-thumbs-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.job-gallery-thumb {
+  width: 86px;
+  height: 86px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: #fff;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.job-gallery-thumb:hover {
+  transform: translateY(-2px);
+}
+
+.job-gallery-thumb.active {
+  border-color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .job-main-gallery-image {
+    max-height: 300px;
+  }
+
+  .job-gallery-thumb {
+    width: 68px;
+    height: 68px;
+  }
+}

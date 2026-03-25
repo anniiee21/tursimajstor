@@ -37,17 +37,20 @@ let jobs = [
     subcategory: "Боядисване",
     ownerEmail: "client@example.com",
     type: "job",
-    imageUrl: ""
+    imageUrl: "",
+    gallery: []
   }
 ];
 
 let applications = [];
 let users = [];
-let ratings = [];
 let posts = [];
 let inboxMessages = [];
 let notifications = [];
 let favorites = [];
+let reviews = [];
+let completedProjects = [];
+let portfolioItems = [];
 
 // ===== HELPERS =====
 function createNotification({ userEmail, type, title, text, link }) {
@@ -63,6 +66,26 @@ function createNotification({ userEmail, type, title, text, link }) {
     isRead: false,
     createdAt: new Date().toLocaleString("bg-BG")
   });
+}
+
+function getRatingSummaryByEmail(userEmail) {
+  const userReviews = reviews.filter(r => r.workerEmail === userEmail);
+
+  if (!userReviews.length) {
+    return {
+      average: 0,
+      count: 0
+    };
+  }
+
+  const average =
+    userReviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
+    userReviews.length;
+
+  return {
+    average: average.toFixed(1),
+    count: userReviews.length
+  };
 }
 
 // ===== PAGES =====
@@ -121,7 +144,10 @@ app.get("/my-jobs/:email", (req, res) => {
   res.json(myJobs);
 });
 
-app.post("/jobs", upload.single("image"), (req, res) => {
+app.post("/jobs", upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "gallery", maxCount: 8 }
+]), (req, res) => {
   const {
     title,
     description,
@@ -139,7 +165,11 @@ app.post("/jobs", upload.single("image"), (req, res) => {
     });
   }
 
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+  const imageFile = req.files?.image?.[0] || null;
+  const galleryFiles = req.files?.gallery || [];
+
+  const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : "";
+  const gallery = galleryFiles.map(file => `/uploads/${file.filename}`);
 
   const newJob = {
     id: jobs.length + 1,
@@ -151,7 +181,8 @@ app.post("/jobs", upload.single("image"), (req, res) => {
     subcategory: subcategory || "",
     ownerEmail,
     type: type || "job",
-    imageUrl
+    imageUrl,
+    gallery
   };
 
   jobs.push(newJob);
@@ -185,7 +216,10 @@ app.get("/api/jobs/:id", (req, res) => {
   });
 });
 
-app.put("/api/jobs/:id", upload.single("image"), (req, res) => {
+app.put("/api/jobs/:id", upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "gallery", maxCount: 8 }
+]), (req, res) => {
   const jobId = Number(req.params.id);
   const {
     requesterEmail,
@@ -226,8 +260,15 @@ app.put("/api/jobs/:id", upload.single("image"), (req, res) => {
   job.subcategory = subcategory || "";
   job.type = type || "job";
 
-  if (req.file) {
-    job.imageUrl = `/uploads/${req.file.filename}`;
+  const imageFile = req.files?.image?.[0] || null;
+  const galleryFiles = req.files?.gallery || [];
+
+  if (imageFile) {
+    job.imageUrl = `/uploads/${imageFile.filename}`;
+  }
+
+  if (galleryFiles.length > 0) {
+    job.gallery = galleryFiles.map(file => `/uploads/${file.filename}`);
   }
 
   res.json({
@@ -260,6 +301,7 @@ app.delete("/api/jobs/:id", (req, res) => {
   applications = applications.filter(app => app.jobId !== jobId);
   inboxMessages = inboxMessages.filter(msg => msg.jobId !== jobId);
   favorites = favorites.filter(item => item.jobId !== jobId);
+  completedProjects = completedProjects.filter(item => item.jobId !== jobId);
 
   res.json({
     message: "Обявата е изтрита успешно ✅",
@@ -598,6 +640,310 @@ app.put("/applications/:applicationId/status", (req, res) => {
   res.json({
     message: "Статусът е обновен успешно ✅",
     application
+  });
+});
+
+// ===== COMPLETED PROJECTS =====
+app.post("/completed-projects", (req, res) => {
+  const {
+    requesterEmail,
+    jobId,
+    workerEmail,
+    workerName
+  } = req.body;
+
+  if (!requesterEmail || !jobId || !workerEmail || !workerName) {
+    return res.status(400).json({
+      message: "Липсват данни за завършения проект."
+    });
+  }
+
+  const job = jobs.find(j => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  if (job.ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Само авторът на обявата може да маркира проект като завършен."
+    });
+  }
+
+  const approvedApplication = applications.find(app =>
+    app.jobId === Number(jobId) &&
+    app.email === workerEmail &&
+    app.status === "Одобрен"
+  );
+
+  if (!approvedApplication) {
+    return res.status(400).json({
+      message: "Само одобрен кандидат може да бъде маркиран като завършен проект."
+    });
+  }
+
+  const exists = completedProjects.find(item =>
+    item.jobId === Number(jobId) &&
+    item.workerEmail === workerEmail
+  );
+
+  if (exists) {
+    return res.status(400).json({
+      message: "Този проект вече е маркиран като завършен."
+    });
+  }
+
+  const newCompletedProject = {
+    id: completedProjects.length + 1,
+    jobId: Number(jobId),
+    workerEmail,
+    workerName,
+    ownerEmail: requesterEmail,
+    jobTitle: job.title,
+    category: job.category,
+    subcategory: job.subcategory || "",
+    city: job.city,
+    completedAt: new Date().toLocaleString("bg-BG")
+  };
+
+  completedProjects.unshift(newCompletedProject);
+
+  createNotification({
+    userEmail: workerEmail,
+    type: "project_completed",
+    title: "Завършен проект",
+    text: `Проектът "${job.title}" е маркиран като завършен.`,
+    link: `/profile/${encodeURIComponent(workerEmail)}`
+  });
+
+  res.status(201).json({
+    message: "Проектът е маркиран като завършен ✅",
+    completedProject: newCompletedProject
+  });
+});
+
+app.get("/completed-projects/check", (req, res) => {
+  const jobId = Number(req.query.jobId);
+  const workerEmail = req.query.workerEmail;
+
+  if (!jobId || !workerEmail) {
+    return res.status(400).json({
+      message: "Липсват данни."
+    });
+  }
+
+  const exists = completedProjects.some(item =>
+    item.jobId === jobId && item.workerEmail === workerEmail
+  );
+
+  res.json({ exists });
+});
+
+app.get("/completed-projects/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const items = completedProjects.filter(item => item.workerEmail === email);
+  res.json(items);
+});
+
+// ===== REVIEWS / RATINGS =====
+app.post("/reviews", (req, res) => {
+  const {
+    requesterEmail,
+    jobId,
+    workerEmail,
+    workerName,
+    rating,
+    text
+  } = req.body;
+
+  if (!requesterEmail || !jobId || !workerEmail || !workerName || !rating) {
+    return res.status(400).json({
+      message: "Липсват данни за оценката."
+    });
+  }
+
+  const numericRating = Number(rating);
+
+  if (numericRating < 1 || numericRating > 5) {
+    return res.status(400).json({
+      message: "Оценката трябва да е между 1 и 5."
+    });
+  }
+
+  const job = jobs.find(j => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({
+      message: "Обявата не е намерена."
+    });
+  }
+
+  if (job.ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Само авторът на обявата може да остави оценка."
+    });
+  }
+
+  const completedProject = completedProjects.find(item =>
+    item.jobId === Number(jobId) &&
+    item.workerEmail === workerEmail
+  );
+
+  if (!completedProject) {
+    return res.status(400).json({
+      message: "Можеш да оцениш само завършен проект."
+    });
+  }
+
+  const existingReview = reviews.find(item =>
+    item.jobId === Number(jobId) &&
+    item.workerEmail === workerEmail &&
+    item.reviewerEmail === requesterEmail
+  );
+
+  if (existingReview) {
+    return res.status(400).json({
+      message: "Вече си оставил оценка за тази обява."
+    });
+  }
+
+  const newReview = {
+    id: reviews.length + 1,
+    jobId: Number(jobId),
+    workerEmail,
+    workerName,
+    reviewerEmail: requesterEmail,
+    reviewerName: users.find(u => u.email === requesterEmail)?.name || requesterEmail,
+    rating: numericRating,
+    text: text || "",
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  reviews.unshift(newReview);
+
+  createNotification({
+    userEmail: workerEmail,
+    type: "review_new",
+    title: "Ново ревю",
+    text: `Получил/а си нова оценка ${numericRating}/5 за "${job.title}".`,
+    link: `/profile/${encodeURIComponent(workerEmail)}`
+  });
+
+  res.status(201).json({
+    message: "Оценката е записана успешно ✅",
+    review: newReview
+  });
+});
+
+app.get("/reviews/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  const userReviews = reviews.filter(item => item.workerEmail === email);
+  const summary = getRatingSummaryByEmail(email);
+
+  res.json({
+    average: summary.average,
+    count: summary.count,
+    reviews: userReviews
+  });
+});
+
+app.get("/reviews/check", (req, res) => {
+  const requesterEmail = req.query.requesterEmail;
+  const jobId = Number(req.query.jobId);
+  const workerEmail = req.query.workerEmail;
+
+  if (!requesterEmail || !jobId || !workerEmail) {
+    return res.status(400).json({
+      message: "Липсват данни."
+    });
+  }
+
+  const exists = reviews.some(item =>
+    item.reviewerEmail === requesterEmail &&
+    item.jobId === jobId &&
+    item.workerEmail === workerEmail
+  );
+
+  res.json({ exists });
+});
+
+// ===== PORTFOLIO =====
+app.post("/portfolio", upload.single("image"), (req, res) => {
+  const {
+    ownerEmail,
+    title,
+    description,
+    link
+  } = req.body;
+
+  if (!ownerEmail || !title) {
+    return res.status(400).json({
+      message: "Заглавието е задължително."
+    });
+  }
+
+  const user = users.find(u => u.email === ownerEmail);
+
+  if (!user) {
+    return res.status(404).json({
+      message: "Потребителят не е намерен."
+    });
+  }
+
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+
+  const newPortfolioItem = {
+    id: portfolioItems.length + 1,
+    ownerEmail,
+    title,
+    description: description || "",
+    link: link || "",
+    imageUrl,
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  portfolioItems.unshift(newPortfolioItem);
+
+  res.status(201).json({
+    message: "Портфолиото е добавено успешно ✅",
+    item: newPortfolioItem
+  });
+});
+
+app.get("/portfolio/:email", (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+  const items = portfolioItems.filter(item => item.ownerEmail === email);
+  res.json(items);
+});
+
+app.delete("/portfolio/:id", (req, res) => {
+  const portfolioId = Number(req.params.id);
+  const requesterEmail = req.query.email;
+
+  const itemIndex = portfolioItems.findIndex(item => item.id === portfolioId);
+
+  if (itemIndex === -1) {
+    return res.status(404).json({
+      message: "Елементът от портфолиото не е намерен."
+    });
+  }
+
+  if (!requesterEmail || portfolioItems[itemIndex].ownerEmail !== requesterEmail) {
+    return res.status(403).json({
+      message: "Нямаш право да изтриеш този елемент."
+    });
+  }
+
+  const deletedItem = portfolioItems[itemIndex];
+  portfolioItems.splice(itemIndex, 1);
+
+  res.json({
+    message: "Елементът от портфолиото е изтрит ✅",
+    item: deletedItem
   });
 });
 
@@ -974,6 +1320,20 @@ app.put("/api/profile/:email", upload.single("profileImage"), (req, res) => {
     favorites.forEach(item => {
       if (item.userEmail === currentEmail) item.userEmail = email;
     });
+
+    reviews.forEach(item => {
+      if (item.workerEmail === currentEmail) item.workerEmail = email;
+      if (item.reviewerEmail === currentEmail) item.reviewerEmail = email;
+    });
+
+    completedProjects.forEach(item => {
+      if (item.workerEmail === currentEmail) item.workerEmail = email;
+      if (item.ownerEmail === currentEmail) item.ownerEmail = email;
+    });
+
+    portfolioItems.forEach(item => {
+      if (item.ownerEmail === currentEmail) item.ownerEmail = email;
+    });
   }
 
   user.name = name || user.name;
@@ -1013,22 +1373,10 @@ app.get("/api/profile/:email", (req, res) => {
   const userPosts = posts.filter(p => p.authorEmail === email);
   const userJobs = jobs.filter(j => j.ownerEmail === email);
 
-  let ratingInfo = { average: 0, count: 0 };
-
-  if (user && (user.role === "freelancer" || user.role === "worker")) {
-    const workerRatings = ratings.filter(r => r.workerName === user.name);
-
-    if (workerRatings.length > 0) {
-      const avg =
-        workerRatings.reduce((sum, r) => sum + r.rating, 0) /
-        workerRatings.length;
-
-      ratingInfo = {
-        average: avg.toFixed(1),
-        count: workerRatings.length
-      };
-    }
-  }
+  const ratingInfo = getRatingSummaryByEmail(email);
+  const userReviews = reviews.filter(item => item.workerEmail === email);
+  const userCompletedProjects = completedProjects.filter(item => item.workerEmail === email);
+  const userPortfolio = portfolioItems.filter(item => item.ownerEmail === email);
 
   res.json({
     user: user || {
@@ -1042,48 +1390,10 @@ app.get("/api/profile/:email", (req, res) => {
     },
     posts: userPosts,
     jobs: userJobs,
-    rating: ratingInfo
-  });
-});
-
-// ===== RATINGS =====
-app.post("/rate", (req, res) => {
-  const { workerName, rating } = req.body;
-
-  if (!workerName || !rating) {
-    return res.status(400).json({
-      message: "Липсват данни за оценка."
-    });
-  }
-
-  ratings.push({
-    workerName,
-    rating: Number(rating)
-  });
-
-  res.json({
-    message: "Оценката е записана ✅"
-  });
-});
-
-app.get("/ratings/:workerName", (req, res) => {
-  const workerName = req.params.workerName;
-  const workerRatings = ratings.filter(r => r.workerName === workerName);
-
-  if (workerRatings.length === 0) {
-    return res.json({
-      average: 0,
-      count: 0
-    });
-  }
-
-  const avg =
-    workerRatings.reduce((sum, r) => sum + r.rating, 0) /
-    workerRatings.length;
-
-  res.json({
-    average: avg.toFixed(1),
-    count: workerRatings.length
+    rating: ratingInfo,
+    reviews: userReviews,
+    completedProjects: userCompletedProjects,
+    portfolio: userPortfolio
   });
 });
 

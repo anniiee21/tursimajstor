@@ -7,21 +7,25 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
+
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a class="active" href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
@@ -35,75 +39,125 @@
     <div class="section-head">
       <div>
         <h2>Моите обяви</h2>
-        <div class="small-text">Управлявай публикуваните от теб обяви.</div>
+        <div class="small-text">Управлявай своите публикувани обяви и виж галерията им.</div>
       </div>
       <div id="myJobsCount" class="results-info"></div>
     </div>
+
+    <div id="myJobsStatus" class="status-box"></div>
     <div id="myJobsList" class="job-cards-grid"></div>
   </div>
 </div>
 
 <script src="/app.js"></script>
 <script>
-updateHeaderUser();
-updateRoleVisibility();
+  updateHeaderUser();
+  updateRoleVisibility();
 
-const myJobsList = document.getElementById("myJobsList");
-const myJobsCount = document.getElementById("myJobsCount");
+  const myJobsStatus = document.getElementById("myJobsStatus");
+  const myJobsList = document.getElementById("myJobsList");
+  const myJobsCount = document.getElementById("myJobsCount");
 
-function getJobTypeText(type) {
-  return type === "service" ? "Предлагам услуга" : "Търся човек";
-}
-
-async function loadMyJobs() {
-  const currentUser = getCurrentUser();
-
-  if (!currentUser) {
-    myJobsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш своите обяви.</div>';
-    return;
+  function getJobTypeLabel(type) {
+    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
   }
 
-  const res = await fetch(`/my-jobs/${encodeURIComponent(currentUser.email)}`);
-  const data = await res.json();
-
-  myJobsCount.textContent = `${data.length} обяви`;
-
-  if (!data.length) {
-    myJobsList.innerHTML = '<div class="empty">Все още нямаш публикувани обяви.</div>';
-    return;
+  function getJobTypeText(type) {
+    return type === "service" ? "Предлагам услуга" : "Търся човек";
   }
 
-  myJobsList.innerHTML = data.map(job => `
-    <div class="job-market-card">
-      <div class="job-market-top">
-        <div>
-          <h4 class="job-market-title">${job.title}</h4>
-          <div class="job-market-meta">
-            <span>📍 ${job.city || "Без град"}</span>
-            <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
-            <span>📌 ${getJobTypeText(job.type)}</span>
-            ${job.budget ? `<span>💰 ${job.budget} лв</span>` : ""}
+  function buildGalleryPreview(job) {
+    const allImages = [job.imageUrl, ...(job.gallery || [])].filter(Boolean);
+
+    if (!allImages.length) return "";
+
+    return `
+      <div class="job-gallery-preview">
+        ${allImages.slice(0, 3).map((img, index) => `
+          <img src="${img}" alt="Снимка ${index + 1}" class="job-gallery-thumb-preview">
+        `).join("")}
+        ${allImages.length > 3 ? `<div class="job-gallery-more">+${allImages.length - 3}</div>` : ""}
+      </div>
+    `;
+  }
+
+  async function deleteJob(jobId) {
+    clearStatus(myJobsStatus);
+
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      showStatus(myJobsStatus, "Трябва да си влязъл.", "error");
+      return;
+    }
+
+    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш тази обява?");
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/jobs/${jobId}?email=${encodeURIComponent(currentUser.email)}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(myJobsStatus, data.message || "Грешка при изтриване.", "error");
+      return;
+    }
+
+    showStatus(myJobsStatus, "Обявата е изтрита успешно ✅", "success");
+    loadMyJobs();
+  }
+
+  async function loadMyJobs() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      myJobsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш своите обяви.</div>';
+      myJobsCount.textContent = "";
+      return;
+    }
+
+    const res = await fetch(`/my-jobs/${encodeURIComponent(currentUser.email)}`);
+    const data = await res.json();
+
+    myJobsCount.textContent = `${data.length} обяви`;
+
+    if (!data.length) {
+      myJobsList.innerHTML = '<div class="empty">Все още нямаш публикувани обяви.</div>';
+      return;
+    }
+
+    myJobsList.innerHTML = data.map(job => `
+      <div class="job-market-card">
+        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${job.city || "Без град"}</span>
+              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📌 ${getJobTypeText(job.type)}</span>
+            </div>
           </div>
+          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+        ${buildGalleryPreview(job)}
+
+        <p class="job-market-desc">${job.description || ""}</p>
+
+        <div class="job-card-actions">
+          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+          <a href="/applications-page" onclick="localStorage.setItem('selectedJobId', '${job.id}')" class="job-card-btn secondary">Кандидатури</a>
+          <button type="button" class="danger-btn small-danger-btn" onclick="deleteJob(${job.id})">Изтрий</button>
         </div>
       </div>
+    `).join("");
+  }
 
-      ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
-      <p class="job-market-desc">${job.description || ""}</p>
-
-      <div class="job-card-actions">
-        <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-        <button type="button" class="job-card-btn secondary" onclick="openApplications(${job.id})">Кандидатури</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-function openApplications(jobId) {
-  localStorage.setItem("selectedJobId", String(jobId));
-  window.location.href = "/applications-page";
-}
-
-loadMyJobs();
+  loadMyJobs();
 </script>
 </body>
 </html>

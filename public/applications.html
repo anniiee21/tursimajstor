@@ -7,21 +7,25 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
+
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" class="active" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
@@ -32,71 +36,253 @@
 
 <div class="container">
   <div class="card">
-    <h2>Кандидатури</h2>
+    <div class="section-head">
+      <div>
+        <h2>Кандидатури</h2>
+        <div class="small-text">
+          Тук виждаш кандидатите по избраната обява. След одобрение можеш да маркираш проекта като завършен и после да оставиш оценка.
+        </div>
+      </div>
+    </div>
+
+    <div id="applicationsStatus" class="status-box"></div>
     <div id="applicationsList" class="application-cards-list"></div>
   </div>
 </div>
 
 <script src="/app.js"></script>
 <script>
-updateHeaderUser();
-updateRoleVisibility();
+  updateHeaderUser();
+  updateRoleVisibility();
 
-const applicationsList = document.getElementById("applicationsList");
+  const applicationsStatus = document.getElementById("applicationsStatus");
+  const applicationsList = document.getElementById("applicationsList");
 
-async function loadApplications() {
   const currentUser = getCurrentUser();
-  const jobId = localStorage.getItem("selectedJobId");
 
   if (!currentUser) {
-    applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл.</div>';
-    return;
+    applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш кандидатурите.</div>';
+    throw new Error("Access denied");
   }
 
-  if (!jobId) {
-    applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
-    return;
+  function statusClass(status) {
+    if (status === "Одобрен") return "status-approved";
+    if (status === "Отказан") return "status-rejected";
+    return "status-pending";
   }
 
-  const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
-  const data = await res.json();
+  async function updateApplicationStatus(applicationId, newStatus) {
+    clearStatus(applicationsStatus);
 
-  if (!res.ok) {
-    applicationsList.innerHTML = `<div class="empty">${data.message || "Грешка."}</div>`;
-    return;
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      showStatus(applicationsStatus, "Трябва да си влязъл.", "error");
+      return;
+    }
+
+    const res = await fetch(`/applications/${applicationId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterEmail: currentUser.email,
+        status: newStatus
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showStatus(applicationsStatus, data.message || "Грешка при смяна на статус.", "error");
+      return;
+    }
+
+    showStatus(applicationsStatus, "Статусът е обновен успешно ✅", "success");
+    loadApplications();
   }
 
-  if (!data.length) {
-    applicationsList.innerHTML = '<div class="empty">Няма кандидатури.</div>';
-    return;
+  async function markCompleted(jobId, workerEmail, workerName) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва да си влязъл.");
+      return;
+    }
+
+    const res = await fetch("/completed-projects", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterEmail: currentUser.email,
+        jobId,
+        workerEmail,
+        workerName
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка при маркиране на завършен проект.");
+      return;
+    }
+
+    alert("Проектът е маркиран като завършен ✅");
+    loadApplications();
   }
 
-  applicationsList.innerHTML = data.map(app => `
-    <div class="application-status-card pending-card">
-      <div class="application-card-top">
-        <div>
-          <h3 class="application-card-title">👤 ${app.name}</h3>
-          <div class="application-card-meta">
-            <span>📧 ${app.email || ""}</span>
-            <span>📅 ${app.createdAt || ""}</span>
+  async function leaveReview(jobId, workerEmail, workerName) {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("Трябва да си влязъл.");
+      return;
+    }
+
+    const rating = prompt("Дай оценка от 1 до 5:");
+    if (!rating) return;
+
+    const numericRating = Number(rating);
+
+    if (numericRating < 1 || numericRating > 5) {
+      alert("Оценката трябва да е между 1 и 5.");
+      return;
+    }
+
+    const text = prompt("Напиши кратко ревю (по желание):") || "";
+
+    const res = await fetch("/reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterEmail: currentUser.email,
+        jobId,
+        workerEmail,
+        workerName,
+        rating: numericRating,
+        text
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Грешка при оценяване.");
+      return;
+    }
+
+    alert("Оценката е записана успешно ✅");
+    loadApplications();
+  }
+
+  async function loadApplications() {
+    const jobId = localStorage.getItem("selectedJobId");
+    applicationsList.innerHTML = "";
+
+    if (!jobId) {
+      applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+
+    const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      applicationsList.innerHTML = `<div class="empty">${data.message || "Грешка при зареждане."}</div>`;
+      return;
+    }
+
+    if (!data.length) {
+      applicationsList.innerHTML = '<div class="empty">Няма кандидатури за тази обява.</div>';
+      return;
+    }
+
+    const reviewChecks = await Promise.all(
+      data.map(app =>
+        fetch(`/reviews/check?requesterEmail=${encodeURIComponent(currentUser.email)}&jobId=${jobId}&workerEmail=${encodeURIComponent(app.email || "")}`)
+          .then(r => r.json())
+          .catch(() => ({ exists: false }))
+      )
+    );
+
+    const completedChecks = await Promise.all(
+      data.map(app =>
+        fetch(`/completed-projects/check?jobId=${jobId}&workerEmail=${encodeURIComponent(app.email || "")}`)
+          .then(r => r.json())
+          .catch(() => ({ exists: false }))
+      )
+    );
+
+    applicationsList.innerHTML = data.map((app, index) => {
+      const alreadyReviewed = !!reviewChecks[index]?.exists;
+      const alreadyCompleted = !!completedChecks[index]?.exists;
+
+      return `
+        <div class="application-status-card ${app.status === "Одобрен" ? "approved-card" : app.status === "Отказан" ? "rejected-card" : "pending-card"}">
+          <div class="application-card-top">
+            <div>
+              <h3 class="application-card-title">👤 ${app.name || "Кандидат"}</h3>
+              <div class="application-card-meta">
+                <span>${app.email || "Без имейл"}</span>
+                <span>📅 ${app.createdAt || ""}</span>
+              </div>
+            </div>
+
+            <span class="application-status-badge ${statusClass(app.status)}">
+              ${app.status || "Чака одобрение"}
+            </span>
+          </div>
+
+          <div class="application-card-body">
+            <p><strong>Съобщение:</strong> ${app.message || "Няма съобщение."}</p>
+
+            ${
+              app.cvUrl
+                ? `<p><a href="${app.cvUrl}" target="_blank" class="see-all-link">📄 Отвори CV</a></p>`
+                : `<p class="small-text">Няма качено CV.</p>`
+            }
+
+            ${
+              alreadyCompleted
+                ? `<div class="role-badge" style="margin-top:10px;">✅ Завършен проект</div>`
+                : ""
+            }
+          </div>
+
+          <div class="application-card-actions-row">
+            <div class="application-action-buttons">
+              <button type="button" onclick="updateApplicationStatus(${app.id}, 'Одобрен')">Одобри</button>
+              <button type="button" class="secondary-btn" onclick="updateApplicationStatus(${app.id}, 'Чака одобрение')">Върни</button>
+              <button type="button" class="danger-btn" onclick="updateApplicationStatus(${app.id}, 'Отказан')">Откажи</button>
+
+              ${
+                app.status === "Одобрен" && !alreadyCompleted
+                  ? `<button type="button" class="secondary-btn" onclick="markCompleted(${Number(jobId)}, '${(app.email || "").replace(/'/g, "\\'")}', '${(app.name || "").replace(/'/g, "\\'")}')">Маркирай като завършен</button>`
+                  : ""
+              }
+
+              ${
+                alreadyCompleted
+                  ? alreadyReviewed
+                    ? `<button type="button" class="secondary-btn" disabled>Вече оценен</button>`
+                    : `<button type="button" class="secondary-btn" onclick="leaveReview(${Number(jobId)}, '${(app.email || "").replace(/'/g, "\\'")}', '${(app.name || "").replace(/'/g, "\\'")}')">Оцени</button>`
+                  : ""
+              }
+            </div>
           </div>
         </div>
-      </div>
+      `;
+    }).join("");
+  }
 
-      <div class="application-card-body">
-        <p>${app.message || ""}</p>
-      </div>
-
-      <div class="application-card-actions-row">
-        <div class="application-action-buttons">
-          ${app.cvUrl ? `<a href="${app.cvUrl}" target="_blank" class="job-card-btn secondary">Виж CV</a>` : ""}
-        </div>
-      </div>
-    </div>
-  `).join("");
-}
-
-loadApplications();
+  loadApplications();
 </script>
 </body>
 </html>
