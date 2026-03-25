@@ -16,7 +16,8 @@
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-        <a href="/">Обяви</a>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
         <a id="applicationsNavLink" class="active" href="/applications-page">Кандидатури</a>
         <a href="/chat-page">Чат</a>
         <a href="/feed-page">Новини</a>
@@ -33,7 +34,6 @@
 <div class="container">
   <div class="card">
     <h2>Кандидатури по избраната обява</h2>
-    <div id="applicationsStatus" class="status-box"></div>
     <div id="applicationsList" class="application-list"></div>
   </div>
 </div>
@@ -124,12 +124,21 @@
         <h4>👤 ${app.name}</h4>
         <div class="meta">
           ${app.email ? `📧 ${app.email} | ` : ""}
-          💰 ${app.price || 0} лв |
           ⭐ ${ratingData.average || 0} (${ratingData.count || 0})
         </div>
-        <div class="meta">${app.createdAt || ""}</div>
+        <div class="meta">📅 ${app.createdAt || ""}</div>
+        <div class="meta">📌 Статус: ${app.status || "Чака одобрение"}</div>
         <p>💬 ${app.message}</p>
-        <button onclick="rateUser('${app.name.replace(/'/g, "\\'")}')">Оцени</button>
+
+        ${
+          app.cvUrl
+            ? `<a href="${app.cvUrl}" target="_blank" class="job-card-btn secondary">Виж CV</a>`
+            : `<div class="small-text">Няма прикачено CV</div>`
+        }
+
+        <div style="margin-top: 12px;">
+          <button onclick="rateUser('${app.name.replace(/'/g, "\\'")}')">Оцени</button>
+        </div>
       `;
       applicationsList.appendChild(div);
     }

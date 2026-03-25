@@ -88,68 +88,84 @@
         </div>
 
         <div id="publishPanel" class="tab-panel hidden">
-          <div class="publish-shell">
-            <div class="publish-intro">
-              <h3>Публикувай нова обява</h3>
-              <p>
-                Независимо дали си с личен профил, свободна практика или фирма, можеш да публикуваш обява и да покажеш какво търсиш или предлагаш.
+          <div id="publishGuestBox" class="publish-guest-box hidden">
+            <div class="publish-guest-inner">
+              <h3>Трябва да имаш профил, за да публикуваш</h3>
+              <p id="publishGuestText">
+                Създай профил и след това публикувай обява според това дали търсиш професионалист или предлагаш услуга.
               </p>
+
+              <div class="publish-guest-actions">
+                <a id="guestRegisterBtn" href="/account-page" class="landing-main-btn">Създай профил</a>
+                <a href="/jobs-page" class="landing-secondary-btn">Назад към обявите</a>
+              </div>
             </div>
+          </div>
 
-            <form id="jobForm" class="publish-form-clean">
-              <div>
-                <label for="type">Тип обява</label>
-                <select id="type" required>
-                  <option value="job">Търся човек</option>
-                  <option value="service">Предлагам услуга</option>
-                </select>
+          <div id="publishFormWrap">
+            <div class="publish-shell">
+              <div class="publish-intro">
+                <h3>Публикувай нова обява</h3>
+                <p>
+                  Независимо дали си с личен профил, свободна практика или фирма, можеш да публикуваш обява и да покажеш какво търсиш или предлагаш.
+                </p>
               </div>
 
-              <div class="form-row-2">
+              <form id="jobForm" class="publish-form-clean">
                 <div>
-                  <label for="title">Заглавие</label>
-                  <input id="title" placeholder="Пример: Боядисване на апартамент в Плевен" required>
-                </div>
-
-                <div>
-                  <label for="city">Град</label>
-                  <input id="city" placeholder="Пример: София" required>
-                </div>
-              </div>
-
-              <div>
-                <label for="description">Описание</label>
-                <textarea id="description" placeholder="Опиши услугата, срока, опита, условията и всичко важно..." required></textarea>
-              </div>
-
-              <div class="form-row-3">
-                <div>
-                  <label for="category">Категория</label>
-                  <select id="category" required>
-                    <option value="">Избери категория</option>
+                  <label for="type">Тип обява</label>
+                  <select id="type" required>
+                    <option value="job">Търся човек</option>
+                    <option value="service">Предлагам услуга</option>
                   </select>
                 </div>
 
-                <div>
-                  <label for="subcategory">Подкатегория</label>
-                  <select id="subcategory">
-                    <option value="">Избери подкатегория</option>
-                  </select>
+                <div class="form-row-2">
+                  <div>
+                    <label for="title">Заглавие</label>
+                    <input id="title" placeholder="Пример: Боядисване на апартамент в Плевен" required>
+                  </div>
+
+                  <div>
+                    <label for="city">Град</label>
+                    <input id="city" placeholder="Пример: София" required>
+                  </div>
                 </div>
 
                 <div>
-                  <label for="budget">Бюджет</label>
-                  <input id="budget" type="number" placeholder="Пример: 300">
+                  <label for="description">Описание</label>
+                  <textarea id="description" placeholder="Опиши услугата, срока, опита, условията и всичко важно..." required></textarea>
                 </div>
-              </div>
 
-              <div>
-                <label for="jobImage">Снимка към обявата</label>
-                <input id="jobImage" type="file" accept="image/*">
-              </div>
+                <div class="form-row-3">
+                  <div>
+                    <label for="category">Категория</label>
+                    <select id="category" required>
+                      <option value="">Избери категория</option>
+                    </select>
+                  </div>
 
-              <button type="submit" class="publish-main-btn">Публикувай обявата</button>
-            </form>
+                  <div>
+                    <label for="subcategory">Подкатегория</label>
+                    <select id="subcategory">
+                      <option value="">Избери подкатегория</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="budget">Бюджет</label>
+                    <input id="budget" type="number" placeholder="Пример: 300">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="jobImage">Снимка към обявата</label>
+                  <input id="jobImage" type="file" accept="image/*">
+                </div>
+
+                <button type="submit" class="publish-main-btn">Публикувай обявата</button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -260,6 +276,11 @@
   const latestPanel = document.getElementById("latestPanel");
   const publishPanel = document.getElementById("publishPanel");
 
+  const publishGuestBox = document.getElementById("publishGuestBox");
+  const publishFormWrap = document.getElementById("publishFormWrap");
+  const guestRegisterBtn = document.getElementById("guestRegisterBtn");
+  const publishGuestText = document.getElementById("publishGuestText");
+
   function switchTab(tabName) {
     if (tabName === "latest") {
       tabLatestBtn.classList.add("active");
@@ -271,6 +292,30 @@
       tabPublishBtn.classList.add("active");
       latestPanel.classList.add("hidden");
       publishPanel.classList.remove("hidden");
+      updatePublishAccess();
+    }
+  }
+
+  function getRedirectRoleByType(type) {
+    return type === "service" ? "freelancer" : "personal";
+  }
+
+  function updatePublishAccess() {
+    const currentUser = getCurrentUser();
+    const selectedType = jobTypeSelect.value || "job";
+    const redirectRole = getRedirectRoleByType(selectedType);
+
+    if (!currentUser) {
+      publishGuestBox.classList.remove("hidden");
+      publishFormWrap.classList.add("hidden");
+      guestRegisterBtn.href = `/account-page?role=${redirectRole}`;
+      publishGuestText.textContent =
+        selectedType === "service"
+          ? "За да публикуваш услуга, създай профил за свободна практика или фирма."
+          : "За да публикуваш търсене, създай личен профил или фирмен профил.";
+    } else {
+      publishGuestBox.classList.add("hidden");
+      publishFormWrap.classList.remove("hidden");
     }
   }
 
@@ -323,6 +368,10 @@
 
   categorySelect.addEventListener("change", () => {
     populateSubcategorySelect(categorySelect.value);
+  });
+
+  jobTypeSelect.addEventListener("change", () => {
+    updatePublishAccess();
   });
 
   function renderSidebarCategories() {
@@ -488,7 +537,8 @@
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
-      alert("Трябва първо да влезеш.");
+      const redirectRole = getRedirectRoleByType(jobTypeSelect.value || "job");
+      window.location.href = `/account-page?role=${redirectRole}`;
       return;
     }
 

@@ -1956,3 +1956,44 @@ button {
     width: 100%;
   }
 }
+
+.publish-guest-box {
+  margin-top: 8px;
+}
+
+.publish-guest-inner {
+  border: 1px solid #dbeafe;
+  background: linear-gradient(180deg, #f8fbff, #eef5ff);
+  border-radius: 22px;
+  padding: 24px;
+}
+
+.publish-guest-inner h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  color: #0f172a;
+}
+
+.publish-guest-inner p {
+  margin: 0 0 18px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.publish-guest-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.apply-form input[type="file"] {
+  margin-bottom: 12px;
+}
+
+.apply-form textarea {
+  min-height: 120px;
+}
+
+.publish-guest-box.hidden {
+  display: none !important;
+}

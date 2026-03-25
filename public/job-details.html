@@ -16,7 +16,8 @@
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-        <a class="active" href="/">Обяви</a>
+        <a href="/">Начало</a>
+        <a class="active" href="/jobs-page">Обяви</a>
         <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
         <a href="/chat-page">Чат</a>
         <a href="/feed-page">Новини</a>
@@ -44,17 +45,31 @@
       </div>
 
       <div class="card">
-        <h3 id="applyTitle">Изпрати оферта</h3>
+        <h3 id="applyTitle">Кандидатствай</h3>
         <div id="applyStatus" class="status-box"></div>
 
+        <div id="applyGuestBox" class="publish-guest-box hidden">
+          <div class="publish-guest-inner">
+            <h3>Трябва да имаш профил, за да кандидатстваш</h3>
+            <p id="applyGuestText">
+              Създай профил и след това изпрати кандидатура по обявата.
+            </p>
+
+            <div class="publish-guest-actions">
+              <a id="applyRegisterBtn" href="/account-page" class="landing-main-btn">Създай профил</a>
+              <a href="/jobs-page" class="landing-secondary-btn">Назад към обявите</a>
+            </div>
+          </div>
+        </div>
+
         <form id="applyForm" class="apply-form">
-          <label for="applyMessage" id="applyMessageLabel">Съобщение</label>
-          <textarea id="applyMessage" placeholder="Опиши офертата си..." required></textarea>
+          <label for="applyMessage" id="applyMessageLabel">Съобщение към кандидатурата</label>
+          <textarea id="applyMessage" placeholder="Напиши кратко представяне, опит, мотивация и важни детайли..." required></textarea>
 
-          <label for="applyPrice" id="applyPriceLabel">Цена (по желание)</label>
-          <input id="applyPrice" type="number" placeholder="Пример: 250">
+          <label for="applyCvFile">Прикачи CV (по желание)</label>
+          <input id="applyCvFile" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
 
-          <button type="submit" id="applySubmitBtn">Изпрати</button>
+          <button type="submit" id="applySubmitBtn">Кандидатствай</button>
         </form>
       </div>
 
@@ -103,12 +118,14 @@
   const applyForm = document.getElementById("applyForm");
   const applyStatus = document.getElementById("applyStatus");
   const applyMessage = document.getElementById("applyMessage");
-  const applyPrice = document.getElementById("applyPrice");
+  const applyCvFile = document.getElementById("applyCvFile");
   const favoriteBtn = document.getElementById("favoriteBtn");
   const applyTitle = document.getElementById("applyTitle");
   const applyMessageLabel = document.getElementById("applyMessageLabel");
-  const applyPriceLabel = document.getElementById("applyPriceLabel");
   const applySubmitBtn = document.getElementById("applySubmitBtn");
+  const applyGuestBox = document.getElementById("applyGuestBox");
+  const applyRegisterBtn = document.getElementById("applyRegisterBtn");
+  const applyGuestText = document.getElementById("applyGuestText");
 
   let loadedJob = null;
 
@@ -133,23 +150,27 @@
     return "Потребител";
   }
 
+  function getApplyRedirectRole(type) {
+    return type === "service" ? "personal" : "freelancer";
+  }
+
   function getApplyText(type) {
     if (type === "service") {
       return {
         title: "Заяви услугата",
         messageLabel: "Съобщение към услугата",
-        messagePlaceholder: "Напиши какво точно търсиш, за кога ти трябва и допълнителни условия...",
-        priceLabel: "Предложена цена (по желание)",
-        submit: "Изпрати запитване"
+        messagePlaceholder: "Опиши от какво имаш нужда, за кога и какво очакваш...",
+        submit: "Изпрати запитване",
+        guestText: "За да заявиш услуга, създай личен профил или фирмен профил."
       };
     }
 
     return {
-      title: "Изпрати оферта",
-      messageLabel: "Съобщение",
-      messagePlaceholder: "Опиши офертата си, опит, срок и какво включва услугата...",
-      priceLabel: "Цена (по желание)",
-      submit: "Изпрати оферта"
+      title: "Кандидатствай",
+      messageLabel: "Съобщение към кандидатурата",
+      messagePlaceholder: "Напиши кратко представяне, опит, умения и защо си подходящ...",
+      submit: "Кандидатствай",
+      guestText: "За да кандидатстваш по обява, създай профил за свободна практика или фирма."
     };
   }
 
@@ -171,6 +192,25 @@
     favoriteBtn.textContent = favs.includes(id)
       ? "💔 Премахни от любими"
       : "❤️ Запази";
+  }
+
+  function updateApplyAccess() {
+    const currentUser = getCurrentUser();
+
+    if (!loadedJob) return;
+
+    const applyText = getApplyText(loadedJob.type);
+    const redirectRole = getApplyRedirectRole(loadedJob.type);
+
+    if (!currentUser) {
+      applyGuestBox.classList.remove("hidden");
+      applyForm.classList.add("hidden");
+      applyRegisterBtn.href = `/account-page?role=${redirectRole}`;
+      applyGuestText.textContent = applyText.guestText;
+    } else {
+      applyGuestBox.classList.add("hidden");
+      applyForm.classList.remove("hidden");
+    }
   }
 
   function buildRelatedCard(job) {
@@ -231,7 +271,6 @@
       applyTitle.textContent = applyText.title;
       applyMessageLabel.textContent = applyText.messageLabel;
       applyMessage.placeholder = applyText.messagePlaceholder;
-      applyPriceLabel.textContent = applyText.priceLabel;
       applySubmitBtn.textContent = applyText.submit;
 
       localStorage.setItem("selectedJobId", String(job.id));
@@ -313,6 +352,7 @@
 
       updateFavBtn(job.id);
       favoriteBtn.onclick = () => toggleFavorite(job.id);
+      updateApplyAccess();
     } catch (error) {
       console.error("DETAILS ERROR:", error);
       jobDetailsCard.innerHTML = '<div class="empty">Стана грешка при зареждане.</div>';
@@ -328,7 +368,12 @@
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
-      showStatus(applyStatus, "Трябва първо да влезеш.", "error");
+      if (loadedJob) {
+        const redirectRole = getApplyRedirectRole(loadedJob.type);
+        window.location.href = `/account-page?role=${redirectRole}`;
+      } else {
+        window.location.href = "/account-page";
+      }
       return;
     }
 
@@ -343,31 +388,31 @@
     }
 
     const message = applyMessage.value.trim();
-    const price = applyPrice.value.trim();
 
     if (!message) {
       showStatus(
         applyStatus,
         loadedJob.type === "service"
           ? "Напиши съобщение към услугата."
-          : "Напиши съобщение към офертата.",
+          : "Напиши съобщение към кандидатурата.",
         "error"
       );
       return;
     }
 
+    const formData = new FormData();
+    formData.append("jobId", loadedJob.id);
+    formData.append("name", currentUser.name);
+    formData.append("email", currentUser.email);
+    formData.append("message", message);
+
+    if (applyCvFile.files[0]) {
+      formData.append("cvFile", applyCvFile.files[0]);
+    }
+
     const res = await fetch("/apply", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        jobId: loadedJob.id,
-        name: currentUser.name,
-        email: currentUser.email,
-        message,
-        price
-      })
+      body: formData
     });
 
     const data = await res.json();
@@ -384,7 +429,7 @@
       applyStatus,
       loadedJob.type === "service"
         ? "Запитването е изпратено успешно ✅"
-        : "Офертата е изпратена успешно ✅",
+        : "Кандидатурата е изпратена успешно ✅",
       "success"
     );
   });

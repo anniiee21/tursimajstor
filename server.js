@@ -263,12 +263,12 @@ app.post("/posts/:id/comments", (req, res) => {
 });
 
 // ===== APPLICATIONS =====
-app.post("/apply", (req, res) => {
-  const { jobId, name, email, message, price } = req.body;
+app.post("/apply", upload.single("cvFile"), (req, res) => {
+  const { jobId, name, email, message } = req.body;
 
   if (!jobId || !name || !message) {
     return res.status(400).json({
-      message: "Попълни всички полета!"
+      message: "Попълни всички задължителни полета!"
     });
   }
 
@@ -293,9 +293,11 @@ app.post("/apply", (req, res) => {
 
   if (alreadyApplied) {
     return res.status(400).json({
-      message: "Вече си изпратил оферта по тази обява."
+      message: "Вече си изпратил кандидатура по тази обява."
     });
   }
+
+  const cvUrl = req.file ? `/uploads/${req.file.filename}` : "";
 
   const application = {
     id: applications.length + 1,
@@ -303,8 +305,9 @@ app.post("/apply", (req, res) => {
     name,
     email: email || "",
     message,
-    price: price ? Number(price) : 0,
-    createdAt: new Date().toLocaleString("bg-BG")
+    cvUrl,
+    createdAt: new Date().toLocaleString("bg-BG"),
+    status: "Чака одобрение"
   };
 
   applications.push(application);
