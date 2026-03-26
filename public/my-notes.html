@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TursiMajstor - Моите бележки</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="navbar">
+      <h1 class="brand">TursiMajstor</h1>
+
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
+      <div id="navLinks" class="nav-links">
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+        <a class="active" href="/my-notes-page">Бележки</a>
+      </div>
+
+      <div class="header-actions-right">
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button">🌙</button>
+
+        <div class="user-menu">
+          <button id="userMenuBtn" class="user-chip">Вход</button>
+          <div id="userDropdown" class="user-dropdown hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <nav class="breadcrumbs">
+    <a href="/">Начало</a>
+    <span>•</span>
+    <span>Моите бележки</span>
+  </nav>
+
+  <section class="card notes-hero-card">
+    <div class="notes-hero-top">
+      <div>
+        <div class="notes-hero-badge">Скрита лична секция</div>
+        <h1 class="notes-hero-title">Моите бележки, CV и кандидатури</h1>
+        <p class="notes-hero-text">
+          Лично пространство само за теб — запазвай CV варианти, мотивационни писма,
+          представяне пред фирми, идеи, умения, видео текстове и готови шаблони.
+        </p>
+      </div>
+
+      <div class="notes-hero-stats">
+        <div class="notes-stat-card">
+          <div class="notes-stat-label">Активни секции</div>
+          <div class="notes-stat-value">6</div>
+        </div>
+        <div class="notes-stat-card">
+          <div class="notes-stat-label">Шаблони</div>
+          <div class="notes-stat-value">8+</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="notesGuestBox" class="card empty-state-box hidden">
+    <div class="empty-state-icon">🔒</div>
+    <h3>Тази страница е само за логнати потребители</h3>
+    <p>Влез в профила си, за да използваш личните бележки, CV помощника и шаблоните.</p>
+    <a href="/account-page" class="job-card-btn">Вход / Регистрация</a>
+  </div>
+
+  <div id="notesMainWrap" class="notes-page-layout hidden">
+
+    <aside class="card notes-sidebar">
+      <div class="notes-sidebar-title">Навигация</div>
+
+      <button class="notes-side-tab active" data-tab="cv">CV / Резюме</button>
+      <button class="notes-side-tab" data-tab="intro">Представяне</button>
+      <button class="notes-side-tab" data-tab="letters">Мотивационни писма</button>
+      <button class="notes-side-tab" data-tab="skills">Умения и опит</button>
+      <button class="notes-side-tab" data-tab="ai">AI помощник</button>
+      <button class="notes-side-tab" data-tab="private">Лични бележки</button>
+
+      <div class="notes-sidebar-divider"></div>
+
+      <div class="notes-sidebar-title">Бързи действия</div>
+      <button id="copyCurrentSectionBtn" class="secondary-btn" type="button">Копирай текущата секция</button>
+      <button id="exportNotesBtn" class="secondary-btn" type="button">Изтегли като .txt</button>
+    </aside>
+
+    <main class="notes-main-content">
+
+      <section class="card notes-templates-card">
+        <div class="section-head">
+          <div>
+            <h2>Готови шаблони</h2>
+            <div class="small-text">Избери шаблон и го постави директно в секцията.</div>
+          </div>
+        </div>
+
+        <div class="notes-template-grid">
+          <button class="notes-template-btn" data-template="cv-basic" type="button">CV - стандартно</button>
+          <button class="notes-template-btn" data-template="cv-chef" type="button">CV - готвач</button>
+          <button class="notes-template-btn" data-template="cv-mechanic" type="button">CV - механик</button>
+          <button class="notes-template-btn" data-template="intro-short" type="button">Кратко представяне</button>
+          <button class="notes-template-btn" data-template="intro-video" type="button">Текст за видео</button>
+          <button class="notes-template-btn" data-template="letter-general" type="button">Мотивационно писмо</button>
+          <button class="notes-template-btn" data-template="skills-basic" type="button">Умения и опит</button>
+          <button class="notes-template-btn" data-template="private-checklist" type="button">Личен checklist</button>
+        </div>
+      </section>
+
+      <div id="notesPageStatus" class="status-box"></div>
+
+      <!-- CV -->
+      <section class="card notes-tab-panel" data-panel="cv">
+        <div class="section-head">
+          <div>
+            <h2>CV / Резюме</h2>
+            <div class="small-text">Подготви различни варианти на CV според позицията.</div>
+          </div>
+          <div class="notes-inline-actions">
+            <button class="secondary-btn notes-insert-template-btn" data-target="cvText" data-template="cv-basic" type="button">Постави пример</button>
+            <button class="notes-save-btn" data-save="cvText" type="button">Запази секцията</button>
+          </div>
+        </div>
+
+        <label for="cvText">Текст</label>
+        <textarea id="cvText" class="notes-big-textarea" placeholder="Напиши тук твоето CV..."></textarea>
+        <div id="cvTextMeta" class="notes-save-meta">Няма запазени промени.</div>
+      </section>
+
+      <!-- INTRO -->
+      <section class="card notes-tab-panel hidden" data-panel="intro">
+        <div class="section-head">
+          <div>
+            <h2>Представяне пред фирми</h2>
+            <div class="small-text">Кратко, силно и професионално представяне.</div>
+          </div>
+          <div class="notes-inline-actions">
+            <button class="secondary-btn notes-insert-template-btn" data-target="introText" data-template="intro-short" type="button">Постави пример</button>
+            <button class="notes-save-btn" data-save="introText" type="button">Запази секцията</button>
+          </div>
+        </div>
+
+        <label for="introText">Текст</label>
+        <textarea id="introText" class="notes-big-textarea" placeholder="Напиши кратко професионално представяне..."></textarea>
+        <div id="introTextMeta" class="notes-save-meta">Няма запазени промени.</div>
+      </section>
+
+      <!-- LETTERS -->
+      <section class="card notes-tab-panel hidden" data-panel="letters">
+        <div class="section-head">
+          <div>
+            <h2>Мотивационни писма</h2>
+            <div class="small-text">Създай различни варианти за различни работодатели.</div>
+          </div>
+          <div class="notes-inline-actions">
+            <button class="secondary-btn notes-insert-template-btn" data-target="lettersText" data-template="letter-general" type="button">Постави пример</button>
+            <button class="notes-save-btn" data-save="lettersText" type="button">Запази секцията</button>
+          </div>
+        </div>
+
+        <label for="lettersText">Текст</label>
+        <textarea id="lettersText" class="notes-big-textarea" placeholder="Напиши мотивационно писмо..."></textarea>
+        <div id="lettersTextMeta" class="notes-save-meta">Няма запазени промени.</div>
+      </section>
+
+      <!-- SKILLS -->
+      <section class="card notes-tab-panel hidden" data-panel="skills">
+        <div class="section-head">
+          <div>
+            <h2>Умения и опит</h2>
+            <div class="small-text">Опиши реалния си опит, системи, инструменти и специализация.</div>
+          </div>
+          <div class="notes-inline-actions">
+            <button class="secondary-btn notes-insert-template-btn" data-target="skillsText" data-template="skills-basic" type="button">Постави пример</button>
+            <button class="notes-save-btn" data-save="skillsText" type="button">Запази секцията</button>
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="professionSelect">Професия</label>
+            <select id="professionSelect">
+              <option value="">Избери професия</option>
+              <option value="gotvach">Готвач</option>
+              <option value="mehanik">Механик</option>
+              <option value="stroitel">Строител</option>
+              <option value="frizyor">Фризьор</option>
+              <option value="it">IT специалист</option>
+              <option value="marketing">Маркетинг</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="specializationSelect">Специализация</label>
+            <select id="specializationSelect">
+              <option value="">Първо избери професия</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="skillsText">Текст</label>
+        <textarea id="skillsText" class="notes-big-textarea" placeholder="Опиши опита си, с какво си работил, какви системи и инструменти познаваш..."></textarea>
+        <div id="skillsTextMeta" class="notes-save-meta">Няма запазени промени.</div>
+      </section>
+
+      <!-- AI -->
+      <section class="card notes-tab-panel hidden" data-panel="ai">
+        <div class="section-head">
+          <div>
+            <h2>AI CV помощник</h2>
+            <div class="small-text">Автоматично генерирай текстове на база твоята професия и опит.</div>
+          </div>
+        </div>
+
+        <div class="notes-ai-grid">
+          <div class="notes-ai-card">
+            <h3>Данни за генериране</h3>
+
+            <label for="aiProfession">Професия</label>
+            <input id="aiProfession" placeholder="Пример: Готвач">
+
+            <label for="aiSpecialization">Специализация</label>
+            <input id="aiSpecialization" placeholder="Пример: Топла кухня">
+
+            <label for="aiExperience">Опит</label>
+            <input id="aiExperience" placeholder="Пример: 4 години">
+
+            <label for="aiStrengths">Силни страни</label>
+            <textarea id="aiStrengths" placeholder="Пример: работа в екип, бързина, организация, отговорност"></textarea>
+
+            <div class="notes-ai-actions">
+              <button id="generateCvSummaryBtn" type="button">Генерирай CV summary</button>
+              <button id="generateIntroBtn" type="button">Генерирай представяне</button>
+              <button id="generateLetterBtn" type="button">Генерирай мотивационно</button>
+              <button id="generateVideoBtn" type="button">Генерирай видео текст</button>
+            </div>
+          </div>
+
+          <div class="notes-ai-card">
+            <h3>AI резултат</h3>
+            <textarea id="aiOutputText" class="notes-big-textarea notes-ai-output" placeholder="Тук ще се появи генерираният текст..."></textarea>
+
+            <div class="notes-ai-actions">
+              <button id="insertAiToCvBtn" class="secondary-btn" type="button">Постави в CV</button>
+              <button id="insertAiToIntroBtn" class="secondary-btn" type="button">Постави в представяне</button>
+              <button id="insertAiToLettersBtn" class="secondary-btn" type="button">Постави в мотивационно</button>
+              <button id="copyAiBtn" class="secondary-btn" type="button">Копирай</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRIVATE -->
+      <section class="card notes-tab-panel hidden" data-panel="private">
+        <div class="section-head">
+          <div>
+            <h2>Лични бележки</h2>
+            <div class="small-text">Скрито пространство за идеи, отметки и лични записки.</div>
+          </div>
+          <div class="notes-inline-actions">
+            <button class="secondary-btn notes-insert-template-btn" data-target="privateText" data-template="private-checklist" type="button">Постави пример</button>
+            <button class="notes-save-btn" data-save="privateText" type="button">Запази секцията</button>
+          </div>
+        </div>
+
+        <label for="privateText">Текст</label>
+        <textarea id="privateText" class="notes-big-textarea" placeholder="Тук можеш да пазиш лични бележки, идеи, линкове, отметки, въпроси за интервю и всичко важно..."></textarea>
+        <div id="privateTextMeta" class="notes-save-meta">Няма запазени промени.</div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+  const notesGuestBox = document.getElementById("notesGuestBox");
+  const notesMainWrap = document.getElementById("notesMainWrap");
+  const notesPageStatus = document.getElementById("notesPageStatus");
+
+  const STORAGE_PREFIX = "tm_notes_v4_";
+  let currentNotesUserKey = "";
+  let activeTab = "cv";
+
+  const professionSpecializations = {
+    gotvach: ["Топла кухня", "Студена кухня", "Сладкарство", "Пицар", "Скара"],
+    mehanik: ["Двигатели", "Ходова част", "Диагностика", "Авто електроника", "Смяна на масла"],
+    stroitel: ["Боядисване", "Шпакловка", "Гипсокартон", "Плочки", "ВиК", "Електро"],
+    frizyor: ["Дамско подстригване", "Мъжко подстригване", "Боядисване", "Стилизиране", "Кератин"],
+    it: ["Frontend", "Backend", "Full Stack", "Support", "QA", "System Administration"],
+    marketing: ["Социални мрежи", "SEO", "Реклама", "Копирайтинг", "Email маркетинг"]
+  };
+
+  const templates = {
+    "cv-basic": `Име: [Твоето име]
+Телефон: [Телефон]
+Имейл: [Имейл]
+
+Профил:
+Мотивиран и отговорен човек с желание за развитие, добра организация и сериозно отношение към работата.
+
+Опит:
+- [Позиция / място]
+- [Позиция / място]
+
+Умения:
+- Работа в екип
+- Комуникация
+- Организация
+- Отговорност
+
+Образование:
+- [Училище / курс / сертификат]`,
+
+    "cv-chef": `Професия: Готвач
+Специализация: Топла / студена кухня
+
+Профил:
+Имам опит в кухня, добра организация по време на натоварени смени, умения за работа в екип и спазване на хигиенни стандарти.
+
+Опит:
+- Подготовка на продукти
+- Работа на топла кухня
+- Работа на студена кухня
+- Поддържане на чисто работно място
+
+Силни страни:
+- Бързина
+- Дисциплина
+- Работа под напрежение
+- Отговорност`,
+
+    "cv-mechanic": `Професия: Механик
+Специализация: Диагностика / двигатели / ходова част
+
+Профил:
+Имам практически опит в ремонти и поддръжка на автомобили, диагностика на проблеми и работа с различни видове инструменти и оборудване.
+
+Опит:
+- Смяна на масла и филтри
+- Диагностика
+- Ремонт по ходова част
+- Работа по двигатели
+
+Силни страни:
+- Точност
+- Техническо мислене
+- Отговорност
+- Бързо намиране на проблеми`,
+
+    "intro-short": `Здравейте, казвам се [име]. Имам опит в сферата на [сфера] и търся възможност да се развивам в стабилна работна среда. Работя организирано, отговорно и с желание да давам добри резултати.`,
+
+    "intro-video": `Здравейте, казвам се [име]. Занимавам се с [професия / услуга] и имам опит в [специализация]. Работя коректно, държа на качеството и добрата комуникация с клиентите / екипа. Ще се радвам да работим заедно.`,
+
+    "letter-general": `Уважаеми господа,
+
+Изразявам интерес към Вашата позиция / обява. Смятам, че моят опит, отношение към работата и желание за развитие биха били полезни за Вашия екип.
+
+Имам опит в [сфера], умея да работя организирано и отговорно и се адаптирам бързо към нови задачи.
+
+Благодаря за отделеното време.
+
+С уважение,
+[Твоето име]`,
+
+    "skills-basic": `Опит:
+- Работил/а съм в [фирма / обект]
+- Изпълнявал/а съм задачи свързани с [дейности]
+
+Умения:
+- Работа с клиенти
+- Работа в екип
+- Работа под напрежение
+- Организация на задачите
+
+Инструменти / системи:
+- [инструменти]
+- [машини / софтуер]`,
+
+    "private-checklist": `Личен checklist:
+- [ ] Да обновя CV
+- [ ] Да подготвя по-силно представяне
+- [ ] Да изпратя кандидатура до фирма X
+- [ ] Да подготвя текст за видео
+- [ ] Да добавя повече реален опит`
+  };
+
+  function getNotesCurrentUser() {
+    return typeof getCurrentUser === "function" ? getCurrentUser() : null;
+  }
+
+  function getNotesStorageKey() {
+    const currentUser = getNotesCurrentUser();
+    if (!currentUser?.email) return "";
+    return STORAGE_PREFIX + String(currentUser.email).trim().toLowerCase();
+  }
+
+  function defaultNotesData() {
+    return {
+      cvText: "",
+      introText: "",
+      lettersText: "",
+      skillsText: "",
+      privateText: "",
+      profession: "",
+      specialization: "",
+      updatedAt: {}
+    };
+  }
+
+  function loadNotesData() {
+    try {
+      const raw = localStorage.getItem(currentNotesUserKey);
+      if (!raw) return defaultNotesData();
+
+      const parsed = JSON.parse(raw);
+      return {
+        ...defaultNotesData(),
+        ...parsed,
+        updatedAt: {
+          ...defaultNotesData().updatedAt,
+          ...(parsed.updatedAt || {})
+        }
+      };
+    } catch (error) {
+      console.error("NOTES LOAD ERROR:", error);
+      return defaultNotesData();
+    }
+  }
+
+  function saveWholeNotesData(data) {
+    localStorage.setItem(currentNotesUserKey, JSON.stringify(data));
+  }
+
+  function updateSectionMeta(fieldId, dateValue) {
+    const meta = document.getElementById(fieldId + "Meta");
+    if (!meta) return;
+
+    if (!dateValue) {
+      meta.textContent = "Няма запазени промени.";
+      return;
+    }
+
+    meta.textContent = "Последно запазено: " + new Date(dateValue).toLocaleString("bg-BG");
+  }
+
+  function saveSingleSection(fieldId) {
+    if (!currentNotesUserKey) return;
+
+    const data = loadNotesData();
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    data[fieldId] = field.value;
+    data.updatedAt[fieldId] = new Date().toISOString();
+
+    if (fieldId === "skillsText") {
+      data.profession = document.getElementById("professionSelect")?.value || "";
+      data.specialization = document.getElementById("specializationSelect")?.value || "";
+    }
+
+    saveWholeNotesData(data);
+    updateSectionMeta(fieldId, data.updatedAt[fieldId]);
+
+    if (typeof showToast === "function") {
+      showToast("Секцията е запазена успешно ✅", "success");
+    }
+
+    if (typeof showStatus === "function") {
+      showStatus(notesPageStatus, "Секцията е запазена успешно ✅", "success");
+      setTimeout(() => clearStatus(notesPageStatus), 2200);
+    }
+  }
+
+  function applyTemplateToField(fieldId, templateKey) {
+    const field = document.getElementById(fieldId);
+    if (!field || !templates[templateKey]) return;
+
+    field.value = templates[templateKey];
+    field.dispatchEvent(new Event("input"));
+  }
+
+  function switchNotesTab(tabName) {
+    activeTab = tabName;
+
+    document.querySelectorAll(".notes-side-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+
+    document.querySelectorAll(".notes-tab-panel").forEach(panel => {
+      panel.classList.toggle("hidden", panel.dataset.panel !== tabName);
+    });
+  }
+
+  function getCurrentVisibleTextareaId() {
+    if (activeTab === "cv") return "cvText";
+    if (activeTab === "intro") return "introText";
+    if (activeTab === "letters") return "lettersText";
+    if (activeTab === "skills") return "skillsText";
+    if (activeTab === "private") return "privateText";
+    if (activeTab === "ai") return "aiOutputText";
+    return "";
+  }
+
+  async function copyTextValue(text) {
+    try {
+      await navigator.clipboard.writeText(text || "");
+      if (typeof showToast === "function") showToast("Текстът е копиран ✅", "success");
+    } catch (error) {
+      console.error("COPY ERROR:", error);
+    }
+  }
+
+  function exportNotesAsTxt() {
+    const data = loadNotesData();
+
+    const content = `
+=== CV / РЕЗЮМЕ ===
+${data.cvText || ""}
+
+=== ПРЕДСТАВЯНЕ ===
+${data.introText || ""}
+
+=== МОТИВАЦИОННИ ПИСМА ===
+${data.lettersText || ""}
+
+=== УМЕНИЯ И ОПИТ ===
+${data.skillsText || ""}
+
+=== ЛИЧНИ БЕЛЕЖКИ ===
+${data.privateText || ""}
+`.trim();
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my-notes.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function populateSpecializations(professionValue, selectedValue = "") {
+    const specializationSelect = document.getElementById("specializationSelect");
+    if (!specializationSelect) return;
+
+    specializationSelect.innerHTML = "";
+
+    if (!professionValue || !professionSpecializations[professionValue]) {
+      specializationSelect.innerHTML = '<option value="">Първо избери професия</option>';
+      return;
+    }
+
+    specializationSelect.innerHTML = '<option value="">Избери специализация</option>';
+
+    professionSpecializations[professionValue].forEach(item => {
+      const option = document.createElement("option");
+      option.value = item;
+      option.textContent = item;
+      if (item === selectedValue) option.selected = true;
+      specializationSelect.appendChild(option);
+    });
+  }
+
+  function generateAiText(mode) {
+    const profession = document.getElementById("aiProfession").value.trim();
+    const specialization = document.getElementById("aiSpecialization").value.trim();
+    const experience = document.getElementById("aiExperience").value.trim();
+    const strengths = document.getElementById("aiStrengths").value.trim();
+
+    let result = "";
+
+    if (mode === "cv") {
+      result = `Професионално резюме:\nИмам опит като ${profession || "[професия]"}${specialization ? " със специализация в " + specialization : ""}${experience ? ", с " + experience + " опит" : ""}. Отличавам се със силни страни като ${strengths || "[силни страни]"} и съм мотивиран/а да се развивам и да постигам добри резултати.`;
+    }
+
+    if (mode === "intro") {
+      result = `Кратко представяне:\nЗдравейте, казвам се [име] и работя като ${profession || "[професия]"}${specialization ? " в областта на " + specialization : ""}. ${experience ? "Имам " + experience + " опит." : ""} ${strengths ? "Моите силни страни са " + strengths + "." : ""} Работя организирано, отговорно и с желание за развитие.`;
+    }
+
+    if (mode === "letter") {
+      result = `Мотивационно писмо:\nУважаеми господа,\n\nИзразявам интерес към Вашата позиция. Работя като ${profession || "[професия]"}${specialization ? " със специализация в " + specialization : ""}${experience ? " и имам " + experience + " опит" : ""}. ${strengths ? "Считам, че моите силни страни като " + strengths + " биха били полезни за Вашия екип. " : ""}\nБлагодаря за отделеното време.\n\nС уважение,\n[Име]`;
+    }
+
+    if (mode === "video") {
+      result = `Видео представяне:\nЗдравейте, казвам се [име]. Занимавам се с ${profession || "[професия]"}${specialization ? ", като специализацията ми е " + specialization : ""}. ${experience ? "Имам " + experience + " опит." : ""} ${strengths ? "Силните ми страни са " + strengths + "." : ""} Държа на качествена работа, коректност и добра комуникация.`;
+    }
+
+    document.getElementById("aiOutputText").value = result;
+  }
+
+  function initNotesPage() {
+    const currentUser = getNotesCurrentUser();
+
+    if (!currentUser?.email) {
+      notesGuestBox.classList.remove("hidden");
+      notesMainWrap.classList.add("hidden");
+      return;
+    }
+
+    notesGuestBox.classList.add("hidden");
+    notesMainWrap.classList.remove("hidden");
+
+    currentNotesUserKey = getNotesStorageKey();
+
+    const data = loadNotesData();
+
+    document.getElementById("cvText").value = data.cvText || "";
+    document.getElementById("introText").value = data.introText || "";
+    document.getElementById("lettersText").value = data.lettersText || "";
+    document.getElementById("skillsText").value = data.skillsText || "";
+    document.getElementById("privateText").value = data.privateText || "";
+
+    const professionSelect = document.getElementById("professionSelect");
+    professionSelect.value = data.profession || "";
+    populateSpecializations(data.profession || "", data.specialization || "");
+
+    updateSectionMeta("cvText", data.updatedAt.cvText);
+    updateSectionMeta("introText", data.updatedAt.introText);
+    updateSectionMeta("lettersText", data.updatedAt.lettersText);
+    updateSectionMeta("skillsText", data.updatedAt.skillsText);
+    updateSectionMeta("privateText", data.updatedAt.privateText);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof updateHeaderUser === "function") updateHeaderUser();
+    if (typeof updateRoleVisibility === "function") updateRoleVisibility();
+    if (typeof initThemeToggle === "function") initThemeToggle();
+
+    initNotesPage();
+
+    document.querySelectorAll(".notes-side-tab").forEach(btn => {
+      btn.addEventListener("click", () => switchNotesTab(btn.dataset.tab));
+    });
+
+    document.querySelectorAll(".notes-save-btn").forEach(btn => {
+      btn.addEventListener("click", () => saveSingleSection(btn.dataset.save));
+    });
+
+    document.querySelectorAll(".notes-template-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const templateKey = btn.dataset.template;
+
+        if (activeTab === "cv") applyTemplateToField("cvText", templateKey);
+        if (activeTab === "intro") applyTemplateToField("introText", templateKey);
+        if (activeTab === "letters") applyTemplateToField("lettersText", templateKey);
+        if (activeTab === "skills") applyTemplateToField("skillsText", templateKey);
+        if (activeTab === "private") applyTemplateToField("privateText", templateKey);
+
+        if (typeof showToast === "function") showToast("Шаблонът е поставен ✅", "success");
+      });
+    });
+
+    document.querySelectorAll(".notes-insert-template-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        applyTemplateToField(btn.dataset.target, btn.dataset.template);
+        if (typeof showToast === "function") showToast("Примерът е поставен ✅", "success");
+      });
+    });
+
+    document.getElementById("copyCurrentSectionBtn").addEventListener("click", () => {
+      const fieldId = getCurrentVisibleTextareaId();
+      const field = document.getElementById(fieldId);
+      if (field) copyTextValue(field.value);
+    });
+
+    document.getElementById("exportNotesBtn").addEventListener("click", exportNotesAsTxt);
+
+    document.getElementById("professionSelect").addEventListener("change", (e) => {
+      populateSpecializations(e.target.value, "");
+    });
+
+    document.getElementById("generateCvSummaryBtn").addEventListener("click", () => generateAiText("cv"));
+    document.getElementById("generateIntroBtn").addEventListener("click", () => generateAiText("intro"));
+    document.getElementById("generateLetterBtn").addEventListener("click", () => generateAiText("letter"));
+    document.getElementById("generateVideoBtn").addEventListener("click", () => generateAiText("video"));
+
+    document.getElementById("insertAiToCvBtn").addEventListener("click", () => {
+      document.getElementById("cvText").value = document.getElementById("aiOutputText").value;
+      switchNotesTab("cv");
+    });
+
+    document.getElementById("insertAiToIntroBtn").addEventListener("click", () => {
+      document.getElementById("introText").value = document.getElementById("aiOutputText").value;
+      switchNotesTab("intro");
+    });
+
+    document.getElementById("insertAiToLettersBtn").addEventListener("click", () => {
+      document.getElementById("lettersText").value = document.getElementById("aiOutputText").value;
+      switchNotesTab("letters");
+    });
+
+    document.getElementById("copyAiBtn").addEventListener("click", () => {
+      copyTextValue(document.getElementById("aiOutputText").value);
+    });
+
+    switchNotesTab("cv");
+  });
+</script>
+</body>
+</html>

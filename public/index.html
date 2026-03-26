@@ -11,9 +11,9 @@
 <header>
   <div class="header-inner">
     <div class="navbar">
-      <a href="/" class="brand" style="text-decoration:none; color:white;">TursiMajstor</a>
+      <h1 class="brand">TursiMajstor</h1>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
         <a class="active" href="/">Начало</a>
@@ -26,15 +26,9 @@
         <a href="/feed-page">Новини</a>
       </div>
 
-      <div class="header-actions-right">
-        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Смени режим">
-          🌙
-        </button>
-
-        <div class="user-menu">
-          <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
-          <div id="userDropdown" class="user-dropdown hidden"></div>
-        </div>
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
   </div>
@@ -42,198 +36,223 @@
 
 <div class="container">
 
-  <nav class="breadcrumbs" aria-label="breadcrumb">
+  <nav class="breadcrumbs">
     <a href="/">Начало</a>
     <span>•</span>
     <span>Начална страница</span>
   </nav>
 
-  <section class="card landing-hero-card landing-hero-rich">
-    <div class="landing-hero-grid">
-      <div>
-        <div class="landing-badge">Платформа за услуги, работа и професионалисти</div>
+  <section class="card redesign-home-hero">
+    <div class="redesign-home-hero-content">
+      <div class="redesign-home-badge">Работа • Услуги • Бизнес партньорства</div>
 
-        <h1 class="landing-title">
-          Намери правилния човек или покажи своята работа пред повече хора
-        </h1>
+      <h1 class="redesign-home-title">
+        Намери правилната работа, услуга или фирмен партньор на едно място
+      </h1>
 
-        <p class="landing-text">
-          Публикувай обява, популяризирай услугите си, разгледай нови възможности и открий
-          професионалисти от различни категории в цяла България.
-        </p>
+      <p class="redesign-home-text">
+        TursiMajstor събира в една платформа обяви за работа, предлагани услуги
+        и фирмени възможности за съвместна работа. Публикувай, откривай и
+        изграждай доверие чрез профили, портфолиа, ревюта и директна комуникация.
+      </p>
 
-        <form id="homepageSearchForm" class="landing-search-box">
-          <input
-            id="homepageSearchInput"
-            type="text"
-            placeholder="Търси по категория, град, услуга..."
-            autocomplete="off"
-          >
-          <button type="submit">Търси</button>
-        </form>
-
-        <div class="landing-cta-row">
-          <a href="/jobs-page" class="landing-main-btn">Разгледай обявите</a>
-          <a href="/account-page?mode=register&role=professional" class="landing-secondary-btn">
-            Създай професионален профил
-          </a>
-        </div>
-
-        <div class="landing-mini-links">
-          <a href="/account-page?mode=register&role=personal&intent=job">Търся работа / услуга</a>
-          <a href="/account-page?mode=register&role=professional&intent=service">Предлагам услуга</a>
-          <a href="/account-page?mode=register&role=company">Регистрирай фирма</a>
-        </div>
+      <div class="redesign-home-actions">
+        <a href="/jobs-page" class="landing-main-btn">Разгледай платформата</a>
+        <a href="/account-page?mode=register" class="landing-secondary-btn">Създай профил</a>
       </div>
+    </div>
+  </section>
 
-      <div class="landing-side-panel">
-        <div class="landing-side-card">
-          <div class="landing-side-icon">⭐</div>
+  <section class="home-main-sections">
+
+    <article class="card home-section-block home-section-jobs">
+      <div class="home-section-overlay"></div>
+
+      <div class="home-section-content">
+        <div class="home-section-top">
           <div>
-            <h3>Промотирани обяви</h3>
-            <p>Покажи се най-горе и достигни до повече хора.</p>
+            <div class="home-section-badge">Обяви за работа</div>
+            <h2>Намери работа или публикувай нова обява</h2>
+            <p>
+              Подходящо за хора, които търсят служители, майстори, помощници,
+              специалисти или изпълнители за конкретна задача.
+            </p>
           </div>
         </div>
 
-        <div class="landing-side-card">
-          <div class="landing-side-icon">🧰</div>
-          <div>
-            <h3>Свободна практика и фирми</h3>
-            <p>Изгради профил, портфолио и публикувай услуги.</p>
+        <div class="home-search-demo">
+          <div class="home-search-row">
+            <input type="text" placeholder="Търсене на обяви...">
+            <select>
+              <option>Категория</option>
+              <option>Строителство</option>
+              <option>Красота</option>
+              <option>IT</option>
+              <option>Образование</option>
+            </select>
+            <select>
+              <option>Местоположение</option>
+              <option>София</option>
+              <option>Пловдив</option>
+              <option>Варна</option>
+              <option>Бургас</option>
+            </select>
+            <button type="button">ТЪРСИ</button>
+          </div>
+
+          <div class="home-demo-grid">
+            <div class="home-demo-list">
+              <div class="home-demo-item">
+                <strong>IT и Програмиране</strong>
+                <span>София, Плевен, Remote</span>
+              </div>
+              <div class="home-demo-item">
+                <strong>Офис мениджър</strong>
+                <span>Пловдив, Пълен работен ден</span>
+              </div>
+              <div class="home-demo-item">
+                <strong>Продавач - Консултант</strong>
+                <span>Варна, Заплата 1200 лв</span>
+              </div>
+            </div>
+
+            <div class="home-demo-list">
+              <div class="home-demo-item"><strong>София</strong></div>
+              <div class="home-demo-item"><strong>Пловдив</strong></div>
+              <div class="home-demo-item"><strong>Варна</strong></div>
+              <div class="home-demo-item"><strong>Бургас</strong></div>
+              <div class="home-demo-item"><strong>Русе</strong></div>
+              <div class="home-demo-item"><strong>Стара Загора</strong></div>
+            </div>
+
+            <div class="home-demo-highlight">
+              <strong>Електротехник</strong>
+              <span>Бургас, Спешно</span>
+            </div>
           </div>
         </div>
 
-        <div class="landing-side-card">
-          <div class="landing-side-icon">📨</div>
-          <div>
-            <h3>Вътрешна поща и известия</h3>
-            <p>Комуникация и запитвания директно в платформата.</p>
-          </div>
+        <div class="home-section-bottom">
+          <a href="/jobs-page?tab=jobs" class="job-card-btn">Виж всички обяви за работа</a>
         </div>
       </div>
-    </div>
-  </section>
+    </article>
 
-  <section class="card homepage-quick-actions">
-    <div class="section-head">
-      <div>
-        <h2>Започни бързо</h2>
-        <div class="small-text">Избери най-подходящия път според това какво търсиш.</div>
+    <article class="card home-section-block home-section-services">
+      <div class="home-section-overlay"></div>
+
+      <div class="home-section-content">
+        <div class="home-section-top">
+          <div>
+            <div class="home-section-badge">Предлагани услуги</div>
+            <h2>Открий свободни професионалисти и услуги</h2>
+            <p>
+              Fiverr-style секция за хора, които предлагат услуги с портфолио,
+              клипове, снимки, рейтинг и ясно представяне.
+            </p>
+          </div>
+        </div>
+
+        <div class="home-services-demo">
+          <div class="home-services-categories">
+            <div class="home-service-cat">Уеб дизайн и програмиране</div>
+            <div class="home-service-cat">Графичен дизайн</div>
+            <div class="home-service-cat">Копирайтинг и преводи</div>
+            <div class="home-service-cat">SEO и дигитален маркетинг</div>
+            <div class="home-service-cat">Видео и анимация</div>
+            <div class="home-service-cat">Фото услуги</div>
+          </div>
+
+          <div class="home-services-featured">
+            <div class="home-services-featured-card">
+              <div class="home-services-featured-badge">Топ услуга</div>
+              <h3>Професионален уеб сайт за бизнес</h3>
+              <p>Снимки, видео представяне, ревюта и бърза заявка.</p>
+              <div class="home-services-featured-meta">
+                <span>⭐ 4.9</span>
+                <span>💰 от 450 лв</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-section-bottom">
+          <a href="/jobs-page?tab=services" class="job-card-btn">Открий фрийлансъри и услуги</a>
+        </div>
       </div>
-    </div>
+    </article>
 
-    <div class="quick-actions-grid">
-      <a href="/account-page?mode=register&role=personal&intent=job" class="quick-action-card">
-        <div class="quick-action-icon">🔎</div>
-        <h3>Търся работа / услуга</h3>
-        <p>Създай личен профил и започни да разглеждаш, публикуваш и кандидатстваш.</p>
-      </a>
+    <article class="card home-section-block home-section-b2b">
+      <div class="home-section-overlay"></div>
 
-      <a href="/account-page?mode=register&role=professional&intent=service" class="quick-action-card">
-        <div class="quick-action-icon">🛠</div>
-        <h3>Предлагам услуга</h3>
-        <p>Създай професионален профил и покажи какво правиш пред повече клиенти.</p>
-      </a>
+      <div class="home-section-content">
+        <div class="home-section-top">
+          <div>
+            <div class="home-section-badge">Фирма за фирма</div>
+            <h2>Фирми търсят други фирми за работа и партньорства</h2>
+            <p>
+              Специална бизнес секция за подизпълнители, транспорт, доставки,
+              строителни фирми, складови услуги, B2B договори и корпоративни услуги.
+            </p>
+          </div>
+        </div>
 
-      <a href="/jobs-page" class="quick-action-card">
-        <div class="quick-action-icon">👷</div>
-        <h3>Търся професионалист</h3>
-        <p>Разгледай обявите и намери майстор, специалист, преподавател, дизайнер или фирма.</p>
-      </a>
+        <div class="home-b2b-demo">
+          <div class="home-b2b-mini-card">
+            <strong>Транспортни услуги</strong>
+            <span>Куриерски и товарни дейности</span>
+          </div>
 
-      <a href="/account-page?mode=register&role=company" class="quick-action-card">
-        <div class="quick-action-icon">🏢</div>
-        <h3>Регистрирай фирма</h3>
-        <p>Изгради фирмен профил, публикувай обяви и качи портфолио.</p>
-      </a>
-    </div>
-  </section>
+          <div class="home-b2b-mini-card">
+            <strong>Строителна фирма</strong>
+            <span>Подизпълнители и ремонтни екипи</span>
+          </div>
 
-  <section class="card">
-    <div class="section-head">
-      <div>
-        <h2>⭐ Промотирани обяви</h2>
-        <div class="small-text">Най-видимите обяви в платформата.</div>
+          <div class="home-b2b-mini-card">
+            <strong>Почистване и консумативи</strong>
+            <span>Дългосрочни фирмени договори</span>
+          </div>
+        </div>
+
+        <div class="home-section-bottom">
+          <a href="/jobs-page?tab=companies" class="job-card-btn">Виж фирмените обяви</a>
+        </div>
       </div>
-      <a href="/jobs-page" class="job-card-btn secondary">Виж всички</a>
-    </div>
+    </article>
 
-    <div id="homepagePromotedJobs" class="job-cards-grid">
-      <div class="job-card-skeleton"></div>
-      <div class="job-card-skeleton"></div>
-      <div class="job-card-skeleton"></div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="section-head">
-      <div>
-        <h2>🆕 Нови обяви</h2>
-        <div class="small-text">Последно публикуваните възможности и услуги.</div>
-      </div>
-      <a href="/jobs-page" class="job-card-btn secondary">Към обявите</a>
-    </div>
-
-    <div id="homepageLatestJobs" class="job-cards-grid">
-      <div class="job-card-skeleton"></div>
-      <div class="job-card-skeleton"></div>
-      <div class="job-card-skeleton"></div>
-      <div class="job-card-skeleton"></div>
-    </div>
-  </section>
-
-  <section class="card homepage-categories-card">
-    <div class="section-head">
-      <div>
-        <h2>Популярни категории</h2>
-        <div class="small-text">Най-търсените сектори в платформата.</div>
-      </div>
-    </div>
-
-    <div class="homepage-category-chips">
-      <a href="/jobs-page?category=Строителство" class="homepage-category-chip">Строителство</a>
-      <a href="/jobs-page?category=Икономика" class="homepage-category-chip">Икономика</a>
-      <a href="/jobs-page?category=IT%20сектор" class="homepage-category-chip">IT сектор</a>
-      <a href="/jobs-page?category=Логистика" class="homepage-category-chip">Логистика</a>
-      <a href="/jobs-page?category=Образование" class="homepage-category-chip">Образование</a>
-      <a href="/jobs-page?category=Услуги" class="homepage-category-chip">Услуги</a>
-      <a href="/jobs-page?category=Ремонтни%20дейности" class="homepage-category-chip">Ремонтни дейности</a>
-      <a href="/jobs-page?category=Преводи" class="homepage-category-chip">Преводи</a>
-      <a href="/jobs-page?category=Сезонна%20работа" class="homepage-category-chip">Сезонна работа</a>
-    </div>
   </section>
 
   <section class="card">
     <div class="section-head">
       <div>
         <h2>Защо TursiMajstor?</h2>
-        <div class="small-text">Всичко важно на едно място.</div>
+        <div class="small-text">Платформа, създадена да бъде по-полезна, подредена и модерна.</div>
       </div>
     </div>
 
-    <div class="home-benefits-grid">
-      <div class="home-benefit-card">
-        <div class="home-benefit-icon">⚡</div>
-        <h3>Бърз старт</h3>
-        <p>Регистрирай се, създай профил и започни веднага.</p>
+    <div class="quick-actions-grid">
+      <div class="quick-action-card">
+        <div class="quick-action-icon">🔎</div>
+        <h3>По-лесно търсене</h3>
+        <p>Филтрирай по категории, подкатегории, градове, тип профил и вид услуга.</p>
       </div>
 
-      <div class="home-benefit-card">
-        <div class="home-benefit-icon">📈</div>
-        <h3>Повече видимост</h3>
-        <p>Промотирани обяви, профили и по-силно присъствие.</p>
+      <div class="quick-action-card">
+        <div class="quick-action-icon">⭐</div>
+        <h3>Рейтинг и доверие</h3>
+        <p>Профили с оценки, ревюта, проекти и портфолиа за по-добър избор.</p>
       </div>
 
-      <div class="home-benefit-card">
-        <div class="home-benefit-icon">💬</div>
-        <h3>Лесна комуникация</h3>
-        <p>Вътрешна поща, известия и директен контакт.</p>
+      <div class="quick-action-card">
+        <div class="quick-action-icon">🎥</div>
+        <h3>Снимки и видеа</h3>
+        <p>Покажи услугите си по по-професионален начин чрез визуално съдържание.</p>
       </div>
 
-      <div class="home-benefit-card">
-        <div class="home-benefit-icon">🧾</div>
-        <h3>Професионално портфолио</h3>
-        <p>Покажи услугите, проектите и отзивите си на едно място.</p>
+      <div class="quick-action-card">
+        <div class="quick-action-icon">🏢</div>
+        <h3>B2B секция</h3>
+        <p>Отделна среда за фирми, които търсят други фирми за работа и партньорства.</p>
       </div>
     </div>
   </section>
@@ -242,215 +261,9 @@
 
 <script src="/app.js"></script>
 <script>
-  const homepagePromotedJobs = document.getElementById("homepagePromotedJobs");
-  const homepageLatestJobs = document.getElementById("homepageLatestJobs");
-  const homepageSearchForm = document.getElementById("homepageSearchForm");
-  const homepageSearchInput = document.getElementById("homepageSearchInput");
-  const themeToggleBtn = document.getElementById("themeToggleBtn");
-
-  function escapeHtml(value = "") {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function isPromotedJob(job) {
-    return !!(
-      job &&
-      job.isPromoted &&
-      job.promotedUntil &&
-      new Date(job.promotedUntil) > new Date()
-    );
-  }
-
-  function getJobTypeLabel(type) {
-    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
-  }
-
-  function getJobTypeText(type) {
-    return type === "service" ? "Предлагам услуга" : "Търся човек";
-  }
-
-  function buildGalleryPreview(job) {
-    const allImages = [job.imageUrl, ...(job.gallery || [])].filter(Boolean);
-
-    if (!allImages.length) return "";
-
-    return `
-      <div class="job-gallery-preview">
-        ${allImages.slice(0, 3).map((img, index) => `
-          <img src="${img}" alt="Снимка ${index + 1}" class="job-gallery-thumb-preview">
-        `).join("")}
-        ${allImages.length > 3 ? `<div class="job-gallery-more">+${allImages.length - 3}</div>` : ""}
-      </div>
-    `;
-  }
-
-  function buildEmptyState(title, text, buttonText, buttonHref) {
-    return `
-      <div class="empty-state-box">
-        <div class="empty-state-icon">📭</div>
-        <h3>${title}</h3>
-        <p>${text}</p>
-        <a href="${buttonHref}" class="job-card-btn">${buttonText}</a>
-      </div>
-    `;
-  }
-
-  function buildHomepageCard(job, highlighted = false) {
-    return `
-      <div class="job-market-card ${highlighted ? "job-market-card-premium" : ""}">
-        ${isPromotedJob(job)
-          ? `<div class="job-promoted-badge">⭐ Промотирана</div>`
-          : ""}
-
-        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
-
-        <div class="job-market-top">
-          <div>
-            <h4 class="job-market-title">${escapeHtml(job.title || "Без заглавие")}</h4>
-            <div class="job-market-meta">
-              <span>📍 ${escapeHtml(job.city || "Без град")}</span>
-              <span>🏷 ${escapeHtml(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}</span>
-              <span>📌 ${getJobTypeText(job.type)}</span>
-            </div>
-            ${isPromotedJob(job)
-              ? `<div class="job-promoted-inline">⭐ До ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>`
-              : ""}
-          </div>
-
-          ${job.budget ? `<div class="job-budget-badge">${escapeHtml(job.budget)} лв</div>` : ""}
-        </div>
-
-        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
-        ${buildGalleryPreview(job)}
-
-        <p class="job-market-desc">${escapeHtml(job.description || "")}</p>
-
-        <div class="job-card-actions">
-          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж профила</a>
-        </div>
-      </div>
-    `;
-  }
-
-  async function loadHomepageJobs() {
-    try {
-      const res = await fetch(`/jobs?t=${Date.now()}`, { cache: "no-store" });
-      const data = await res.json();
-
-      const jobs = Array.isArray(data) ? data : [];
-      const promoted = jobs.filter(isPromotedJob).slice(0, 3);
-      const latest = jobs.filter(job => !isPromotedJob(job)).slice(0, 6);
-
-      if (!promoted.length) {
-        homepagePromotedJobs.innerHTML = buildEmptyState(
-          "Все още няма промотирани обяви",
-          "Когато някой активира промотиране, тук ще се покажат най-видимите предложения.",
-          "Разгледай всички обяви",
-          "/jobs-page"
-        );
-      } else {
-        homepagePromotedJobs.innerHTML = promoted
-          .map(job => buildHomepageCard(job, true))
-          .join("");
-      }
-
-      if (!latest.length) {
-        homepageLatestJobs.innerHTML = buildEmptyState(
-          "Все още няма нови обяви",
-          "Бъди сред първите, които публикуват или разгледай платформата.",
-          "Публикувай / Виж обяви",
-          "/jobs-page"
-        );
-      } else {
-        homepageLatestJobs.innerHTML = latest
-          .map(job => buildHomepageCard(job, false))
-          .join("");
-      }
-    } catch (error) {
-      console.error("HOMEPAGE JOBS ERROR:", error);
-
-      homepagePromotedJobs.innerHTML = buildEmptyState(
-        "Възникна проблем",
-        "Не успяхме да заредим промотираните обяви в момента.",
-        "Опитай пак",
-        "/"
-      );
-
-      homepageLatestJobs.innerHTML = buildEmptyState(
-        "Възникна проблем",
-        "Не успяхме да заредим новите обяви в момента.",
-        "Опитай пак",
-        "/"
-      );
-
-      if (typeof showToast === "function") {
-        showToast("Грешка при зареждане на началната страница.", "error");
-      }
-    }
-  }
-
-  function setupHomepageSearch() {
-    if (!homepageSearchForm || !homepageSearchInput) return;
-
-    homepageSearchForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const value = homepageSearchInput.value.trim();
-
-      if (!value) {
-        window.location.href = "/jobs-page";
-        return;
-      }
-
-      window.location.href = `/jobs-page?search=${encodeURIComponent(value)}`;
-    });
-  }
-
-  function syncThemeIcon() {
-    if (!themeToggleBtn) return;
-    const isDark = document.body.classList.contains("dark-mode");
-    themeToggleBtn.textContent = isDark ? "☀️" : "🌙";
-  }
-
-  function initDarkModeButton() {
-    if (!themeToggleBtn) return;
-
-    if (localStorage.getItem("siteTheme") === "dark") {
-      document.body.classList.add("dark-mode");
-    }
-
-    syncThemeIcon();
-
-    themeToggleBtn.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      localStorage.setItem(
-        "siteTheme",
-        document.body.classList.contains("dark-mode") ? "dark" : "light"
-      );
-      syncThemeIcon();
-
-      if (typeof showToast === "function") {
-        showToast(
-          document.body.classList.contains("dark-mode")
-            ? "Тъмният режим е включен."
-            : "Светлият режим е включен.",
-          "success"
-        );
-      }
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
     updateHeaderUser();
     updateRoleVisibility();
-    setupHomepageSearch();
-    initDarkModeButton();
-    loadHomepageJobs();
   });
 </script>
 </body>

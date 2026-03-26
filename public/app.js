@@ -154,6 +154,39 @@
     }
   }
 
+  function getThemeMode() {
+  return localStorage.getItem("themeMode") || "light";
+}
+
+function applyThemeMode(mode) {
+  if (mode === "dark") {
+    document.body.classList.add("dark-mode");
+  } else {
+    document.body.classList.remove("dark-mode");
+  }
+
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) {
+    btn.textContent = mode === "dark" ? "☀️" : "🌙";
+  }
+}
+
+function toggleThemeMode() {
+  const current = getThemeMode();
+  const next = current === "dark" ? "light" : "dark";
+  localStorage.setItem("themeMode", next);
+  applyThemeMode(next);
+}
+
+function initThemeToggle() {
+  applyThemeMode(getThemeMode());
+
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) {
+    btn.onclick = toggleThemeMode;
+  }
+}
+
   function toggleDarkMode() {
     const enabled = isDarkModeEnabled();
     localStorage.setItem(APP.darkModeKey, enabled ? "0" : "1");
@@ -377,18 +410,19 @@
           <a href="/notifications-page" class="dropdown-preview-link">Виж всички известия</a>
         </div>
 
-        <div class="header-user-actions">
-          <a href="/profile/${encodeURIComponent(currentUser.email)}" class="header-action-link">Моят профил</a>
-          <a href="/my-jobs-page" class="header-action-link">Моите обяви</a>
-          <a href="/favorites-page" class="header-action-link">Любими</a>
-          <a href="/inbox-page" class="header-action-link">Поща</a>
-          <a href="/notifications-page" class="header-action-link inbox-link-wrapper">
-            Известия
-            <span id="dropdownNotificationBadge" class="inbox-badge hidden">0</span>
-          </a>
-          <button type="button" id="headerEditProfileBtn" class="header-action-btn">Редактирай профил</button>
-          <button type="button" id="logoutBtn" class="danger-btn">Изход</button>
-        </div>
+      <div class="header-user-actions">
+  <a href="/profile/${encodeURIComponent(currentUser.email)}" class="header-action-link">Моят профил</a>
+  <a href="/my-jobs-page" class="header-action-link">Моите обяви</a>
+  <a href="/favorites-page" class="header-action-link">Любими</a>
+  <a href="/my-notes-page" class="header-action-link">Моите бележки</a>
+  <a href="/inbox-page" class="header-action-link">Поща</a>
+  <a href="/notifications-page" class="header-action-link inbox-link-wrapper">
+    Известия
+    <span id="dropdownNotificationBadge" class="inbox-badge hidden">0</span>
+  </a>
+  <button type="button" id="headerEditProfileBtn" class="header-action-btn">Редактирай профил</button>
+  <button type="button" onclick="logout()" class="danger-btn">Изход</button>
+</div>
       `;
     }
 
@@ -929,5 +963,6 @@
     bindRegisterRoleChange();
     bindAuthActions();
     updateRoleVisibility();
+    initThemeToggle();
   });
 })();

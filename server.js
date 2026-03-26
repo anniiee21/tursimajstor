@@ -303,6 +303,9 @@ app.get("/jobs-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "jobs.html"));
 });
 
+app.get("/my-notes-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "my-notes.html"));
+});
 /* =========================
    JOBS
 ========================= */
