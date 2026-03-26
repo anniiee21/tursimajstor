@@ -13,21 +13,21 @@
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a class="active" href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
 
       <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
@@ -35,144 +35,391 @@
 </header>
 
 <div class="container">
-  <div class="card">
-    <div class="top-tabs">
-      <button id="inboxTabBtn" class="top-tab active" type="button">Входящи</button>
-      <button id="sentTabBtn" class="top-tab" type="button">Изпратени</button>
-    </div>
 
-    <div class="section-head" style="margin-top: 18px;">
+  <section class="card landing-hero-card">
+    <div class="landing-hero-grid">
       <div>
-        <h2>Вътрешна поща</h2>
-        <div class="small-text">Тук виждаш запитванията по обяви и изпратените от теб съобщения.</div>
+        <div class="landing-badge">Комуникация вътре в платформата</div>
+        <h1 class="landing-title">Поща и запитвания</h1>
+        <p class="landing-text">
+          Виж входящите и изпратените съобщения, следи новите запитвания
+          и отваряй бързо профилите и обявите, свързани с тях.
+        </p>
+
+        <div class="landing-cta-row">
+          <a href="/jobs-page" class="landing-main-btn">Разгледай обявите</a>
+          <a href="/notifications-page" class="landing-secondary-btn">Към известията</a>
+        </div>
       </div>
-      <div id="mailCount" class="results-info"></div>
+
+      <div class="landing-side-panel">
+        <div class="landing-side-card">
+          <div class="landing-side-icon">📨</div>
+          <div>
+            <h3>Входящи съобщения</h3>
+            <p>Получавай директни запитвания за твоите обяви и услуги.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">✉️</div>
+          <div>
+            <h3>Изпратени</h3>
+            <p>Преглеждай всички запитвания, които си изпратил през платформата.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">⚡</div>
+          <div>
+            <h3>Бързи действия</h3>
+            <p>Отвори профила на автора или свързаната обява само с един клик.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="inboxGuestBox" class="card hidden">
+    <div class="empty-state-box">
+      <div class="empty-state-icon">🔐</div>
+      <h3>Трябва да влезеш в профила си</h3>
+      <p>Само влезли потребители могат да виждат своята вътрешна поща.</p>
+      <div class="empty-state-actions">
+        <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+        <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="inboxSection" class="hidden">
+    <div class="card">
+      <div class="top-tabs">
+        <button id="tabInboxBtn" class="top-tab active" type="button">Входящи</button>
+        <button id="tabSentBtn" class="top-tab" type="button">Изпратени</button>
+      </div>
+
+      <div class="favorites-filters">
+        <div class="favorites-filters-grid">
+          <input id="messageSearchInput" placeholder="Търси по тема, текст или подател...">
+          <input id="messageJobFilter" placeholder="Филтър по обява">
+          <select id="messageReadFilter">
+            <option value="">Всички</option>
+            <option value="unread">Само непрочетени</option>
+            <option value="read">Само прочетени</option>
+          </select>
+          <select id="messageSortFilter">
+            <option value="newest">Най-нови</option>
+            <option value="oldest">Най-стари</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <div id="mailList" class="application-cards-list"></div>
-  </div>
+    <section id="inboxPanel" class="card">
+      <div class="section-head">
+        <div>
+          <h2>Входящи съобщения</h2>
+          <div id="inboxInfo" class="small-text">Зареждане...</div>
+        </div>
+      </div>
+
+      <div id="inboxList" class="application-cards-list"></div>
+    </section>
+
+    <section id="sentPanel" class="card hidden">
+      <div class="section-head">
+        <div>
+          <h2>Изпратени съобщения</h2>
+          <div id="sentInfo" class="small-text">Зареждане...</div>
+        </div>
+      </div>
+
+      <div id="sentList" class="application-cards-list"></div>
+    </section>
+  </section>
+
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
+  const inboxGuestBox = document.getElementById("inboxGuestBox");
+  const inboxSection = document.getElementById("inboxSection");
 
-  const inboxTabBtn = document.getElementById("inboxTabBtn");
-  const sentTabBtn = document.getElementById("sentTabBtn");
-  const mailList = document.getElementById("mailList");
-  const mailCount = document.getElementById("mailCount");
+  const tabInboxBtn = document.getElementById("tabInboxBtn");
+  const tabSentBtn = document.getElementById("tabSentBtn");
+  const inboxPanel = document.getElementById("inboxPanel");
+  const sentPanel = document.getElementById("sentPanel");
 
+  const inboxInfo = document.getElementById("inboxInfo");
+  const sentInfo = document.getElementById("sentInfo");
+  const inboxList = document.getElementById("inboxList");
+  const sentList = document.getElementById("sentList");
+
+  const messageSearchInput = document.getElementById("messageSearchInput");
+  const messageJobFilter = document.getElementById("messageJobFilter");
+  const messageReadFilter = document.getElementById("messageReadFilter");
+  const messageSortFilter = document.getElementById("messageSortFilter");
+
+  let inboxMessagesData = [];
+  let sentMessagesData = [];
   let activeTab = "inbox";
 
-  function switchTab(tab) {
-    activeTab = tab;
-
-    if (tab === "inbox") {
-      inboxTabBtn.classList.add("active");
-      sentTabBtn.classList.remove("active");
-    } else {
-      sentTabBtn.classList.add("active");
-      inboxTabBtn.classList.remove("active");
-    }
-
-    loadMessages();
+  function escapeHtmlLocal(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  inboxTabBtn.addEventListener("click", () => switchTab("inbox"));
-  sentTabBtn.addEventListener("click", () => switchTab("sent"));
+  function switchTab(tabName) {
+    activeTab = tabName;
 
-  async function markAsRead(messageId) {
-    const currentUser = getCurrentUser();
+    tabInboxBtn.classList.toggle("active", tabName === "inbox");
+    tabSentBtn.classList.toggle("active", tabName === "sent");
 
-    if (!currentUser) return;
+    inboxPanel.classList.toggle("hidden", tabName !== "inbox");
+    sentPanel.classList.toggle("hidden", tabName !== "sent");
 
-    const res = await fetch(`/messages/${messageId}/read`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        requesterEmail: currentUser.email
-      })
+    renderMessages();
+  }
+
+  function getFilteredMessages(items, isInbox = true) {
+    const searchValue = messageSearchInput.value.trim().toLowerCase();
+    const jobValue = messageJobFilter.value.trim().toLowerCase();
+    const readValue = messageReadFilter.value;
+    const sortValue = messageSortFilter.value;
+
+    let filtered = items.filter(item => {
+      const subject = (item.subject || "").toLowerCase();
+      const text = (item.text || "").toLowerCase();
+      const jobTitle = (item.jobTitle || "").toLowerCase();
+      const senderName = (item.senderName || "").toLowerCase();
+      const senderEmail = (item.senderEmail || "").toLowerCase();
+      const receiverEmail = (item.receiverEmail || "").toLowerCase();
+
+      const matchesSearch =
+        !searchValue ||
+        subject.includes(searchValue) ||
+        text.includes(searchValue) ||
+        senderName.includes(searchValue) ||
+        senderEmail.includes(searchValue) ||
+        receiverEmail.includes(searchValue);
+
+      const matchesJob =
+        !jobValue || jobTitle.includes(jobValue);
+
+      const matchesRead =
+        !readValue ||
+        (readValue === "unread" && isInbox && !item.isRead) ||
+        (readValue === "read" && isInbox && !!item.isRead) ||
+        (!isInbox && readValue === "");
+
+      return matchesSearch && matchesJob && matchesRead;
     });
 
-    await res.json();
-    loadMessages();
+    filtered.sort((a, b) => {
+      const aId = Number(a.id) || 0;
+      const bId = Number(b.id) || 0;
+      return sortValue === "oldest" ? aId - bId : bId - aId;
+    });
+
+    return filtered;
   }
 
-  function buildMailCard(item, mode) {
-    const unreadClass = mode === "inbox" && !item.isRead ? "pending-card" : "";
-    const topLabel = mode === "inbox"
-      ? `От: ${item.senderName} (${item.senderEmail})`
-      : `До: ${item.receiverEmail}`;
+  function buildInboxCard(item) {
+    const unreadClass = item.isRead ? "" : "pending-card";
 
     return `
       <div class="application-status-card ${unreadClass}">
         <div class="application-card-top">
           <div>
-            <h3 class="application-card-title">${item.subject || "Без тема"}</h3>
+            <h3 class="application-card-title">${escapeHtmlLocal(item.subject || "Без тема")}</h3>
             <div class="application-card-meta">
-              <span>${topLabel}</span>
-              <span>📌 Обява: ${item.jobTitle || "Неизвестна обява"}</span>
-              <span>📅 ${item.createdAt || ""}</span>
+              <span>👤 От: ${escapeHtmlLocal(item.senderName || item.senderEmail || "Потребител")}</span>
+              <span>📧 ${escapeHtmlLocal(item.senderEmail || "")}</span>
+              <span>🧾 Обява: ${escapeHtmlLocal(item.jobTitle || "Неизвестна обява")}</span>
+              <span>🕒 ${escapeHtmlLocal(item.createdAt || "")}</span>
             </div>
           </div>
 
-          ${
-            mode === "inbox"
-              ? `<span class="application-status-badge ${item.isRead ? "status-approved" : "status-pending"}">
-                  ${item.isRead ? "Прочетено" : "Ново"}
-                </span>`
-              : ""
-          }
+          <div class="application-status-badge ${item.isRead ? "status-approved" : "status-pending"}">
+            ${item.isRead ? "Прочетено" : "Ново"}
+          </div>
         </div>
 
         <div class="application-card-body">
-          <p>${item.text || ""}</p>
+          <h4>Съобщение</h4>
+          <p>${escapeHtmlLocal(item.text || "")}</p>
         </div>
 
-        <div class="application-card-actions-row">
-          <div class="application-action-buttons">
-            <a href="/job/${item.jobId}" class="job-card-btn">Виж обявата</a>
-            ${
-              mode === "inbox" && !item.isRead
-                ? `<button type="button" onclick="markAsRead(${item.id})">Маркирай като прочетено</button>`
-                : ""
-            }
-          </div>
+        <div class="application-action-buttons">
+          <a href="/job/${item.jobId}" class="job-card-btn">Виж обявата</a>
+          <a href="/profile/${encodeURIComponent(item.senderEmail || "")}" class="job-card-btn secondary">Виж профила</a>
+          ${!item.isRead
+            ? `<button type="button" class="secondary-btn" onclick="markMessageRead(${item.id})">Маркирай като прочетено</button>`
+            : ""}
         </div>
       </div>
     `;
   }
 
-  async function loadMessages() {
-    const currentUser = getCurrentUser();
+  function buildSentCard(item) {
+    return `
+      <div class="application-status-card">
+        <div class="application-card-top">
+          <div>
+            <h3 class="application-card-title">${escapeHtmlLocal(item.subject || "Без тема")}</h3>
+            <div class="application-card-meta">
+              <span>👤 До: ${escapeHtmlLocal(item.receiverEmail || "Потребител")}</span>
+              <span>🧾 Обява: ${escapeHtmlLocal(item.jobTitle || "Неизвестна обява")}</span>
+              <span>🕒 ${escapeHtmlLocal(item.createdAt || "")}</span>
+            </div>
+          </div>
 
-    if (!currentUser) {
-      mailList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш пощата си.</div>';
-      mailCount.textContent = "";
-      return;
-    }
+          <div class="application-status-badge status-approved">
+            Изпратено
+          </div>
+        </div>
 
-    const url = activeTab === "inbox"
-      ? `/messages/inbox/${encodeURIComponent(currentUser.email)}`
-      : `/messages/sent/${encodeURIComponent(currentUser.email)}`;
+        <div class="application-card-body">
+          <h4>Съобщение</h4>
+          <p>${escapeHtmlLocal(item.text || "")}</p>
+        </div>
 
-    const res = await fetch(url);
-    const data = await res.json();
-
-    mailCount.textContent = `${data.length} съобщения`;
-
-    if (!data.length) {
-      mailList.innerHTML = `<div class="empty">${activeTab === "inbox" ? "Нямаш входящи съобщения." : "Нямаш изпратени съобщения."}</div>`;
-      return;
-    }
-
-    mailList.innerHTML = data.map(item => buildMailCard(item, activeTab)).join("");
+        <div class="application-action-buttons">
+          <a href="/job/${item.jobId}" class="job-card-btn">Виж обявата</a>
+          <a href="/profile/${encodeURIComponent(item.receiverEmail || "")}" class="job-card-btn secondary">Виж профила</a>
+        </div>
+      </div>
+    `;
   }
 
-  loadMessages();
+  function renderMessages() {
+    const filteredInbox = getFilteredMessages(inboxMessagesData, true);
+    const filteredSent = getFilteredMessages(sentMessagesData, false);
+
+    inboxInfo.textContent = `Общо: ${filteredInbox.length} съобщения`;
+    sentInfo.textContent = `Общо: ${filteredSent.length} съобщения`;
+
+    if (!filteredInbox.length) {
+      inboxList.innerHTML = createEmptyStateHTML({
+        icon: "📭",
+        title: "Нямаш входящи съобщения",
+        text: "Когато някой ти изпрати запитване за обява, то ще се появи тук.",
+        buttonText: "Към обявите",
+        buttonHref: "/jobs-page"
+      });
+    } else {
+      inboxList.innerHTML = filteredInbox.map(buildInboxCard).join("");
+    }
+
+    if (!filteredSent.length) {
+      sentList.innerHTML = createEmptyStateHTML({
+        icon: "✉️",
+        title: "Нямаш изпратени съобщения",
+        text: "Изпрати запитване по обява и то ще се появи тук.",
+        buttonText: "Разгледай обяви",
+        buttonHref: "/jobs-page"
+      });
+    } else {
+      sentList.innerHTML = filteredSent.map(buildSentCard).join("");
+    }
+  }
+
+  async function loadInboxData() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser?.email) {
+      inboxGuestBox.classList.remove("hidden");
+      inboxSection.classList.add("hidden");
+      return;
+    }
+
+    inboxGuestBox.classList.add("hidden");
+    inboxSection.classList.remove("hidden");
+
+    try {
+      showSkeletons(inboxList, 3);
+      showSkeletons(sentList, 3);
+
+      const [inboxRes, sentRes] = await Promise.all([
+        fetch(`/messages/inbox/${encodeURIComponent(currentUser.email)}`),
+        fetch(`/messages/sent/${encodeURIComponent(currentUser.email)}`)
+      ]);
+
+      const inboxData = await inboxRes.json();
+      const sentData = await sentRes.json();
+
+      inboxMessagesData = Array.isArray(inboxData) ? inboxData : [];
+      sentMessagesData = Array.isArray(sentData) ? sentData : [];
+
+      renderMessages();
+    } catch (error) {
+      console.error("LOAD INBOX ERROR:", error);
+
+      inboxList.innerHTML = createEmptyStateHTML({
+        icon: "⚠️",
+        title: "Стана грешка",
+        text: "Не успяхме да заредим входящите съобщения."
+      });
+
+      sentList.innerHTML = createEmptyStateHTML({
+        icon: "⚠️",
+        title: "Стана грешка",
+        text: "Не успяхме да заредим изпратените съобщения."
+      });
+    }
+  }
+
+  async function markMessageRead(messageId) {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.email) return;
+
+    try {
+      const res = await fetch(`/messages/${messageId}/read`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          requesterEmail: currentUser.email
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Грешка при маркиране.", "error");
+        return;
+      }
+
+      showToast(data.message || "Съобщението е маркирано като прочетено ✅", "success");
+      await loadInboxData();
+    } catch (error) {
+      console.error("MARK READ ERROR:", error);
+      showToast("Стана грешка при маркиране.", "error");
+    }
+  }
+
+  window.markMessageRead = markMessageRead;
+
+  tabInboxBtn.addEventListener("click", () => switchTab("inbox"));
+  tabSentBtn.addEventListener("click", () => switchTab("sent"));
+
+  messageSearchInput.addEventListener("input", renderMessages);
+  messageJobFilter.addEventListener("input", renderMessages);
+  messageReadFilter.addEventListener("change", renderMessages);
+  messageSortFilter.addEventListener("change", renderMessages);
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+    switchTab("inbox");
+    await loadInboxData();
+  });
 </script>
 </body>
 </html>

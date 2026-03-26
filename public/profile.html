@@ -11,9 +11,9 @@
 <header>
   <div class="header-inner">
     <div class="navbar">
-      <h1 class="brand">TursiMajstor</h1>
+      <a href="/" class="brand" style="text-decoration:none; color:white;">TursiMajstor</a>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
         <a href="/">Начало</a>
@@ -26,118 +26,318 @@
         <a href="/feed-page">Новини</a>
       </div>
 
-      <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip">Вход</button>
-        <div id="userDropdown" class="user-dropdown hidden"></div>
+      <div class="header-actions-right">
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Смени режим">
+          🌙
+        </button>
+
+        <div class="user-menu">
+          <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
+          <div id="userDropdown" class="user-dropdown hidden"></div>
+        </div>
       </div>
     </div>
   </div>
 </header>
 
 <div class="container">
-  <div class="card profile-card">
-    <div class="profile-top">
-      <div id="profileImageWrap"></div>
 
-      <div class="profile-main-info">
-        <h2 id="profileName">Профил</h2>
+  <nav class="breadcrumbs" aria-label="breadcrumb">
+    <a href="/">Начало</a>
+    <span>•</span>
+    <span id="breadcrumbProfileLabel">Профил</span>
+  </nav>
+
+  <div class="card profile-cover-card profile-pro-cover-card">
+    <div id="profileCoverWrap" class="profile-cover-wrap">
+      <div class="profile-cover-fallback">
+        <div class="profile-cover-fallback-badge">TursiMajstor профил</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card profile-pro-hero-card">
+    <div class="profile-pro-hero">
+      <div class="profile-pro-avatar-column">
+        <div id="profileImageWrap">
+          <div class="profile-placeholder profile-pro-avatar-placeholder">👤</div>
+        </div>
+      </div>
+
+      <div class="profile-pro-main-column">
+        <div class="profile-pro-topline">
+          <div id="profileTypeBadge" class="profile-type-badge">Профил</div>
+          <div id="profileRatingBadge" class="profile-rating-badge hidden">⭐ 0.0</div>
+        </div>
+
+        <h1 id="profileName" class="profile-pro-title">Профил</h1>
         <div id="profileMeta" class="meta"></div>
         <div id="profileRating" class="small-text"></div>
-        <div id="profileDescription" class="profile-description"></div>
+        <div id="profileDescription" class="profile-description">Зареждане...</div>
         <div id="profilePhone" class="profile-phone"></div>
-        <button id="editProfileBtn" class="secondary-btn hidden" type="button">✏️ Редактирай профил</button>
+        <div id="profileQuickChips" class="profile-quick-chips"></div>
+
+        <div class="profile-pro-actions">
+          <button id="editProfileBtn" class="secondary-btn" type="button" style="display:none;">
+            ✏️ Редактирай профил
+          </button>
+          <a href="#profileJobsSection" class="job-card-btn secondary">Виж обявите</a>
+        </div>
+      </div>
+
+      <div class="profile-pro-side-column">
+        <div class="profile-stat-card">
+          <div class="profile-stat-label">Рейтинг</div>
+          <div id="statRating" class="profile-stat-value">—</div>
+        </div>
+
+        <div class="profile-stat-card">
+          <div class="profile-stat-label">Ревюта</div>
+          <div id="statReviews" class="profile-stat-value">0</div>
+        </div>
+
+        <div class="profile-stat-card">
+          <div class="profile-stat-label">Проекти</div>
+          <div id="statProjects" class="profile-stat-value">0</div>
+        </div>
+
+        <div class="profile-stat-card">
+          <div class="profile-stat-label">Обяви</div>
+          <div id="statJobs" class="profile-stat-value">0</div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="editProfileCard" class="card hidden">
-    <h2>Редакция на профил</h2>
-    <div id="profileEditStatus" class="status-box"></div>
-
-    <label for="editName">Име</label>
-    <input id="editName" placeholder="Име">
-
-    <label for="editEmail">Имейл</label>
-    <input id="editEmail" type="email" placeholder="Имейл">
-
-    <label for="editDescription">Описание</label>
-    <textarea id="editDescription" placeholder="Напиши кратко описание"></textarea>
-
-    <label for="editPhone">Телефон</label>
-    <input id="editPhone" placeholder="Телефон за връзка">
-
-    <label class="small-checkbox">
-      <input type="checkbox" id="editShowPhone">
-      Покажи телефона в профила
-    </label>
-
-    <label for="editProfileImage">Нова снимка / лого</label>
-    <input type="file" id="editProfileImage" accept="image/*">
-
-    <button type="button" onclick="saveProfile()">Запази промените</button>
-  </div>
-
-  <div id="portfolioEditorCard" class="card hidden">
-    <h2>Добави в портфолио</h2>
-    <div id="portfolioStatus" class="status-box"></div>
-
-    <label for="portfolioTitle">Заглавие</label>
-    <input id="portfolioTitle" placeholder="Пример: Ремонт на баня в София">
-
-    <label for="portfolioDescription">Описание</label>
-    <textarea id="portfolioDescription" placeholder="Опиши проекта, услугата или примера на работа"></textarea>
-
-    <label for="portfolioLink">Линк (по желание)</label>
-    <input id="portfolioLink" placeholder="https://...">
-
-    <label for="portfolioImage">Снимка (по желание)</label>
-    <input id="portfolioImage" type="file" accept="image/*">
-
-    <button type="button" onclick="addPortfolioItem()">Добави в портфолио</button>
-  </div>
-
-  <div class="grid-2-wide">
-    <div class="card">
-      <h2>Завършени проекти</h2>
-      <div id="completedProjectsList"></div>
-    </div>
-
-    <div class="card">
-      <h2>Ревюта и оценки</h2>
-      <div id="reviewsList"></div>
-    </div>
-  </div>
-
-  <div class="card">
+  <section id="editProfileCard" class="card" style="display:none;">
     <div class="section-head">
       <div>
-        <h2>Портфолио</h2>
-        <div class="small-text">Примери на работа, услуги, проекти и постигнати резултати.</div>
+        <h2>Редакция на профил</h2>
+        <div class="small-text">Обнови профила си и запази промените.</div>
       </div>
-      <button id="togglePortfolioEditorBtn" class="secondary-btn hidden" type="button">➕ Добави пример</button>
     </div>
 
-    <div id="portfolioList" class="portfolio-grid"></div>
+    <div id="profileEditStatus" class="status-box"></div>
+
+    <div class="profile-edit-layout">
+      <div class="profile-edit-main">
+        <div class="page-form-grid">
+          <div>
+            <label for="editName">Име</label>
+            <input id="editName" placeholder="Име">
+          </div>
+
+          <div>
+            <label for="editEmail">Имейл</label>
+            <input id="editEmail" type="email" placeholder="Имейл">
+          </div>
+        </div>
+
+        <label for="editDescription">Описание</label>
+        <textarea id="editDescription" placeholder="Напиши кратко описание"></textarea>
+
+        <div class="page-form-grid">
+          <div>
+            <label>Услуги</label>
+            <input type="hidden" id="editServices">
+            <div id="servicesEditor" class="chips-editor-box"></div>
+          </div>
+
+          <div>
+            <label>Град / райони</label>
+            <input type="hidden" id="editWorkCities">
+            <div id="citiesEditor" class="chips-editor-box"></div>
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="editPhone">Телефон</label>
+            <input id="editPhone" placeholder="Телефон">
+          </div>
+
+          <div>
+            <label for="editWorkingHours">Работно време</label>
+            <input id="editWorkingHours" placeholder="Пон-Пет 09:00 - 18:00">
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="editWebsite">Сайт</label>
+            <input id="editWebsite" placeholder="https://...">
+          </div>
+
+          <div>
+            <label for="editFacebook">Facebook</label>
+            <input id="editFacebook" placeholder="https://facebook.com/...">
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="editInstagram">Instagram</label>
+            <input id="editInstagram" placeholder="https://instagram.com/...">
+          </div>
+
+          <div>
+            <label for="editYoutube">YouTube</label>
+            <input id="editYoutube" placeholder="https://youtube.com/...">
+          </div>
+        </div>
+
+        <label for="editVideoUrl">Видео представяне</label>
+        <input id="editVideoUrl" placeholder="YouTube линк">
+
+        <label for="editFaq">FAQ</label>
+        <textarea id="editFaq" placeholder="Пример:
+Колко време отнема?
+- Обикновено 2 до 3 дни.
+
+Работиш ли уикенд?
+- Да, с предварителна уговорка."></textarea>
+      </div>
+
+      <div class="profile-edit-side">
+        <label for="editCoverImage">Корична снимка (линк)</label>
+        <input id="editCoverImage" placeholder="https://...">
+
+        <label for="editProfileImage">Нова снимка / лого</label>
+        <input type="file" id="editProfileImage" accept="image/*">
+
+        <label class="small-checkbox">
+          <input type="checkbox" id="editShowPhone">
+          Покажи телефона в профила
+        </label>
+
+        <button id="saveProfileBtn" type="button">Запази промените</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="profile-pro-grid">
+    <div class="profile-pro-main-stack">
+
+      <section class="card profile-section-card">
+        <div class="section-head">
+          <div>
+            <h2>Услуги</h2>
+            <div class="small-text">Какво предлага този профил.</div>
+          </div>
+        </div>
+        <div id="servicesBlock" class="empty small-empty">Зареждане...</div>
+      </section>
+
+      <section class="card profile-section-card">
+        <div class="section-head">
+          <div>
+            <h2>Видео представяне</h2>
+            <div class="small-text">Кратко визуално представяне на услугите и работата.</div>
+          </div>
+        </div>
+        <div id="videoBlock" class="empty small-empty">Зареждане...</div>
+      </section>
+
+      <section class="card profile-section-card">
+        <div class="section-head">
+          <div>
+            <h2>FAQ</h2>
+            <div class="small-text">Най-честите въпроси и отговори.</div>
+          </div>
+        </div>
+        <div id="faqBlock" class="empty small-empty">Зареждане...</div>
+      </section>
+
+      <section class="card profile-section-card">
+        <div class="section-head">
+          <div>
+            <h2>Портфолио</h2>
+            <div class="small-text">Примери на работа, услуги, проекти и резултати.</div>
+          </div>
+          <button id="togglePortfolioEditorBtn" class="secondary-btn" type="button" style="display:none;">
+            ➕ Добави пример
+          </button>
+        </div>
+
+        <div id="portfolioEditorCard" class="profile-inner-editor" style="display:none;">
+          <h3>Добави в портфолио</h3>
+          <div id="portfolioStatus" class="status-box"></div>
+
+          <label for="portfolioTitle">Заглавие</label>
+          <input id="portfolioTitle" placeholder="Пример: Ремонт на баня в София">
+
+          <label for="portfolioDescription">Описание</label>
+          <textarea id="portfolioDescription" placeholder="Опиши проекта"></textarea>
+
+          <label for="portfolioLink">Линк (по желание)</label>
+          <input id="portfolioLink" placeholder="https://...">
+
+          <label for="portfolioImage">Снимка (по желание)</label>
+          <input id="portfolioImage" type="file" accept="image/*">
+
+          <button id="addPortfolioBtn" type="button">Добави в портфолио</button>
+        </div>
+
+        <div id="portfolioList" class="portfolio-grid premium-portfolio-grid">
+          <div class="empty">Зареждане...</div>
+        </div>
+      </section>
+
+      <section class="grid-2-wide">
+        <div class="card profile-section-card">
+          <h2>Завършени проекти</h2>
+          <div id="completedProjectsList" class="empty small-empty">Зареждане...</div>
+        </div>
+
+        <div class="card profile-section-card">
+          <h2>Ревюта и оценки</h2>
+          <div id="reviewsList" class="empty small-empty">Зареждане...</div>
+        </div>
+      </section>
+
+      <section class="grid-2-wide">
+        <div class="card profile-section-card">
+          <h2>Публикации</h2>
+          <div id="profilePosts" class="empty small-empty">Зареждане...</div>
+        </div>
+
+        <div id="profileJobsSection" class="card profile-section-card">
+          <h2>Обяви</h2>
+          <div id="profileJobs" class="empty small-empty">Зареждане...</div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="profile-pro-sidebar">
+      <section class="card profile-side-card">
+        <h3>Контакт</h3>
+        <div id="contactCardBlock" class="profile-side-list">
+          <div class="empty small-empty">Зареждане...</div>
+        </div>
+      </section>
+
+      <section class="card profile-side-card">
+        <h3>Локация и работно време</h3>
+        <div id="locationHoursBlock" class="empty small-empty">Зареждане...</div>
+      </section>
+
+      <section class="card profile-side-card">
+        <h3>Социални мрежи и сайт</h3>
+        <div id="socialLinksBlock" class="profile-social-card-list">
+          <div class="empty small-empty">Зареждане...</div>
+        </div>
+      </section>
+    </aside>
   </div>
+</div>
 
-  <div class="grid-2-wide">
-    <div class="card">
-      <h2>Публикации</h2>
-      <div id="profilePosts"></div>
-    </div>
-
-    <div class="card">
-      <h2>Обяви</h2>
-      <div id="profileJobs"></div>
-    </div>
-  </div>
+<div id="portfolioLightbox" class="portfolio-lightbox hidden">
+  <button id="closeLightboxBtn" class="portfolio-lightbox-close" type="button">✕</button>
+  <img id="lightboxImage" class="portfolio-lightbox-image" src="" alt="Портфолио">
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
-
   const profileName = document.getElementById("profileName");
   const profileMeta = document.getElementById("profileMeta");
   const profileRating = document.getElementById("profileRating");
@@ -146,9 +346,26 @@
   const profilePosts = document.getElementById("profilePosts");
   const profileJobs = document.getElementById("profileJobs");
   const profileImageWrap = document.getElementById("profileImageWrap");
+  const profileCoverWrap = document.getElementById("profileCoverWrap");
   const reviewsList = document.getElementById("reviewsList");
   const completedProjectsList = document.getElementById("completedProjectsList");
   const portfolioList = document.getElementById("portfolioList");
+  const profileTypeBadge = document.getElementById("profileTypeBadge");
+  const profileQuickChips = document.getElementById("profileQuickChips");
+  const profileRatingBadge = document.getElementById("profileRatingBadge");
+  const breadcrumbProfileLabel = document.getElementById("breadcrumbProfileLabel");
+
+  const statRating = document.getElementById("statRating");
+  const statReviews = document.getElementById("statReviews");
+  const statProjects = document.getElementById("statProjects");
+  const statJobs = document.getElementById("statJobs");
+
+  const servicesBlock = document.getElementById("servicesBlock");
+  const locationHoursBlock = document.getElementById("locationHoursBlock");
+  const socialLinksBlock = document.getElementById("socialLinksBlock");
+  const videoBlock = document.getElementById("videoBlock");
+  const faqBlock = document.getElementById("faqBlock");
+  const contactCardBlock = document.getElementById("contactCardBlock");
 
   const editProfileBtn = document.getElementById("editProfileBtn");
   const editProfileCard = document.getElementById("editProfileCard");
@@ -164,297 +381,868 @@
   const editPhone = document.getElementById("editPhone");
   const editShowPhone = document.getElementById("editShowPhone");
   const editProfileImage = document.getElementById("editProfileImage");
+  const editWorkingHours = document.getElementById("editWorkingHours");
+  const editWebsite = document.getElementById("editWebsite");
+  const editFacebook = document.getElementById("editFacebook");
+  const editInstagram = document.getElementById("editInstagram");
+  const editYoutube = document.getElementById("editYoutube");
+  const editVideoUrl = document.getElementById("editVideoUrl");
+  const editFaq = document.getElementById("editFaq");
+  const editCoverImage = document.getElementById("editCoverImage");
+  const editServices = document.getElementById("editServices");
+  const editWorkCities = document.getElementById("editWorkCities");
 
   const portfolioTitle = document.getElementById("portfolioTitle");
   const portfolioDescription = document.getElementById("portfolioDescription");
   const portfolioLink = document.getElementById("portfolioLink");
   const portfolioImage = document.getElementById("portfolioImage");
 
+  const portfolioLightbox = document.getElementById("portfolioLightbox");
+  const lightboxImage = document.getElementById("lightboxImage");
+  const closeLightboxBtn = document.getElementById("closeLightboxBtn");
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+
   let loadedProfileUser = null;
+  let isOwnerProfile = false;
+  let servicesEditor = null;
+  let citiesEditor = null;
+
+  function normalizeEmailSafe(email = "") {
+    return String(email || "").trim().toLowerCase();
+  }
+
+  function emailsMatch(a, b) {
+    return !!normalizeEmailSafe(a) && normalizeEmailSafe(a) === normalizeEmailSafe(b);
+  }
+
+  function getProfileEmailFromUrl() {
+    return decodeURIComponent(window.location.pathname.split("/profile/")[1] || "").trim();
+  }
 
   function roleText(role) {
     if (role === "personal") return "Личен профил";
+    if (role === "professional") return "Професионален профил";
     if (role === "freelancer") return "Свободна практика";
     if (role === "company") return "Фирма";
+    if (role === "client") return "Личен профил";
+    if (role === "worker") return "Свободна практика";
     return role || "Потребител";
   }
 
-  async function deletePortfolioItem(portfolioId) {
-    const currentUser = getCurrentUser();
+  function escapeHtml(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
-    if (!currentUser) {
-      alert("Трябва да си влязъл.");
-      return;
+  function normalizeLink(url = "") {
+    if (!url) return "";
+    const trimmed = String(url).trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+    return "https://" + trimmed;
+  }
+
+  function splitCommaItems(text = "") {
+    return String(text || "")
+      .split(",")
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  function getYoutubeEmbedUrl(url = "") {
+    const value = String(url || "").trim();
+    if (!value) return "";
+
+    try {
+      const parsed = new URL(normalizeLink(value));
+      const host = parsed.hostname.replace(/^www\./, "");
+
+      if (host === "youtube.com" || host === "m.youtube.com") {
+        const videoId = parsed.searchParams.get("v");
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+      }
+
+      if (host === "youtu.be") {
+        const videoId = parsed.pathname.replace("/", "").trim();
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+      }
+    } catch (error) {
+      return "";
     }
 
-    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш този елемент?");
-    if (!confirmed) return;
+    return "";
+  }
 
-    const res = await fetch(`/portfolio/${portfolioId}?email=${encodeURIComponent(currentUser.email)}`, {
-      method: "DELETE"
+  function parseFaqText(faqText = "") {
+    return String(faqText || "")
+      .split(/\n\s*\n/)
+      .map(block => block.trim())
+      .filter(Boolean)
+      .map(block => {
+        const lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+        return {
+          question: lines[0] || "",
+          answer: lines.slice(1).join(" ").replace(/^-+\s*/, "") || "Няма добавен отговор."
+        };
+      });
+  }
+
+  function setStoredCurrentUser(user) {
+    localStorage.setItem("currentUser", JSON.stringify(user));
+  }
+
+  function createChipsEditor(containerId, hiddenInputId, placeholder) {
+    const container = document.getElementById(containerId);
+    const hiddenInput = document.getElementById(hiddenInputId);
+
+    if (!container || !hiddenInput) return null;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "chips-editor";
+
+    const chipsList = document.createElement("div");
+    chipsList.className = "chips-editor-list";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "chips-editor-input";
+    input.placeholder = placeholder;
+
+    wrapper.appendChild(chipsList);
+    wrapper.appendChild(input);
+    container.innerHTML = "";
+    container.appendChild(wrapper);
+
+    let values = [];
+
+    function syncHidden() {
+      hiddenInput.value = values.join(", ");
+    }
+
+    function render() {
+      chipsList.innerHTML = values.map((item, index) => `
+        <span class="editor-chip">
+          ${escapeHtml(item)}
+          <button type="button" data-index="${index}">✕</button>
+        </span>
+      `).join("");
+
+      chipsList.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.index);
+          values.splice(index, 1);
+          render();
+          syncHidden();
+        });
+      });
+    }
+
+    function addValue(raw) {
+      const value = String(raw || "").trim();
+      if (!value) return;
+      if (values.includes(value)) return;
+      values.push(value);
+      render();
+      syncHidden();
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === ",") {
+        e.preventDefault();
+        addValue(input.value);
+        input.value = "";
+      }
+
+      if (e.key === "Backspace" && !input.value && values.length) {
+        values.pop();
+        render();
+        syncHidden();
+      }
     });
 
-    const data = await res.json();
+    input.addEventListener("blur", () => {
+      if (input.value.trim()) {
+        addValue(input.value);
+        input.value = "";
+      }
+    });
 
-    if (!res.ok) {
-      alert(data.message || "Грешка при изтриване.");
-      return;
+    return {
+      setValues(list) {
+        values = Array.isArray(list) ? list.filter(Boolean) : [];
+        render();
+        syncHidden();
+      },
+      getValues() {
+        return [...values];
+      }
+    };
+  }
+
+  function buildEmptyState(title, text, buttonText = "", buttonHref = "#") {
+    return `
+      <div class="empty-state-box">
+        <div class="empty-state-icon">📭</div>
+        <h3>${escapeHtml(title)}</h3>
+        <p>${escapeHtml(text)}</p>
+        ${buttonText ? `<a href="${buttonHref}" class="job-card-btn">${escapeHtml(buttonText)}</a>` : ""}
+      </div>
+    `;
+  }
+
+  function syncThemeIcon() {
+    if (!themeToggleBtn) return;
+    const isDark = document.body.classList.contains("dark-mode");
+    themeToggleBtn.textContent = isDark ? "☀️" : "🌙";
+  }
+
+  function initDarkModeButton() {
+    if (!themeToggleBtn) return;
+
+    if (localStorage.getItem("siteTheme") === "dark") {
+      document.body.classList.add("dark-mode");
     }
 
-    await loadProfile();
+    syncThemeIcon();
+
+    themeToggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem(
+        "siteTheme",
+        document.body.classList.contains("dark-mode") ? "dark" : "light"
+      );
+      syncThemeIcon();
+
+      if (typeof showToast === "function") {
+        showToast(
+          document.body.classList.contains("dark-mode")
+            ? "Тъмният режим е включен."
+            : "Светлият режим е включен.",
+          "success"
+        );
+      }
+    });
+  }
+
+  function showOwnerUI() {
+    if (editProfileBtn) {
+      editProfileBtn.style.display = isOwnerProfile ? "inline-flex" : "none";
+    }
+
+    if (togglePortfolioEditorBtn) {
+      togglePortfolioEditorBtn.style.display = isOwnerProfile ? "inline-flex" : "none";
+    }
+
+    if (!isOwnerProfile) {
+      if (editProfileCard) editProfileCard.style.display = "none";
+      if (portfolioEditorCard) portfolioEditorCard.style.display = "none";
+    }
+  }
+
+  function openEditCard() {
+    if (!isOwnerProfile || !editProfileCard) return;
+    editProfileCard.style.display = "block";
+    editProfileCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function toggleEditCard() {
+    if (!isOwnerProfile || !editProfileCard) return;
+
+    const isHidden = editProfileCard.style.display === "none" || !editProfileCard.style.display;
+    editProfileCard.style.display = isHidden ? "block" : "none";
+
+    if (editProfileCard.style.display === "block") {
+      editProfileCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function togglePortfolioCard() {
+    if (!isOwnerProfile || !portfolioEditorCard) return;
+    const isHidden = portfolioEditorCard.style.display === "none" || !portfolioEditorCard.style.display;
+    portfolioEditorCard.style.display = isHidden ? "block" : "none";
+  }
+
+  function renderQuickChips(user) {
+    if (!profileQuickChips) return;
+
+    const chips = [];
+    if (user.workingHours) chips.push(`🕒 ${user.workingHours}`);
+
+    const firstCity = splitCommaItems(user.workCities || "")[0];
+    if (firstCity) chips.push(`📍 ${firstCity}`);
+
+    profileQuickChips.innerHTML = chips
+      .map(chip => `<span class="profile-chip">${escapeHtml(chip)}</span>`)
+      .join("");
+  }
+
+  function renderStats(data) {
+    const ratingAverage = Number(data.rating?.average || 0);
+    const ratingCount = Number(data.rating?.count || 0);
+
+    if (statRating) statRating.textContent = ratingCount ? ratingAverage.toFixed(1) : "—";
+    if (statReviews) statReviews.textContent = String(ratingCount);
+    if (statProjects) statProjects.textContent = String((data.completedProjects || []).length);
+    if (statJobs) statJobs.textContent = String((data.jobs || []).length);
+
+    if (profileRating) {
+      if (ratingCount) {
+        profileRating.textContent = `⭐ Рейтинг: ${ratingAverage.toFixed(1)} / 5 (${ratingCount} оценки)`;
+      } else {
+        profileRating.textContent = "Все още няма оценки.";
+      }
+    }
+
+    if (profileRatingBadge) {
+      if (ratingCount) {
+        profileRatingBadge.textContent = `⭐ ${ratingAverage.toFixed(1)}`;
+        profileRatingBadge.classList.remove("hidden");
+      } else {
+        profileRatingBadge.classList.add("hidden");
+      }
+    }
+  }
+
+  function renderContactCard(user) {
+    if (!contactCardBlock) return;
+
+    const items = [];
+    items.push(`<div class="profile-side-item"><span>👤</span><strong>${escapeHtml(user.name || "Потребител")}</strong></div>`);
+    items.push(`<div class="profile-side-item"><span>✉️</span><span>${escapeHtml(user.email || "")}</span></div>`);
+
+    if (user.showPhone && user.phone) {
+      items.push(`<div class="profile-side-item"><span>📞</span><span>${escapeHtml(user.phone)}</span></div>`);
+    }
+
+    items.push(`<div class="profile-side-item"><span>🏷️</span><span>${escapeHtml(roleText(user.role))}</span></div>`);
+    contactCardBlock.innerHTML = items.join("");
+  }
+
+  function openLightbox(imageUrl) {
+    if (!imageUrl || !portfolioLightbox || !lightboxImage) return;
+    lightboxImage.src = imageUrl;
+    portfolioLightbox.classList.remove("hidden");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeLightbox() {
+    if (!portfolioLightbox || !lightboxImage) return;
+    portfolioLightbox.classList.add("hidden");
+    lightboxImage.src = "";
+    document.body.classList.remove("modal-open");
   }
 
   async function addPortfolioItem() {
+    clearStatus(profileEditStatus);
     clearStatus(portfolioStatus);
 
-    const currentUser = getCurrentUser();
-
-    if (!currentUser || !loadedProfileUser || currentUser.email !== loadedProfileUser.email) {
+    const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+    if (!currentUser || !isOwnerProfile) {
       showStatus(portfolioStatus, "Нямаш право да редактираш това портфолио.", "error");
       return;
     }
 
     const title = portfolioTitle.value.trim();
-
     if (!title) {
       showStatus(portfolioStatus, "Заглавието е задължително.", "error");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("ownerEmail", currentUser.email);
-    formData.append("title", title);
-    formData.append("description", portfolioDescription.value.trim());
-    formData.append("link", portfolioLink.value.trim());
+    try {
+      const formData = new FormData();
+      formData.append("ownerEmail", currentUser.email);
+      formData.append("title", title);
+      formData.append("description", portfolioDescription.value.trim());
+      formData.append("link", portfolioLink.value.trim());
 
-    if (portfolioImage.files[0]) {
-      formData.append("image", portfolioImage.files[0]);
-    }
+      if (portfolioImage.files[0]) {
+        formData.append("image", portfolioImage.files[0]);
+      }
 
-    const res = await fetch("/portfolio", {
-      method: "POST",
-      body: formData
-    });
+      const res = await fetch(`/portfolio?t=${Date.now()}`, {
+        method: "POST",
+        body: formData,
+        cache: "no-store"
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      showStatus(portfolioStatus, data.message || "Грешка при добавяне.", "error");
-      return;
-    }
+      if (!res.ok) {
+        showStatus(portfolioStatus, data.message || "Грешка при добавяне.", "error");
+        return;
+      }
 
-    portfolioTitle.value = "";
-    portfolioDescription.value = "";
-    portfolioLink.value = "";
-    portfolioImage.value = "";
+      portfolioTitle.value = "";
+      portfolioDescription.value = "";
+      portfolioLink.value = "";
+      portfolioImage.value = "";
 
-    showStatus(portfolioStatus, "Портфолиото е добавено успешно ✅", "success");
-    await loadProfile();
-  }
-
-  async function loadProfile() {
-    const email = decodeURIComponent(window.location.pathname.split("/profile/")[1] || "");
-
-    if (!email) {
-      profileName.textContent = "Профилът не е намерен";
-      return;
-    }
-
-    const res = await fetch(`/api/profile/${encodeURIComponent(email)}`);
-    const data = await res.json();
-
-    const user = data.user;
-    loadedProfileUser = user;
-
-    profileName.textContent = user.name || "Потребител";
-    profileMeta.textContent = `${user.email || ""} | ${roleText(user.role)}`;
-
-    if (user.profileImage) {
-      profileImageWrap.innerHTML = `<img src="${user.profileImage}" alt="Профилна снимка" class="profile-image-large">`;
-    } else {
-      profileImageWrap.innerHTML = `<div class="profile-placeholder">👤</div>`;
-    }
-
-    if (data.rating && Number(data.rating.count) > 0) {
-      profileRating.textContent = `⭐ Рейтинг: ${data.rating.average} / 5 (${data.rating.count} оценки)`;
-    } else {
-      profileRating.textContent = "Все още няма оценки.";
-    }
-
-    profileDescription.textContent = user.description
-      ? user.description
-      : "Няма добавено описание.";
-
-    profilePhone.textContent =
-      user.showPhone && user.phone
-        ? `📞 Телефон: ${user.phone}`
-        : "Телефонът е скрит.";
-
-    editName.value = user.name || "";
-    editEmail.value = user.email || "";
-    editDescription.value = user.description || "";
-    editPhone.value = user.phone || "";
-    editShowPhone.checked = !!user.showPhone;
-
-    const currentUser = getCurrentUser();
-    const isOwner = currentUser && currentUser.email === user.email;
-
-    if (isOwner) {
-      editProfileBtn.classList.remove("hidden");
-      togglePortfolioEditorBtn.classList.remove("hidden");
-    } else {
-      editProfileBtn.classList.add("hidden");
-      editProfileCard.classList.add("hidden");
-      togglePortfolioEditorBtn.classList.add("hidden");
-      portfolioEditorCard.classList.add("hidden");
-    }
-
-    // COMPLETED PROJECTS
-    completedProjectsList.innerHTML = "";
-    if (!data.completedProjects || data.completedProjects.length === 0) {
-      completedProjectsList.innerHTML = '<div class="empty">Все още няма завършени проекти.</div>';
-    } else {
-      completedProjectsList.innerHTML = data.completedProjects.map(item => `
-        <div class="job-item">
-          <h3>${item.jobTitle || "Проект"}</h3>
-          <div class="meta">
-            📍 ${item.city || "Без град"}
-            ${item.category ? ` | 🏷 ${item.category}${item.subcategory ? " / " + item.subcategory : ""}` : ""}
-            | ✅ ${item.completedAt || ""}
-          </div>
-        </div>
-      `).join("");
-    }
-
-    // REVIEWS
-    reviewsList.innerHTML = "";
-    if (!data.reviews || data.reviews.length === 0) {
-      reviewsList.innerHTML = '<div class="empty">Все още няма ревюта.</div>';
-    } else {
-      reviewsList.innerHTML = data.reviews.map(review => `
-        <div class="comment-item">
-          <strong>⭐ ${review.rating}/5</strong>
-          <div class="meta">от ${review.reviewerName || review.reviewerEmail || "Потребител"} | ${review.createdAt || ""}</div>
-          <div>${review.text || "Без текстово ревю."}</div>
-        </div>
-      `).join("");
-    }
-
-    // PORTFOLIO
-    portfolioList.innerHTML = "";
-    if (!data.portfolio || data.portfolio.length === 0) {
-      portfolioList.innerHTML = '<div class="empty">Все още няма добавени елементи в портфолиото.</div>';
-    } else {
-      portfolioList.innerHTML = data.portfolio.map(item => `
-        <div class="portfolio-card">
-          ${item.imageUrl ? `<img src="${item.imageUrl}" alt="Портфолио" class="portfolio-image">` : '<div class="portfolio-placeholder">🧰</div>'}
-
-          <div class="portfolio-body">
-            <h3>${item.title || "Проект"}</h3>
-            <div class="meta">${item.createdAt || ""}</div>
-            <p>${item.description || "Няма описание."}</p>
-
-            <div class="portfolio-actions">
-              ${item.link ? `<a href="${item.link}" target="_blank" class="job-card-btn">Отвори линк</a>` : ""}
-              ${isOwner ? `<button type="button" class="danger-btn small-danger-btn" onclick="deletePortfolioItem(${item.id})">Изтрий</button>` : ""}
-            </div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    // POSTS
-    profilePosts.innerHTML = "";
-    if (!data.posts || data.posts.length === 0) {
-      profilePosts.innerHTML = '<div class="empty">Няма публикации.</div>';
-    } else {
-      profilePosts.innerHTML = data.posts.map(post => `
-        <div class="post-item">
-          <div class="meta">${post.createdAt}</div>
-          <p>${post.text}</p>
-          ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
-        </div>
-      `).join("");
-    }
-
-    // JOBS
-    profileJobs.innerHTML = "";
-    if (!data.jobs || data.jobs.length === 0) {
-      profileJobs.innerHTML = '<div class="empty">Няма активни обяви.</div>';
-    } else {
-      profileJobs.innerHTML = data.jobs.map(job => `
-        <div class="job-item">
-          <h3>${job.title}</h3>
-          <div class="meta">📍 ${job.city} | 🏷 ${job.category}${job.subcategory ? " / " + job.subcategory : ""} | 💰 ${job.budget || 0} лв</div>
-          <p>${job.description}</p>
-          <div class="job-card-actions">
-            <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("edit") === "1" && isOwner) {
-      editProfileCard.classList.remove("hidden");
+      showStatus(portfolioStatus, "Портфолиото е добавено успешно ✅", "success");
+      if (typeof showToast === "function") showToast("Портфолиото е добавено успешно ✅", "success");
+      await loadProfile();
+    } catch (error) {
+      console.error("ADD PORTFOLIO ERROR:", error);
+      showStatus(portfolioStatus, "Стана грешка при добавяне.", "error");
     }
   }
 
-  editProfileBtn.addEventListener("click", () => {
-    editProfileCard.classList.toggle("hidden");
-  });
+  async function deletePortfolioItem(id) {
+    const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+    if (!currentUser || !isOwnerProfile) return;
 
-  togglePortfolioEditorBtn.addEventListener("click", () => {
-    portfolioEditorCard.classList.toggle("hidden");
-  });
+    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш този елемент?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/portfolio/${id}?email=${encodeURIComponent(currentUser.email)}&t=${Date.now()}`, {
+        method: "DELETE",
+        cache: "no-store"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Грешка при изтриване.");
+        return;
+      }
+
+      if (typeof showToast === "function") showToast("Елементът е изтрит ✅", "success");
+      await loadProfile();
+    } catch (error) {
+      console.error("DELETE PORTFOLIO ERROR:", error);
+      alert("Стана грешка при изтриване.");
+    }
+  }
 
   async function saveProfile() {
     clearStatus(profileEditStatus);
 
-    const currentUser = getCurrentUser();
-
-    if (!currentUser || !loadedProfileUser || currentUser.email !== loadedProfileUser.email) {
+    const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+    if (!currentUser || !isOwnerProfile) {
       showStatus(profileEditStatus, "Нямаш право да редактираш този профил.", "error");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", editName.value.trim());
-    formData.append("email", editEmail.value.trim());
-    formData.append("description", editDescription.value.trim());
-    formData.append("phone", editPhone.value.trim());
-    formData.append("showPhone", editShowPhone.checked);
+    try {
+      const formData = new FormData();
+      formData.append("name", editName.value.trim());
+      formData.append("email", editEmail.value.trim());
+      formData.append("description", editDescription.value.trim());
+      formData.append("phone", editPhone.value.trim());
+      formData.append("showPhone", editShowPhone.checked);
+      formData.append("coverImage", editCoverImage.value.trim());
+      formData.append("services", editServices.value.trim());
+      formData.append("workCities", editWorkCities.value.trim());
+      formData.append("workingHours", editWorkingHours.value.trim());
+      formData.append("website", editWebsite.value.trim());
+      formData.append("facebook", editFacebook.value.trim());
+      formData.append("instagram", editInstagram.value.trim());
+      formData.append("youtube", editYoutube.value.trim());
+      formData.append("videoUrl", editVideoUrl.value.trim());
+      formData.append("faq", editFaq.value.trim());
 
-    if (editProfileImage.files[0]) {
-      formData.append("profileImage", editProfileImage.files[0]);
+      if (editProfileImage.files[0]) {
+        formData.append("profileImage", editProfileImage.files[0]);
+      }
+
+      const res = await fetch(`/api/profile/${encodeURIComponent(currentUser.email)}?t=${Date.now()}`, {
+        method: "PUT",
+        body: formData,
+        cache: "no-store"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(profileEditStatus, data.message || "Грешка при обновяване на профила.", "error");
+        return;
+      }
+
+      setStoredCurrentUser(data.user);
+      if (typeof updateHeaderUser === "function") updateHeaderUser();
+
+      showStatus(profileEditStatus, "Профилът е обновен успешно ✅", "success");
+      if (typeof showToast === "function") showToast("Профилът е обновен успешно ✅", "success");
+
+      editProfileImage.value = "";
+
+      if (!emailsMatch(currentUser.email, data.user.email)) {
+        window.location.href = `/profile/${encodeURIComponent(data.user.email)}?edit=1&t=${Date.now()}`;
+        return;
+      }
+
+      await loadProfile();
+      openEditCard();
+    } catch (error) {
+      console.error("SAVE PROFILE ERROR:", error);
+      showStatus(profileEditStatus, "Стана грешка при запазване.", "error");
     }
-
-    const res = await fetch(`/api/profile/${encodeURIComponent(currentUser.email)}`, {
-      method: "PUT",
-      body: formData
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showStatus(profileEditStatus, data.message || "Грешка при обновяване на профила.", "error");
-      return;
-    }
-
-    localStorage.setItem("currentUser", JSON.stringify(data.user));
-    updateHeaderUser();
-    showStatus(profileEditStatus, "Профилът е обновен успешно ✅", "success");
-    editProfileImage.value = "";
-
-    if (currentUser.email !== data.user.email) {
-      window.location.href = `/profile/${encodeURIComponent(data.user.email)}`;
-      return;
-    }
-
-    await loadProfile();
   }
 
-  loadProfile();
+  async function loadProfile() {
+    try {
+      const emailFromUrl = getProfileEmailFromUrl();
+      if (!emailFromUrl) return;
+
+      const res = await fetch(`/api/profile/${encodeURIComponent(emailFromUrl)}?t=${Date.now()}`, {
+        cache: "no-store"
+      });
+
+      if (!res.ok) {
+        profileDescription.textContent = "Профилът не можа да бъде зареден.";
+        return;
+      }
+
+      const data = await res.json();
+      const user = data.user || {};
+
+      loadedProfileUser = user;
+
+      const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+
+      isOwnerProfile = !!(
+        currentUser &&
+        (
+          emailsMatch(currentUser.email, emailFromUrl) ||
+          emailsMatch(currentUser.email, user.email)
+        )
+      );
+
+      showOwnerUI();
+
+      if (profileName) profileName.textContent = user.name || "Потребител";
+      if (breadcrumbProfileLabel) breadcrumbProfileLabel.textContent = user.name || "Профил";
+      if (profileMeta) profileMeta.textContent = `${user.email || ""} | ${roleText(user.role)}`;
+      if (profileTypeBadge) profileTypeBadge.textContent = roleText(user.role);
+
+      renderStats(data);
+      renderContactCard(user);
+
+      if (profileCoverWrap) {
+        if (user.coverImage) {
+          profileCoverWrap.innerHTML = `
+            <img src="${user.coverImage}?t=${Date.now()}" alt="Корична снимка" class="profile-cover-image">
+          `;
+        } else {
+          profileCoverWrap.innerHTML = `
+            <div class="profile-cover-fallback">
+              <div class="profile-cover-fallback-badge">TursiMajstor профил</div>
+            </div>
+          `;
+        }
+      }
+
+      if (profileImageWrap) {
+        if (user.profileImage) {
+          profileImageWrap.innerHTML = `
+            <img src="${user.profileImage}?t=${Date.now()}" alt="Профилна снимка" class="profile-image-large profile-pro-avatar">
+          `;
+        } else {
+          profileImageWrap.innerHTML = `<div class="profile-placeholder profile-pro-avatar-placeholder">👤</div>`;
+        }
+      }
+
+      if (profileDescription) {
+        profileDescription.textContent = user.description || "Няма добавено описание.";
+      }
+
+      if (profilePhone) {
+        profilePhone.textContent =
+          user.showPhone && user.phone
+            ? `📞 Телефон: ${user.phone}`
+            : "Телефонът е скрит.";
+      }
+
+      renderQuickChips(user);
+
+      const services = splitCommaItems(user.services || "");
+      if (servicesBlock) {
+        servicesBlock.innerHTML = services.length
+          ? `
+            <div class="services-tags-grid">
+              ${services.map(x => `<span class="service-tag-pill">🛠 ${escapeHtml(x)}</span>`).join("")}
+            </div>
+          `
+          : buildEmptyState(
+              "Няма услуги",
+              "Този профил все още няма добавени услуги.",
+              isOwnerProfile ? "Редактирай профила" : "",
+              "#"
+            );
+      }
+
+      const cities = splitCommaItems(user.workCities || "");
+      let locationHtml = "";
+
+      if (cities.length) {
+        locationHtml += `
+          <div class="location-block">
+            <div class="location-block-title">📍 Град / райони</div>
+            <div class="location-tags-grid">
+              ${cities.map(city => `<span class="location-tag-pill">📍 ${escapeHtml(city)}</span>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      if (user.workingHours) {
+        locationHtml += `
+          <div class="location-block">
+            <div class="location-block-title">🕒 Работно време</div>
+            <div class="working-hours-pill">${escapeHtml(user.workingHours)}</div>
+          </div>
+        `;
+      }
+
+      if (locationHoursBlock) {
+        locationHoursBlock.innerHTML =
+          locationHtml || `<div class="empty small-empty">Няма добавени локации и работно време.</div>`;
+      }
+
+      const socialCards = [];
+      if (user.website) {
+        socialCards.push(`
+          <a href="${normalizeLink(user.website)}" target="_blank" class="social-card-link">
+            <div class="social-card-icon">🌐</div>
+            <div class="social-card-content">
+              <strong>Сайт</strong>
+              <span>Отвори сайта</span>
+            </div>
+          </a>
+        `);
+      }
+      if (user.facebook) {
+        socialCards.push(`
+          <a href="${normalizeLink(user.facebook)}" target="_blank" class="social-card-link">
+            <div class="social-card-icon">📘</div>
+            <div class="social-card-content">
+              <strong>Facebook</strong>
+              <span>Виж страницата</span>
+            </div>
+          </a>
+        `);
+      }
+      if (user.instagram) {
+        socialCards.push(`
+          <a href="${normalizeLink(user.instagram)}" target="_blank" class="social-card-link">
+            <div class="social-card-icon">📷</div>
+            <div class="social-card-content">
+              <strong>Instagram</strong>
+              <span>Виж профила</span>
+            </div>
+          </a>
+        `);
+      }
+      if (user.youtube) {
+        socialCards.push(`
+          <a href="${normalizeLink(user.youtube)}" target="_blank" class="social-card-link">
+            <div class="social-card-icon">▶️</div>
+            <div class="social-card-content">
+              <strong>YouTube</strong>
+              <span>Виж канала</span>
+            </div>
+          </a>
+        `);
+      }
+
+      if (socialLinksBlock) {
+        socialLinksBlock.innerHTML = socialCards.length
+          ? socialCards.join("")
+          : `<div class="empty small-empty">Няма добавени социални мрежи или сайт.</div>`;
+      }
+
+      const embedUrl = getYoutubeEmbedUrl(user.videoUrl || "");
+      if (videoBlock) {
+        if (embedUrl) {
+          videoBlock.innerHTML = `
+            <div class="profile-video-embed-wrap">
+              <iframe class="profile-video-embed" src="${embedUrl}" title="Видео представяне" loading="lazy" allowfullscreen></iframe>
+            </div>
+            <div class="profile-video-actions">
+              <a href="${normalizeLink(user.videoUrl)}" target="_blank" class="job-card-btn secondary">Отвори в YouTube</a>
+            </div>
+          `;
+        } else if (user.videoUrl) {
+          videoBlock.innerHTML = `
+            <div class="profile-video-actions">
+              <a href="${normalizeLink(user.videoUrl)}" target="_blank" class="job-card-btn">▶️ Отвори видео</a>
+            </div>
+          `;
+        } else {
+          videoBlock.innerHTML = `<div class="empty small-empty">Няма добавено видео представяне.</div>`;
+        }
+      }
+
+      const faqItems = parseFaqText(user.faq || "");
+      if (faqBlock) {
+        faqBlock.innerHTML = faqItems.length
+          ? faqItems.map(item => `
+              <details class="faq-accordion-item">
+                <summary>${escapeHtml(item.question)}</summary>
+                <div class="faq-accordion-content">${escapeHtml(item.answer)}</div>
+              </details>
+            `).join("")
+          : `<div class="empty">Все още няма добавени често задавани въпроси.</div>`;
+      }
+
+      if (editName) editName.value = user.name || "";
+      if (editEmail) editEmail.value = user.email || "";
+      if (editDescription) editDescription.value = user.description || "";
+      if (editPhone) editPhone.value = user.phone || "";
+      if (editShowPhone) editShowPhone.checked = !!user.showPhone;
+      if (editCoverImage) editCoverImage.value = user.coverImage || "";
+      if (editWorkingHours) editWorkingHours.value = user.workingHours || "";
+      if (editWebsite) editWebsite.value = user.website || "";
+      if (editFacebook) editFacebook.value = user.facebook || "";
+      if (editInstagram) editInstagram.value = user.instagram || "";
+      if (editYoutube) editYoutube.value = user.youtube || "";
+      if (editVideoUrl) editVideoUrl.value = user.videoUrl || "";
+      if (editFaq) editFaq.value = user.faq || "";
+
+      if (servicesEditor) servicesEditor.setValues(splitCommaItems(user.services || ""));
+      if (citiesEditor) citiesEditor.setValues(splitCommaItems(user.workCities || ""));
+
+      if (portfolioList) {
+        portfolioList.innerHTML = (data.portfolio || []).length
+          ? data.portfolio.map(item => `
+              <div class="portfolio-card profile-pro-portfolio-card">
+                <div class="portfolio-card-media">
+                  ${item.imageUrl
+                    ? `<img src="${item.imageUrl}" alt="Портфолио" class="portfolio-image" data-lightbox="${item.imageUrl}">`
+                    : `<div class="portfolio-placeholder">🧰</div>`}
+                </div>
+                <div class="portfolio-body">
+                  <h3>${escapeHtml(item.title || "Проект")}</h3>
+                  <div class="meta">${escapeHtml(item.createdAt || "")}</div>
+                  <p>${escapeHtml(item.description || "Няма описание.")}</p>
+                  <div class="portfolio-actions">
+                    ${item.imageUrl ? `<button type="button" class="job-card-btn secondary" data-lightbox-btn="${item.imageUrl}">Преглед</button>` : ""}
+                    ${item.link ? `<a href="${normalizeLink(item.link)}" target="_blank" class="job-card-btn">Отвори линк</a>` : ""}
+                    ${isOwnerProfile ? `<button type="button" class="danger-btn small-danger-btn" data-delete-portfolio="${item.id}">Изтрий</button>` : ""}
+                  </div>
+                </div>
+              </div>
+            `).join("")
+          : `<div class="empty">Все още няма добавени елементи в портфолиото.</div>`;
+
+        portfolioList.querySelectorAll("[data-lightbox]").forEach(el => {
+          el.addEventListener("click", () => openLightbox(el.getAttribute("data-lightbox")));
+        });
+
+        portfolioList.querySelectorAll("[data-lightbox-btn]").forEach(el => {
+          el.addEventListener("click", () => openLightbox(el.getAttribute("data-lightbox-btn")));
+        });
+
+        portfolioList.querySelectorAll("[data-delete-portfolio]").forEach(el => {
+          el.addEventListener("click", () => deletePortfolioItem(Number(el.getAttribute("data-delete-portfolio"))));
+        });
+      }
+
+      if (completedProjectsList) {
+        completedProjectsList.innerHTML = (data.completedProjects || []).length
+          ? data.completedProjects.map(item => `
+              <div class="job-item profile-pro-list-item">
+                <h3>${escapeHtml(item.jobTitle || "Проект")}</h3>
+                <div class="meta">📍 ${escapeHtml(item.city || "Без град")} | ✅ ${escapeHtml(item.completedAt || "")}</div>
+              </div>
+            `).join("")
+          : `<div class="empty">Все още няма завършени проекти.</div>`;
+      }
+
+      if (reviewsList) {
+        reviewsList.innerHTML = (data.reviews || []).length
+          ? data.reviews.map(review => `
+              <div class="comment-item profile-review-card">
+                <strong>⭐ ${escapeHtml(String(review.rating || 0))}/5</strong>
+                <div class="meta">от ${escapeHtml(review.reviewerName || review.reviewerEmail || "Потребител")} | ${escapeHtml(review.createdAt || "")}</div>
+                <div>${escapeHtml(review.text || "Без текстово ревю.")}</div>
+              </div>
+            `).join("")
+          : `<div class="empty">Все още няма ревюта.</div>`;
+      }
+
+      if (profilePosts) {
+        profilePosts.innerHTML = (data.posts || []).length
+          ? data.posts.map(post => `
+              <div class="post-item">
+                <div class="meta">${escapeHtml(post.createdAt || "")}</div>
+                <p>${escapeHtml(post.text || "")}</p>
+                ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
+              </div>
+            `).join("")
+          : `<div class="empty">Няма публикации.</div>`;
+      }
+
+      if (profileJobs) {
+        profileJobs.innerHTML = (data.jobs || []).length
+          ? data.jobs.map(job => `
+              <div class="job-item profile-pro-list-item">
+                <h3>${escapeHtml(job.title || "")}</h3>
+                <div class="meta">
+                  📍 ${escapeHtml(job.city || "")}
+                  | 🏷 ${escapeHtml(job.category || "")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}
+                  | 💰 ${escapeHtml(String(job.budget || 0))} лв
+                </div>
+                <p>${escapeHtml(job.description || "")}</p>
+                <div class="job-card-actions">
+                  <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
+                </div>
+              </div>
+            `).join("")
+          : `<div class="empty">Няма активни обяви.</div>`;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("edit") === "1" && isOwnerProfile) {
+        openEditCard();
+      }
+    } catch (error) {
+      console.error("LOAD PROFILE ERROR:", error);
+      if (typeof showToast === "function") {
+        showToast("Грешка при зареждане на профила.", "error");
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      if (typeof updateHeaderUser === "function") updateHeaderUser();
+      if (typeof updateRoleVisibility === "function") updateRoleVisibility();
+
+      initDarkModeButton();
+
+      servicesEditor = createChipsEditor("servicesEditor", "editServices", "Напиши услуга и натисни Enter");
+      citiesEditor = createChipsEditor("citiesEditor", "editWorkCities", "Напиши град и натисни Enter");
+
+      if (editProfileBtn) editProfileBtn.addEventListener("click", toggleEditCard);
+      if (togglePortfolioEditorBtn) togglePortfolioEditorBtn.addEventListener("click", togglePortfolioCard);
+
+      const saveProfileBtn = document.getElementById("saveProfileBtn");
+      if (saveProfileBtn) saveProfileBtn.addEventListener("click", saveProfile);
+
+      const addPortfolioBtn = document.getElementById("addPortfolioBtn");
+      if (addPortfolioBtn) addPortfolioBtn.addEventListener("click", addPortfolioItem);
+
+      if (closeLightboxBtn) closeLightboxBtn.addEventListener("click", closeLightbox);
+      if (portfolioLightbox) {
+        portfolioLightbox.addEventListener("click", (e) => {
+          if (e.target === portfolioLightbox) closeLightbox();
+        });
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
+      });
+
+      await loadProfile();
+    } catch (error) {
+      console.error("PROFILE PAGE INIT ERROR:", error);
+    }
+  });
 </script>
 </body>
 </html>

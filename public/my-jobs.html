@@ -13,7 +13,7 @@
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
         <a href="/">Начало</a>
@@ -27,7 +27,7 @@
       </div>
 
       <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
@@ -35,28 +35,170 @@
 </header>
 
 <div class="container">
-  <div class="card">
+
+  <section class="card landing-hero-card">
+    <div class="landing-hero-grid">
+      <div>
+        <div class="landing-badge">Управление на твоите публикации</div>
+        <h1 class="landing-title">Моите обяви</h1>
+        <p class="landing-text">
+          Тук можеш да виждаш, редактираш, изтриваш и промотираш всичките си обяви.
+          Управлявай по-лесно услугите и проектите си от едно място.
+        </p>
+
+        <div class="landing-cta-row">
+          <a href="/jobs-page" class="landing-main-btn">Публикувай нова обява</a>
+          <a href="/profile-page" class="landing-secondary-btn" onclick="return false;">Моят профил</a>
+        </div>
+      </div>
+
+      <div class="landing-side-panel">
+        <div class="landing-side-card">
+          <div class="landing-side-icon">📋</div>
+          <div>
+            <h3>Всички твои обяви</h3>
+            <p>Бърз достъп до активните ти публикации.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">⭐</div>
+          <div>
+            <h3>Boost / Premium</h3>
+            <p>Промотирай важните обяви и бъди по-видим.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">✏️</div>
+          <div>
+            <h3>Редакция и изтриване</h3>
+            <p>Обновявай информацията, снимките и бюджета си лесно.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="guestBox" class="card hidden">
+    <div class="empty-state-box">
+      <div class="empty-state-icon">🔐</div>
+      <h3>Трябва да влезеш в профила си</h3>
+      <p>Само влезли потребители могат да виждат и управляват своите обяви.</p>
+      <div class="empty-state-actions">
+        <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+        <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="myJobsSection" class="card hidden">
     <div class="section-head">
       <div>
-        <h2>Моите обяви</h2>
-        <div class="small-text">Управлявай своите публикувани обяви и виж галерията им.</div>
+        <h2>Моите публикувани обяви</h2>
+        <div id="myJobsInfo" class="small-text">Зареждане...</div>
       </div>
-      <div id="myJobsCount" class="results-info"></div>
+
+      <div class="job-card-actions">
+        <a href="/jobs-page" class="job-card-btn">+ Нова обява</a>
+      </div>
     </div>
 
-    <div id="myJobsStatus" class="status-box"></div>
+    <div class="favorites-filters">
+      <div class="favorites-filters-grid">
+        <input id="myJobsSearch" placeholder="Търси по заглавие или описание...">
+        <input id="myJobsCityFilter" placeholder="Филтър по град">
+        <select id="myJobsTypeFilter">
+          <option value="">Всички типове</option>
+          <option value="job">Само работа</option>
+          <option value="service">Само услуги</option>
+        </select>
+        <select id="myJobsSortFilter">
+          <option value="newest">Най-нови</option>
+          <option value="oldest">Най-стари</option>
+          <option value="budgetDesc">Бюджет: висок към нисък</option>
+          <option value="budgetAsc">Бюджет: нисък към висок</option>
+        </select>
+      </div>
+
+      <div class="favorites-quick-tabs">
+        <button id="myJobsTabAll" class="favorites-quick-tab active" type="button">Всички</button>
+        <button id="myJobsTabPremium" class="favorites-quick-tab" type="button">Premium</button>
+        <button id="myJobsClearFilters" class="favorites-quick-tab" type="button">Изчисти</button>
+      </div>
+    </div>
+
     <div id="myJobsList" class="job-cards-grid"></div>
+  </section>
+
+</div>
+
+<div id="boostModal" class="boost-modal hidden">
+  <div class="boost-modal-backdrop" id="boostModalBackdrop"></div>
+
+  <div class="boost-modal-dialog">
+    <button id="boostCloseBtn" class="boost-close-btn" type="button">✕</button>
+
+    <div class="boost-modal-header">
+      <div class="boost-modal-badge">Boost / Premium</div>
+      <h2>Промотирай обявата си</h2>
+      <p>Избери план и покажи обявата си най-горе пред повече хора.</p>
+    </div>
+
+    <div id="boostSelectedJob" class="boost-selected-job"></div>
+    <div id="boostPlansGrid" class="boost-pricing-grid"></div>
+
+    <div class="boost-modal-footer">
+      <button id="boostFooterCloseBtn" class="job-card-btn secondary boost-footer-btn" type="button">Затвори</button>
+    </div>
   </div>
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
-
-  const myJobsStatus = document.getElementById("myJobsStatus");
+  const guestBox = document.getElementById("guestBox");
+  const myJobsSection = document.getElementById("myJobsSection");
+  const myJobsInfo = document.getElementById("myJobsInfo");
   const myJobsList = document.getElementById("myJobsList");
-  const myJobsCount = document.getElementById("myJobsCount");
+
+  const myJobsSearch = document.getElementById("myJobsSearch");
+  const myJobsCityFilter = document.getElementById("myJobsCityFilter");
+  const myJobsTypeFilter = document.getElementById("myJobsTypeFilter");
+  const myJobsSortFilter = document.getElementById("myJobsSortFilter");
+
+  const myJobsTabAll = document.getElementById("myJobsTabAll");
+  const myJobsTabPremium = document.getElementById("myJobsTabPremium");
+  const myJobsClearFilters = document.getElementById("myJobsClearFilters");
+
+  const boostModal = document.getElementById("boostModal");
+  const boostModalBackdrop = document.getElementById("boostModalBackdrop");
+  const boostCloseBtn = document.getElementById("boostCloseBtn");
+  const boostFooterCloseBtn = document.getElementById("boostFooterCloseBtn");
+  const boostSelectedJob = document.getElementById("boostSelectedJob");
+  const boostPlansGrid = document.getElementById("boostPlansGrid");
+
+  let allMyJobs = [];
+  let activeQuickFilter = "all";
+  let selectedBoostJob = null;
+  let boostPlans = [];
+
+  function escapeHtmlLocal(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function isPromotedJob(job) {
+    return !!(
+      job &&
+      job.isPromoted &&
+      job.promotedUntil &&
+      new Date(job.promotedUntil) > new Date()
+    );
+  }
 
   function getJobTypeLabel(type) {
     return type === "service" ? "🟢 Услуга" : "🔵 Работа";
@@ -64,6 +206,18 @@
 
   function getJobTypeText(type) {
     return type === "service" ? "Предлагам услуга" : "Търся човек";
+  }
+
+  function setQuickFilter(filterName) {
+    activeQuickFilter = filterName;
+
+    myJobsTabAll.classList.remove("active");
+    myJobsTabPremium.classList.remove("active");
+
+    if (filterName === "all") myJobsTabAll.classList.add("active");
+    if (filterName === "premium") myJobsTabPremium.classList.add("active");
+
+    renderMyJobs();
   }
 
   function buildGalleryPreview(job) {
@@ -81,83 +235,302 @@
     `;
   }
 
-  async function deleteJob(jobId) {
-    clearStatus(myJobsStatus);
+  function sortJobs(items) {
+    const sortValue = myJobsSortFilter.value;
+    const sorted = [...items];
 
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      showStatus(myJobsStatus, "Трябва да си влязъл.", "error");
-      return;
+    if (sortValue === "newest") {
+      sorted.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+    } else if (sortValue === "oldest") {
+      sorted.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    } else if (sortValue === "budgetDesc") {
+      sorted.sort((a, b) => (Number(b.budget) || 0) - (Number(a.budget) || 0));
+    } else if (sortValue === "budgetAsc") {
+      sorted.sort((a, b) => (Number(a.budget) || 0) - (Number(b.budget) || 0));
     }
 
-    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш тази обява?");
-    if (!confirmed) return;
-
-    const res = await fetch(`/api/jobs/${jobId}?email=${encodeURIComponent(currentUser.email)}`, {
-      method: "DELETE"
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showStatus(myJobsStatus, data.message || "Грешка при изтриване.", "error");
-      return;
-    }
-
-    showStatus(myJobsStatus, "Обявата е изтрита успешно ✅", "success");
-    loadMyJobs();
+    return sorted;
   }
 
-  async function loadMyJobs() {
-    const currentUser = getCurrentUser();
+  function getFilteredJobs() {
+    const searchValue = myJobsSearch.value.trim().toLowerCase();
+    const cityValue = myJobsCityFilter.value.trim().toLowerCase();
+    const typeValue = myJobsTypeFilter.value;
 
-    if (!currentUser) {
-      myJobsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш своите обяви.</div>';
-      myJobsCount.textContent = "";
-      return;
-    }
+    let filtered = allMyJobs.filter(job => {
+      const title = (job.title || "").toLowerCase();
+      const description = (job.description || "").toLowerCase();
+      const city = (job.city || "").toLowerCase();
+      const type = job.type || "job";
 
-    const res = await fetch(`/my-jobs/${encodeURIComponent(currentUser.email)}`);
-    const data = await res.json();
+      const matchesSearch =
+        !searchValue ||
+        title.includes(searchValue) ||
+        description.includes(searchValue);
 
-    myJobsCount.textContent = `${data.length} обяви`;
+      const matchesCity =
+        !cityValue || city.includes(cityValue);
 
-    if (!data.length) {
-      myJobsList.innerHTML = '<div class="empty">Все още нямаш публикувани обяви.</div>';
-      return;
-    }
+      const matchesType =
+        !typeValue || type === typeValue;
 
-    myJobsList.innerHTML = data.map(job => `
-      <div class="job-market-card">
+      const matchesQuick =
+        activeQuickFilter === "all" ||
+        (activeQuickFilter === "premium" && isPromotedJob(job));
+
+      return matchesSearch && matchesCity && matchesType && matchesQuick;
+    });
+
+    return sortJobs(filtered);
+  }
+
+  function buildJobCard(job) {
+    return `
+      <div class="job-market-card ${isPromotedJob(job) ? "job-market-card-premium" : ""}">
+        ${isPromotedJob(job) ? `<div class="job-promoted-badge">⭐ Промотирана</div>` : ""}
+
         <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
 
         <div class="job-market-top">
           <div>
-            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <h4 class="job-market-title">${escapeHtmlLocal(job.title || "Без заглавие")}</h4>
             <div class="job-market-meta">
-              <span>📍 ${job.city || "Без град"}</span>
-              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📍 ${escapeHtmlLocal(job.city || "Без град")}</span>
+              <span>🏷 ${escapeHtmlLocal(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtmlLocal(job.subcategory) : ""}</span>
               <span>📌 ${getJobTypeText(job.type)}</span>
             </div>
+
+            ${isPromotedJob(job)
+              ? `<div class="job-promoted-inline">⭐ До ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>`
+              : ""}
           </div>
-          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+
+          ${job.budget ? `<div class="job-budget-badge">${escapeHtmlLocal(String(job.budget))} лв</div>` : ""}
         </div>
 
         ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
         ${buildGalleryPreview(job)}
 
-        <p class="job-market-desc">${job.description || ""}</p>
+        <p class="job-market-desc">${escapeHtmlLocal(job.description || "")}</p>
 
         <div class="job-card-actions">
-          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-          <a href="/applications-page" onclick="localStorage.setItem('selectedJobId', '${job.id}')" class="job-card-btn secondary">Кандидатури</a>
-          <button type="button" class="danger-btn small-danger-btn" onclick="deleteJob(${job.id})">Изтрий</button>
+          <a href="/job/${job.id}" class="job-card-btn">Виж</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Профил</a>
+          <button type="button" class="secondary-btn" onclick="openBoostModal(${job.id})">⭐ Boost</button>
+          <button type="button" class="danger-btn" onclick="deleteJob(${job.id})">🗑 Изтрий</button>
         </div>
       </div>
+    `;
+  }
+
+  function renderMyJobs() {
+    const filtered = getFilteredJobs();
+
+    myJobsInfo.textContent = `Общо: ${filtered.length} обяви`;
+
+    if (!filtered.length) {
+      myJobsList.innerHTML = createEmptyStateHTML({
+        icon: "📭",
+        title: "Няма намерени обяви",
+        text: "Пробвай с различни филтри или публикувай нова обява.",
+        buttonText: "Публикувай обява",
+        buttonHref: "/jobs-page"
+      });
+      return;
+    }
+
+    myJobsList.innerHTML = filtered.map(buildJobCard).join("");
+  }
+
+  async function loadMyJobs() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser?.email) {
+      guestBox.classList.remove("hidden");
+      myJobsSection.classList.add("hidden");
+      return;
+    }
+
+    guestBox.classList.add("hidden");
+    myJobsSection.classList.remove("hidden");
+
+    try {
+      showSkeletons(myJobsList, 3);
+
+      const res = await fetch(`/my-jobs/${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+
+      allMyJobs = Array.isArray(data) ? data : [];
+      renderMyJobs();
+    } catch (error) {
+      console.error("LOAD MY JOBS ERROR:", error);
+      myJobsList.innerHTML = createEmptyStateHTML({
+        icon: "⚠️",
+        title: "Стана грешка",
+        text: "Не успяхме да заредим твоите обяви."
+      });
+    }
+  }
+
+  async function deleteJob(jobId) {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.email) return;
+
+    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш тази обява?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/jobs/${jobId}?email=${encodeURIComponent(currentUser.email)}`, {
+        method: "DELETE"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Грешка при изтриване.", "error");
+        return;
+      }
+
+      showToast(data.message || "Обявата е изтрита успешно ✅", "success");
+      await loadMyJobs();
+    } catch (error) {
+      console.error("DELETE JOB ERROR:", error);
+      showToast("Стана грешка при изтриване.", "error");
+    }
+  }
+
+  window.deleteJob = deleteJob;
+
+  async function loadBoostPlans() {
+    try {
+      const res = await fetch("/api/boost-plans");
+      const data = await res.json();
+      boostPlans = Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error("BOOST PLANS ERROR:", error);
+      boostPlans = [];
+    }
+  }
+
+  function closeBoostModal() {
+    boostModal.classList.add("hidden");
+    document.body.classList.remove("modal-open");
+    selectedBoostJob = null;
+  }
+
+  async function boostJob(days) {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.email || !selectedBoostJob) return;
+
+    try {
+      const res = await fetch(`/api/jobs/${selectedBoostJob.id}/boost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          requesterEmail: currentUser.email,
+          days
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Грешка при boost.", "error");
+        return;
+      }
+
+      showToast(data.message || "Обявата е промотирана успешно ⭐", "success");
+      closeBoostModal();
+      await loadMyJobs();
+    } catch (error) {
+      console.error("BOOST JOB ERROR:", error);
+      showToast("Стана грешка при boost.", "error");
+    }
+  }
+
+  function renderBoostPlans() {
+    if (!selectedBoostJob) return;
+
+    boostSelectedJob.innerHTML = `
+      <strong>${escapeHtmlLocal(selectedBoostJob.title || "Обява")}</strong>
+      <span>📍 ${escapeHtmlLocal(selectedBoostJob.city || "Без град")}</span>
+      ${isPromotedJob(selectedBoostJob)
+        ? `<span class="boost-current-inline">⭐ Активна до ${new Date(selectedBoostJob.promotedUntil).toLocaleDateString("bg-BG")}</span>`
+        : ""}
+    `;
+
+    if (!boostPlans.length) {
+      boostPlansGrid.innerHTML = `
+        <div class="empty-state-box">
+          <div class="empty-state-icon">⚠️</div>
+          <h3>Няма налични планове</h3>
+          <p>Не успяхме да заредим boost пакетите.</p>
+        </div>
+      `;
+      return;
+    }
+
+    boostPlansGrid.innerHTML = boostPlans.map((plan, index) => `
+      <button
+        type="button"
+        class="boost-plan-card ${index === 1 ? "boost-plan-featured" : ""}"
+        onclick="boostJob(${plan.days})"
+      >
+        ${index === 1 ? `<div class="boost-plan-recommended">Препоръчан</div>` : ""}
+
+        <div class="boost-plan-top">
+          <div class="boost-plan-name">${escapeHtmlLocal(plan.name || "Boost")}</div>
+          <div class="boost-plan-days">${escapeHtmlLocal(String(plan.days))} дни</div>
+        </div>
+
+        <div class="boost-plan-price">${escapeHtmlLocal(String(plan.price))} лв</div>
+        <div class="boost-plan-text">Повече видимост, повече интерес и по-предни позиции в списъците.</div>
+      </button>
     `).join("");
   }
 
-  loadMyJobs();
+  function openBoostModal(jobId) {
+    const found = allMyJobs.find(job => Number(job.id) === Number(jobId));
+    if (!found) return;
+
+    selectedBoostJob = found;
+    renderBoostPlans();
+    boostModal.classList.remove("hidden");
+    document.body.classList.add("modal-open");
+  }
+
+  window.openBoostModal = openBoostModal;
+  window.boostJob = boostJob;
+
+  myJobsSearch.addEventListener("input", renderMyJobs);
+  myJobsCityFilter.addEventListener("input", renderMyJobs);
+  myJobsTypeFilter.addEventListener("change", renderMyJobs);
+  myJobsSortFilter.addEventListener("change", renderMyJobs);
+
+  myJobsTabAll.addEventListener("click", () => setQuickFilter("all"));
+  myJobsTabPremium.addEventListener("click", () => setQuickFilter("premium"));
+
+  myJobsClearFilters.addEventListener("click", () => {
+    myJobsSearch.value = "";
+    myJobsCityFilter.value = "";
+    myJobsTypeFilter.value = "";
+    myJobsSortFilter.value = "newest";
+    setQuickFilter("all");
+  });
+
+  boostCloseBtn.addEventListener("click", closeBoostModal);
+  boostFooterCloseBtn.addEventListener("click", closeBoostModal);
+  boostModalBackdrop.addEventListener("click", closeBoostModal);
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+
+    await loadBoostPlans();
+    await loadMyJobs();
+  });
 </script>
 </body>
 </html>

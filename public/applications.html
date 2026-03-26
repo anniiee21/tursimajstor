@@ -22,7 +22,7 @@
         <a href="/favorites-page">Любими</a>
         <a href="/inbox-page">Поща</a>
         <a href="/notifications-page">Известия</a>
-        <a id="applicationsNavLink" class="active" href="/applications-page">Кандидатури</a>
+        <a class="active" id="applicationsNavLink" href="/applications-page">Кандидатури</a>
         <a href="/feed-page">Новини</a>
       </div>
 
@@ -35,254 +35,156 @@
 </header>
 
 <div class="container">
-  <div class="card">
-    <div class="section-head">
-      <div>
-        <h2>Кандидатури</h2>
-        <div class="small-text">
-          Тук виждаш кандидатите по избраната обява. След одобрение можеш да маркираш проекта като завършен и после да оставиш оценка.
-        </div>
+
+  <!-- GUEST -->
+  <section id="applicationsGuestBox" class="card hidden">
+    <div class="empty-state-box">
+      <div class="empty-state-icon">🔐</div>
+      <h3>Трябва да влезеш</h3>
+      <p>За да виждаш кандидатури, трябва да имаш профил.</p>
+      <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <section id="applicationsSection" class="hidden">
+
+    <div class="card">
+      <div class="section-head">
+        <h2>Моите кандидатури</h2>
+        <div id="applicationsInfo" class="small-text"></div>
+      </div>
+
+      <div class="filters-grid filters-grid-3">
+        <input id="searchInput" placeholder="Търси...">
+        <input id="cityFilter" placeholder="Град">
+
+        <select id="statusFilter">
+          <option value="">Всички статуси</option>
+          <option value="pending">Изчакване</option>
+          <option value="approved">Одобрени</option>
+          <option value="rejected">Отказани</option>
+        </select>
       </div>
     </div>
 
-    <div id="applicationsStatus" class="status-box"></div>
-    <div id="applicationsList" class="application-cards-list"></div>
-  </div>
+    <div id="applicationsList" class="job-cards-grid"></div>
+
+  </section>
+
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
+  const guestBox = document.getElementById("applicationsGuestBox");
+  const section = document.getElementById("applicationsSection");
+  const list = document.getElementById("applicationsList");
+  const info = document.getElementById("applicationsInfo");
 
-  const applicationsStatus = document.getElementById("applicationsStatus");
-  const applicationsList = document.getElementById("applicationsList");
+  const searchInput = document.getElementById("searchInput");
+  const cityFilter = document.getElementById("cityFilter");
+  const statusFilter = document.getElementById("statusFilter");
 
-  const currentUser = getCurrentUser();
+  let applicationsData = [];
 
-  if (!currentUser) {
-    applicationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш кандидатурите.</div>';
-    throw new Error("Access denied");
+  function escapeHtml(text = "") {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
   }
 
-  function statusClass(status) {
-    if (status === "Одобрен") return "status-approved";
-    if (status === "Отказан") return "status-rejected";
-    return "status-pending";
+  function getStatusBadge(status) {
+    if (status === "approved") return `<span class="status-badge success">Одобрен</span>`;
+    if (status === "rejected") return `<span class="status-badge error">Отказан</span>`;
+    return `<span class="status-badge">Изчакване</span>`;
   }
 
-  async function updateApplicationStatus(applicationId, newStatus) {
-    clearStatus(applicationsStatus);
+  function buildCard(item) {
+    return `
+      <div class="job-market-card">
 
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      showStatus(applicationsStatus, "Трябва да си влязъл.", "error");
-      return;
-    }
-
-    const res = await fetch(`/applications/${applicationId}/status`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        requesterEmail: currentUser.email,
-        status: newStatus
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showStatus(applicationsStatus, data.message || "Грешка при смяна на статус.", "error");
-      return;
-    }
-
-    showStatus(applicationsStatus, "Статусът е обновен успешно ✅", "success");
-    loadApplications();
-  }
-
-  async function markCompleted(jobId, workerEmail, workerName) {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      alert("Трябва да си влязъл.");
-      return;
-    }
-
-    const res = await fetch("/completed-projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        requesterEmail: currentUser.email,
-        jobId,
-        workerEmail,
-        workerName
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Грешка при маркиране на завършен проект.");
-      return;
-    }
-
-    alert("Проектът е маркиран като завършен ✅");
-    loadApplications();
-  }
-
-  async function leaveReview(jobId, workerEmail, workerName) {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      alert("Трябва да си влязъл.");
-      return;
-    }
-
-    const rating = prompt("Дай оценка от 1 до 5:");
-    if (!rating) return;
-
-    const numericRating = Number(rating);
-
-    if (numericRating < 1 || numericRating > 5) {
-      alert("Оценката трябва да е между 1 и 5.");
-      return;
-    }
-
-    const text = prompt("Напиши кратко ревю (по желание):") || "";
-
-    const res = await fetch("/reviews", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        requesterEmail: currentUser.email,
-        jobId,
-        workerEmail,
-        workerName,
-        rating: numericRating,
-        text
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Грешка при оценяване.");
-      return;
-    }
-
-    alert("Оценката е записана успешно ✅");
-    loadApplications();
-  }
-
-  async function loadApplications() {
-    const jobId = localStorage.getItem("selectedJobId");
-    applicationsList.innerHTML = "";
-
-    if (!jobId) {
-      applicationsList.innerHTML = '<div class="empty">Няма избрана обява.</div>';
-      return;
-    }
-
-    const currentUser = getCurrentUser();
-
-    const res = await fetch(`/applications/${jobId}?email=${encodeURIComponent(currentUser.email)}`);
-    const data = await res.json();
-
-    if (!res.ok) {
-      applicationsList.innerHTML = `<div class="empty">${data.message || "Грешка при зареждане."}</div>`;
-      return;
-    }
-
-    if (!data.length) {
-      applicationsList.innerHTML = '<div class="empty">Няма кандидатури за тази обява.</div>';
-      return;
-    }
-
-    const reviewChecks = await Promise.all(
-      data.map(app =>
-        fetch(`/reviews/check?requesterEmail=${encodeURIComponent(currentUser.email)}&jobId=${jobId}&workerEmail=${encodeURIComponent(app.email || "")}`)
-          .then(r => r.json())
-          .catch(() => ({ exists: false }))
-      )
-    );
-
-    const completedChecks = await Promise.all(
-      data.map(app =>
-        fetch(`/completed-projects/check?jobId=${jobId}&workerEmail=${encodeURIComponent(app.email || "")}`)
-          .then(r => r.json())
-          .catch(() => ({ exists: false }))
-      )
-    );
-
-    applicationsList.innerHTML = data.map((app, index) => {
-      const alreadyReviewed = !!reviewChecks[index]?.exists;
-      const alreadyCompleted = !!completedChecks[index]?.exists;
-
-      return `
-        <div class="application-status-card ${app.status === "Одобрен" ? "approved-card" : app.status === "Отказан" ? "rejected-card" : "pending-card"}">
-          <div class="application-card-top">
-            <div>
-              <h3 class="application-card-title">👤 ${app.name || "Кандидат"}</h3>
-              <div class="application-card-meta">
-                <span>${app.email || "Без имейл"}</span>
-                <span>📅 ${app.createdAt || ""}</span>
-              </div>
-            </div>
-
-            <span class="application-status-badge ${statusClass(app.status)}">
-              ${app.status || "Чака одобрение"}
-            </span>
-          </div>
-
-          <div class="application-card-body">
-            <p><strong>Съобщение:</strong> ${app.message || "Няма съобщение."}</p>
-
-            ${
-              app.cvUrl
-                ? `<p><a href="${app.cvUrl}" target="_blank" class="see-all-link">📄 Отвори CV</a></p>`
-                : `<p class="small-text">Няма качено CV.</p>`
-            }
-
-            ${
-              alreadyCompleted
-                ? `<div class="role-badge" style="margin-top:10px;">✅ Завършен проект</div>`
-                : ""
-            }
-          </div>
-
-          <div class="application-card-actions-row">
-            <div class="application-action-buttons">
-              <button type="button" onclick="updateApplicationStatus(${app.id}, 'Одобрен')">Одобри</button>
-              <button type="button" class="secondary-btn" onclick="updateApplicationStatus(${app.id}, 'Чака одобрение')">Върни</button>
-              <button type="button" class="danger-btn" onclick="updateApplicationStatus(${app.id}, 'Отказан')">Откажи</button>
-
-              ${
-                app.status === "Одобрен" && !alreadyCompleted
-                  ? `<button type="button" class="secondary-btn" onclick="markCompleted(${Number(jobId)}, '${(app.email || "").replace(/'/g, "\\'")}', '${(app.name || "").replace(/'/g, "\\'")}')">Маркирай като завършен</button>`
-                  : ""
-              }
-
-              ${
-                alreadyCompleted
-                  ? alreadyReviewed
-                    ? `<button type="button" class="secondary-btn" disabled>Вече оценен</button>`
-                    : `<button type="button" class="secondary-btn" onclick="leaveReview(${Number(jobId)}, '${(app.email || "").replace(/'/g, "\\'")}', '${(app.name || "").replace(/'/g, "\\'")}')">Оцени</button>`
-                  : ""
-              }
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${escapeHtml(item.jobTitle || "Обява")}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${escapeHtml(item.city || "")}</span>
+              <span>${getStatusBadge(item.status)}</span>
             </div>
           </div>
         </div>
-      `;
-    }).join("");
+
+        <p class="job-market-desc">${escapeHtml(item.message || "")}</p>
+
+        <div class="job-card-actions">
+          <a href="/job/${item.jobId}" class="job-card-btn">Виж обявата</a>
+        </div>
+
+      </div>
+    `;
   }
 
-  loadApplications();
+  function render() {
+    const search = searchInput.value.toLowerCase();
+    const city = cityFilter.value.toLowerCase();
+    const status = statusFilter.value;
+
+    let filtered = applicationsData.filter(app => {
+      return (
+        (!search || (app.jobTitle || "").toLowerCase().includes(search)) &&
+        (!city || (app.city || "").toLowerCase().includes(city)) &&
+        (!status || app.status === status)
+      );
+    });
+
+    info.textContent = `${filtered.length} кандидатури`;
+
+    if (!filtered.length) {
+      list.innerHTML = `
+        <div class="empty">
+          Няма намерени кандидатури.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = filtered.map(buildCard).join("");
+  }
+
+  async function loadApplications() {
+    const user = getCurrentUser();
+
+    if (!user) {
+      guestBox.classList.remove("hidden");
+      section.classList.add("hidden");
+      return;
+    }
+
+    guestBox.classList.add("hidden");
+    section.classList.remove("hidden");
+
+    try {
+      const res = await fetch(`/applications/${encodeURIComponent(user.email)}`);
+      const data = await res.json();
+
+      applicationsData = data || [];
+      render();
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = '<div class="empty">Грешка при зареждане.</div>';
+    }
+  }
+
+  searchInput.addEventListener("input", render);
+  cityFilter.addEventListener("input", render);
+  statusFilter.addEventListener("change", render);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+    loadApplications();
+  });
 </script>
+
 </body>
 </html>

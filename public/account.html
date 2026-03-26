@@ -3,25 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TursiMajstor - Акаунт</title>
+  <title>TursiMajstor - Вход и регистрация</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
+
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
+
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
@@ -31,16 +35,524 @@
 </header>
 
 <div class="container">
-  <div class="card">
-    <h2>Регистрация</h2>
-    <p>Използвай менюто горе вдясно за вход и регистрация.</p>
+  <div class="auth-page-layout">
+
+    <section class="card auth-hero-card">
+      <div id="roleVisualCard" class="profile-type-visual-card profile-type-visual-personal">
+        <div id="roleVisualIcon" class="profile-type-visual-icon">👤</div>
+
+        <div class="profile-type-visual-content">
+          <div id="roleVisualBadge" class="profile-type-visual-badge profile-type-badge-personal">
+            Личен профил
+          </div>
+          <h3 id="roleVisualTitle">Избери правилния тип профил</h3>
+          <p id="roleVisualText">
+            Създай акаунт според това дали търсиш услуги, предлагаш работа като свободна практика
+            или искаш да представиш фирма.
+          </p>
+        </div>
+      </div>
+
+      <div class="auth-hero-badge">Вход, регистрация и професионално представяне</div>
+      <h1 class="auth-hero-title">Създай профил, публикувай, кандидатствай и развивай присъствието си</h1>
+      <p class="auth-hero-text">
+        TursiMajstor ти дава възможност да намериш точните хора, да покажеш услугите си,
+        да качваш портфолио и да управляваш комуникацията си на едно място.
+      </p>
+
+      <div class="auth-hero-points">
+        <div class="auth-point-card">
+          <h3>🧰 За професионалисти</h3>
+          <p>Покажи умения, опит, услуги, градове, портфолио, социални мрежи и работно време.</p>
+        </div>
+
+        <div class="auth-point-card">
+          <h3>🏢 За фирми</h3>
+          <p>Създай по-силен фирмен профил, публикувай обяви и представи бизнеса си по-премиум.</p>
+        </div>
+
+        <div class="auth-point-card">
+          <h3>🔎 За клиенти</h3>
+          <p>Разглеждай, запазвай любими, изпращай запитвания и следи нови възможности.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="auth-side-layout">
+      <section class="card auth-switch-card">
+        <div class="big-auth-tabs">
+          <button id="loginPageTabBtn" class="big-auth-tab active" type="button">Вход</button>
+          <button id="registerPageTabBtn" class="big-auth-tab" type="button">Регистрация</button>
+        </div>
+      </section>
+
+      <section id="loginCard" class="card">
+        <div class="section-head">
+          <div>
+            <h2>Вход</h2>
+            <div class="small-text">Влез в профила си, за да управляваш обяви, публикации и съобщения.</div>
+          </div>
+        </div>
+
+        <div id="loginStatus" class="status-box"></div>
+
+        <form id="pageLoginForm" class="page-auth-form">
+          <div>
+            <label for="pageLoginEmail">Имейл</label>
+            <input id="pageLoginEmail" type="email" placeholder="example@email.com" required>
+          </div>
+
+          <div>
+            <label for="pageLoginPassword">Парола</label>
+            <input id="pageLoginPassword" type="password" placeholder="Парола" required>
+          </div>
+
+          <button type="submit" class="auth-submit-btn">Влез в профила</button>
+        </form>
+      </section>
+
+      <section id="registerCard" class="card hidden">
+        <div class="section-head">
+          <div>
+            <h2>Регистрация</h2>
+            <div class="small-text">Избери тип профил и попълни данните си.</div>
+          </div>
+        </div>
+
+        <div id="registerStatus" class="status-box"></div>
+
+        <div id="registerProgress" class="register-progress register-progress-personal">
+          <div class="register-progress-line" id="registerProgressLine"></div>
+
+          <div class="register-step done">
+            <div class="register-step-circle">1</div>
+            <div class="register-step-text">Тип профил</div>
+          </div>
+
+          <div class="register-step active">
+            <div class="register-step-circle">2</div>
+            <div class="register-step-text">Основни данни</div>
+          </div>
+
+          <div class="register-step">
+            <div class="register-step-circle">3</div>
+            <div class="register-step-text">Контакт</div>
+          </div>
+
+          <div class="register-step">
+            <div class="register-step-circle">4</div>
+            <div class="register-step-text">Финализиране</div>
+          </div>
+        </div>
+
+        <form id="pageRegisterForm" class="page-auth-form" enctype="multipart/form-data">
+          <div>
+            <label for="pageRegRole">Тип профил</label>
+            <select id="pageRegRole" required>
+              <option value="personal">Личен профил</option>
+              <option value="freelancer">Свободна практика</option>
+              <option value="professional">Професионален профил</option>
+              <option value="company">Фирма</option>
+            </select>
+          </div>
+
+          <div id="roleIntroCard" class="role-intro-card role-intro-personal">
+            <h3 id="roleIntroTitle">Личен профил</h3>
+            <p id="roleIntroText">
+              Подходящ, ако искаш да търсиш услуги, да запазваш обяви и да изпращаш запитвания.
+            </p>
+          </div>
+
+          <div id="pageRegisterDynamicFields"></div>
+
+          <div class="page-form-grid">
+            <div>
+              <label for="pageRegEmail">Имейл</label>
+              <input id="pageRegEmail" type="email" placeholder="example@email.com" required>
+            </div>
+
+            <div>
+              <label for="pageRegPassword">Парола</label>
+              <input id="pageRegPassword" type="password" placeholder="Парола" required>
+            </div>
+          </div>
+
+          <div class="page-form-grid">
+            <div>
+              <label for="pageRegPhone">Телефон</label>
+              <input id="pageRegPhone" placeholder="Телефон за връзка">
+            </div>
+
+            <div>
+              <label for="pageRegProfileImage">Снимка / Лого</label>
+              <input id="pageRegProfileImage" type="file" accept="image/*">
+            </div>
+          </div>
+
+          <label class="smart-checkbox">
+            <input type="checkbox" id="pageRegShowPhone">
+            Покажи телефона в профила
+          </label>
+
+          <button type="submit" class="auth-submit-btn">Създай профил</button>
+        </form>
+      </section>
+    </aside>
+
   </div>
 </div>
 
 <script src="/app.js"></script>
 <script>
-updateHeaderUser();
-updateRoleVisibility();
+  const loginPageTabBtn = document.getElementById("loginPageTabBtn");
+  const registerPageTabBtn = document.getElementById("registerPageTabBtn");
+  const loginCard = document.getElementById("loginCard");
+  const registerCard = document.getElementById("registerCard");
+
+  const pageLoginForm = document.getElementById("pageLoginForm");
+  const pageRegisterForm = document.getElementById("pageRegisterForm");
+
+  const loginStatus = document.getElementById("loginStatus");
+  const registerStatus = document.getElementById("registerStatus");
+
+  const pageRegRole = document.getElementById("pageRegRole");
+  const pageRegisterDynamicFields = document.getElementById("pageRegisterDynamicFields");
+
+  const roleVisualCard = document.getElementById("roleVisualCard");
+  const roleVisualIcon = document.getElementById("roleVisualIcon");
+  const roleVisualBadge = document.getElementById("roleVisualBadge");
+  const roleVisualTitle = document.getElementById("roleVisualTitle");
+  const roleVisualText = document.getElementById("roleVisualText");
+
+  const roleIntroCard = document.getElementById("roleIntroCard");
+  const roleIntroTitle = document.getElementById("roleIntroTitle");
+  const roleIntroText = document.getElementById("roleIntroText");
+
+  const registerProgress = document.getElementById("registerProgress");
+  const registerProgressLine = document.getElementById("registerProgressLine");
+
+  function getQueryParams() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  function switchAuthTab(tab) {
+    if (tab === "register") {
+      registerPageTabBtn.classList.add("active");
+      loginPageTabBtn.classList.remove("active");
+      registerCard.classList.remove("hidden");
+      loginCard.classList.add("hidden");
+      return;
+    }
+
+    loginPageTabBtn.classList.add("active");
+    registerPageTabBtn.classList.remove("active");
+    loginCard.classList.remove("hidden");
+    registerCard.classList.add("hidden");
+  }
+
+  function renderRegisterFields(role = "personal") {
+    if (!pageRegisterDynamicFields) return;
+
+    if (role === "company") {
+      pageRegisterDynamicFields.innerHTML = `
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegName">Име на фирма</label>
+            <input id="pageRegName" placeholder="Име на фирма" required>
+          </div>
+
+          <div>
+            <label for="pageRegContactName">Лице за контакт</label>
+            <input id="pageRegContactName" placeholder="Име на контактно лице">
+          </div>
+        </div>
+
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegCompanyId">ЕИК</label>
+            <input id="pageRegCompanyId" placeholder="ЕИК">
+          </div>
+
+          <div>
+            <label for="pageRegManager">Представител / МОЛ</label>
+            <input id="pageRegManager" placeholder="Представител / МОЛ">
+          </div>
+        </div>
+
+        <div>
+          <label for="pageRegDescription">Описание на фирмата</label>
+          <textarea id="pageRegDescription" placeholder="Представи фирмата, дейността и услугите"></textarea>
+        </div>
+      `;
+      return;
+    }
+
+    if (role === "freelancer" || role === "professional") {
+      pageRegisterDynamicFields.innerHTML = `
+        <div class="page-form-grid">
+          <div>
+            <label for="pageRegName">Име и фамилия</label>
+            <input id="pageRegName" placeholder="Име и фамилия" required>
+          </div>
+
+          <div>
+            <label for="pageRegProfession">Професия / Специалност</label>
+            <input id="pageRegProfession" placeholder="Пример: Ел. техник, дизайнер, преводач">
+          </div>
+        </div>
+
+        <div>
+          <label for="pageRegDescription">Описание</label>
+          <textarea id="pageRegDescription" placeholder="Представи се, опита си и какво предлагаш"></textarea>
+        </div>
+      `;
+      return;
+    }
+
+    pageRegisterDynamicFields.innerHTML = `
+      <div>
+        <label for="pageRegName">Име и фамилия</label>
+        <input id="pageRegName" placeholder="Име и фамилия" required>
+      </div>
+
+      <div>
+        <label for="pageRegDescription">Кратко представяне</label>
+        <textarea id="pageRegDescription" placeholder="Няколко думи за теб"></textarea>
+      </div>
+    `;
+  }
+
+  function updateRoleVisual(role = "personal") {
+    const roleMap = {
+      personal: {
+        visualClass: "profile-type-visual-personal",
+        badgeClass: "profile-type-badge-personal",
+        introClass: "role-intro-personal",
+        progressClass: "register-progress-personal",
+        icon: "👤",
+        badge: "Личен профил",
+        title: "Профил за търсене и комуникация",
+        visualText: "Подходящ, ако искаш да търсиш услуги, да разглеждаш обяви и да изпращаш запитвания.",
+        introTitle: "Личен профил",
+        introText: "Най-подходящ за потребители, които искат да намерят майстор, специалист или услуга."
+      },
+      freelancer: {
+        visualClass: "profile-type-visual-professional",
+        badgeClass: "profile-type-badge-professional",
+        introClass: "role-intro-professional",
+        progressClass: "register-progress-professional",
+        icon: "🛠",
+        badge: "Свободна практика",
+        title: "Профил за услуги и работа",
+        visualText: "Подходящ, ако предлагаш услуги, работиш самостоятелно и искаш да показваш опит и умения.",
+        introTitle: "Свободна практика",
+        introText: "Избери този тип, ако си майстор, специалист или изпълнител и искаш да качиш по-силен профил."
+      },
+      professional: {
+        visualClass: "profile-type-visual-professional",
+        badgeClass: "profile-type-badge-professional",
+        introClass: "role-intro-professional",
+        progressClass: "register-progress-professional",
+        icon: "💼",
+        badge: "Професионален профил",
+        title: "Профил за професионално присъствие",
+        visualText: "Подходящ, ако искаш да представиш дейността си по-премиум и да изглеждаш по-доверено.",
+        introTitle: "Професионален профил",
+        introText: "Идеален за специалисти с услуги, проекти и нужда от по-професионално представяне."
+      },
+      company: {
+        visualClass: "profile-type-visual-company",
+        badgeClass: "profile-type-badge-company",
+        introClass: "role-intro-company",
+        progressClass: "register-progress-company",
+        icon: "🏢",
+        badge: "Фирма",
+        title: "Фирмен профил за по-силно присъствие",
+        visualText: "Подходящ за компании, екипи и организации, които публикуват обяви и представят услуги.",
+        introTitle: "Фирмен профил",
+        introText: "Използвай този тип профил, ако искаш да представиш бизнес, фирма, контакти и дейност."
+      }
+    };
+
+    const config = roleMap[role] || roleMap.personal;
+
+    roleVisualCard.className = `profile-type-visual-card ${config.visualClass}`;
+    roleVisualIcon.textContent = config.icon;
+    roleVisualBadge.className = `profile-type-visual-badge ${config.badgeClass}`;
+    roleVisualBadge.textContent = config.badge;
+    roleVisualTitle.textContent = config.title;
+    roleVisualText.textContent = config.visualText;
+
+    roleIntroCard.className = `role-intro-card ${config.introClass}`;
+    roleIntroTitle.textContent = config.introTitle;
+    roleIntroText.textContent = config.introText;
+
+    registerProgress.className = `register-progress ${config.progressClass}`;
+
+    if (registerProgressLine) {
+      registerProgressLine.style.width = "58%";
+    }
+  }
+
+  async function submitLogin(event) {
+    event.preventDefault();
+    clearStatus(loginStatus);
+
+    const email = document.getElementById("pageLoginEmail")?.value.trim();
+    const password = document.getElementById("pageLoginPassword")?.value.trim();
+
+    try {
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(loginStatus, data.message || "Грешка при вход.", "error");
+        return;
+      }
+
+      if (typeof setCurrentUser === "function") {
+        setCurrentUser(data.user);
+      } else {
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
+      }
+
+      localStorage.removeItem("lastNotificationCount");
+
+      showStatus(loginStatus, "Входът е успешен ✅", "success");
+
+      if (typeof showToast === "function") {
+        showToast("Входът е успешен ✅", "success");
+      }
+
+      setTimeout(() => {
+        const params = getQueryParams();
+        const redirect = params.get("redirect");
+
+        if (redirect) {
+          window.location.href = redirect;
+        } else {
+          window.location.href = `/profile/${encodeURIComponent(data.user.email)}`;
+        }
+      }, 500);
+    } catch (error) {
+      console.error("PAGE LOGIN ERROR:", error);
+      showStatus(loginStatus, "Стана грешка при вход.", "error");
+    }
+  }
+
+  async function submitRegister(event) {
+    event.preventDefault();
+    clearStatus(registerStatus);
+
+    const role = document.getElementById("pageRegRole")?.value || "personal";
+    const name = document.getElementById("pageRegName")?.value.trim() || "";
+    const email = document.getElementById("pageRegEmail")?.value.trim() || "";
+    const password = document.getElementById("pageRegPassword")?.value.trim() || "";
+    const description = document.getElementById("pageRegDescription")?.value.trim() || "";
+    const phone = document.getElementById("pageRegPhone")?.value.trim() || "";
+    const showPhone = document.getElementById("pageRegShowPhone")?.checked || false;
+    const profileImage = document.getElementById("pageRegProfileImage")?.files?.[0] || null;
+
+    const contactName = document.getElementById("pageRegContactName")?.value.trim() || "";
+    const companyId = document.getElementById("pageRegCompanyId")?.value.trim() || "";
+    const manager = document.getElementById("pageRegManager")?.value.trim() || "";
+    const profession = document.getElementById("pageRegProfession")?.value.trim() || "";
+
+    if (!name || !email || !password) {
+      showStatus(registerStatus, "Попълни име, имейл и парола.", "error");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("role", role);
+      formData.append("description", description);
+      formData.append("phone", phone);
+      formData.append("showPhone", showPhone);
+      formData.append("contactName", contactName);
+      formData.append("companyId", companyId);
+      formData.append("manager", manager);
+      formData.append("profession", profession);
+
+      if (profileImage) {
+        formData.append("profileImage", profileImage);
+      }
+
+      const res = await fetch("/register", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showStatus(registerStatus, data.message || "Грешка при регистрация.", "error");
+        return;
+      }
+
+      showStatus(registerStatus, "Регистрацията е успешна ✅", "success");
+
+      if (typeof showToast === "function") {
+        showToast("Регистрацията е успешна ✅", "success");
+      }
+
+      setTimeout(() => {
+        switchAuthTab("login");
+        document.getElementById("pageLoginEmail").value = email;
+        document.getElementById("pageLoginPassword").value = password;
+      }, 500);
+    } catch (error) {
+      console.error("PAGE REGISTER ERROR:", error);
+      showStatus(registerStatus, "Стана грешка при регистрация.", "error");
+    }
+  }
+
+  function applyPageModeFromUrl() {
+    const params = getQueryParams();
+    const mode = params.get("mode");
+    const role = params.get("role");
+
+    if (role && pageRegRole) {
+      pageRegRole.value = role;
+    }
+
+    renderRegisterFields(pageRegRole.value || "personal");
+    updateRoleVisual(pageRegRole.value || "personal");
+
+    if (mode === "register") {
+      switchAuthTab("register");
+    } else {
+      switchAuthTab("login");
+    }
+  }
+
+  loginPageTabBtn.addEventListener("click", () => switchAuthTab("login"));
+  registerPageTabBtn.addEventListener("click", () => switchAuthTab("register"));
+
+  pageRegRole.addEventListener("change", () => {
+    renderRegisterFields(pageRegRole.value || "personal");
+    updateRoleVisual(pageRegRole.value || "personal");
+  });
+
+  pageLoginForm.addEventListener("submit", submitLogin);
+  pageRegisterForm.addEventListener("submit", submitRegister);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+    applyPageModeFromUrl();
+  });
 </script>
+
 </body>
 </html>

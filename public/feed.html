@@ -16,15 +16,15 @@
       <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a class="active" href="/feed-page">Новини</a>
+      </div>
 
       <div class="user-menu">
         <button id="userMenuBtn" class="user-chip">Вход</button>
@@ -35,65 +35,371 @@
 </header>
 
 <div class="container">
-  <div class="grid-2-wide">
-    <div class="card">
-      <h2>Нова публикация</h2>
-      <div class="small-text">
-        Всеки регистриран потребител може да публикува новини, продукти, услуги, постижения и каквото иска да покаже.
+
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Новини и публикации</h2>
+        <div class="small-text">Споделяй проекти, снимки, идеи и обновления.</div>
+      </div>
+    </div>
+
+    <div id="feedGuestBox" class="publish-guest-box hidden">
+      <div class="publish-guest-inner">
+        <h3>Трябва да влезеш</h3>
+        <p>Създай профил, за да публикуваш в новинарския поток.</p>
+        <div class="publish-guest-actions">
+          <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+          <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
+        </div>
+      </div>
+    </div>
+
+    <form id="postForm" class="publish-form-clean">
+      <label for="postText">Какво искаш да споделиш?</label>
+      <textarea id="postText" placeholder="Пример: Завършихме нов проект в София, ето резултата..." required></textarea>
+
+      <div class="form-row-2">
+        <div>
+          <label for="postImage">Снимка (по желание)</label>
+          <input id="postImage" type="file" accept="image/*">
+        </div>
+
+        <div class="selected-job">
+          Публикацията ще се покаже в профила ти и в общия feed.
+        </div>
       </div>
 
       <div id="postStatus" class="status-box"></div>
+      <button type="submit" class="publish-main-btn">Публикувай</button>
+    </form>
+  </section>
 
-      <label for="postText">Какво искаш да споделиш?</label>
-      <textarea
-        id="postText"
-        placeholder="Пример: Нова услуга / нови продукти / участие в събитие / промоция..."
-      ></textarea>
-
-      <label for="postImage">Снимка (по желание)</label>
-      <input type="file" id="postImage" accept="image/*">
-
-      <button onclick="createPost()">Публикувай</button>
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Поток</h2>
+        <div id="feedInfo" class="small-text">Зареждане...</div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Новини</h2>
-      <div id="postsList"></div>
+    <div id="feedFilters" class="favorites-filters">
+      <div class="favorites-filters-grid">
+        <input id="feedSearchInput" placeholder="Търси по текст или автор...">
+        <input id="feedAuthorInput" placeholder="Автор">
+        <select id="feedSortSelect">
+          <option value="newest">Най-нови</option>
+          <option value="oldest">Най-стари</option>
+          <option value="popular">Най-харесвани</option>
+        </select>
+        <button id="clearFeedFiltersBtn" type="button" class="clear-filter-btn">Изчисти</button>
+      </div>
     </div>
-  </div>
+
+    <div id="postsList"></div>
+  </section>
+
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
-
-  const postStatus = document.getElementById("postStatus");
-  const postsList = document.getElementById("postsList");
+  const postForm = document.getElementById("postForm");
   const postText = document.getElementById("postText");
   const postImage = document.getElementById("postImage");
+  const postStatus = document.getElementById("postStatus");
+  const postsList = document.getElementById("postsList");
+  const feedGuestBox = document.getElementById("feedGuestBox");
+  const feedInfo = document.getElementById("feedInfo");
 
-  async function createPost() {
+  const feedSearchInput = document.getElementById("feedSearchInput");
+  const feedAuthorInput = document.getElementById("feedAuthorInput");
+  const feedSortSelect = document.getElementById("feedSortSelect");
+  const clearFeedFiltersBtn = document.getElementById("clearFeedFiltersBtn");
+
+  let allPosts = [];
+
+  function escapeHtml(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function getCurrentUserSafe() {
+    return typeof getCurrentUser === "function" ? getCurrentUser() : null;
+  }
+
+  function updateFeedAccess() {
+    const currentUser = getCurrentUserSafe();
+
+    if (!currentUser) {
+      postForm.classList.add("hidden");
+      feedGuestBox.classList.remove("hidden");
+    } else {
+      postForm.classList.remove("hidden");
+      feedGuestBox.classList.add("hidden");
+    }
+  }
+
+  function sortPosts(items) {
+    const sortValue = feedSortSelect.value;
+    const sorted = [...items];
+
+    if (sortValue === "popular") {
+      sorted.sort((a, b) => {
+        const likesA = Number(a.likes || 0);
+        const likesB = Number(b.likes || 0);
+        if (likesB !== likesA) return likesB - likesA;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      });
+    } else if (sortValue === "oldest") {
+      sorted.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    } else {
+      sorted.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+    }
+
+    return sorted;
+  }
+
+  function getFilteredPosts() {
+    const searchValue = (feedSearchInput.value || "").trim().toLowerCase();
+    const authorValue = (feedAuthorInput.value || "").trim().toLowerCase();
+
+    let filtered = allPosts.filter(post => {
+      const text = (post.text || "").toLowerCase();
+      const authorName = (post.authorName || "").toLowerCase();
+      const authorEmail = (post.authorEmail || "").toLowerCase();
+
+      const matchesSearch =
+        !searchValue ||
+        text.includes(searchValue) ||
+        authorName.includes(searchValue) ||
+        authorEmail.includes(searchValue);
+
+      const matchesAuthor =
+        !authorValue ||
+        authorName.includes(authorValue) ||
+        authorEmail.includes(authorValue);
+
+      return matchesSearch && matchesAuthor;
+    });
+
+    return sortPosts(filtered);
+  }
+
+  function renderComments(post) {
+    const comments = Array.isArray(post.comments) ? post.comments : [];
+
+    if (!comments.length) {
+      return `<div class="empty small-empty">Все още няма коментари.</div>`;
+    }
+
+    return `
+      <div class="comments-list">
+        ${comments.map(comment => `
+          <div class="comment-item">
+            <strong>${escapeHtml(comment.authorName || comment.authorEmail || "Потребител")}</strong>
+            <div class="meta">${escapeHtml(comment.createdAt || "")}</div>
+            <div>${escapeHtml(comment.text || "")}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function buildPostCard(post) {
+    return `
+      <article class="post-item">
+        <div class="section-head">
+          <div>
+            <h3 style="margin:0;">
+              <a class="author-link" href="/profile/${encodeURIComponent(post.authorEmail || "")}">
+                ${escapeHtml(post.authorName || "Потребител")}
+              </a>
+            </h3>
+            <div class="meta">${escapeHtml(post.createdAt || "")}</div>
+          </div>
+        </div>
+
+        <p>${escapeHtml(post.text || "")}</p>
+
+        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
+
+        <div class="post-actions">
+          <button type="button" class="like-btn" onclick="likePost(${post.id})">
+            ❤️ Харесай
+          </button>
+          <span class="like-count">${Number(post.likes || 0)} харесвания</span>
+        </div>
+
+        <div class="comments-section">
+          <h4>Коментари</h4>
+
+          ${renderComments(post)}
+
+          <form class="comment-form" onsubmit="submitComment(event, ${post.id})">
+            <textarea id="commentText-${post.id}" placeholder="Напиши коментар..." required></textarea>
+            <button type="submit" class="comment-btn">Добави коментар</button>
+          </form>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderPosts() {
+    const filtered = getFilteredPosts();
+
+    feedInfo.textContent = `${filtered.length} публикации`;
+
+    if (!filtered.length) {
+      postsList.innerHTML = `
+        <div class="empty">
+          Няма публикации по тези филтри.
+        </div>
+      `;
+      return;
+    }
+
+    postsList.innerHTML = filtered.map(buildPostCard).join("");
+  }
+
+  async function loadPosts() {
     try {
-      clearStatus(postStatus);
+      const res = await fetch("/posts");
+      const data = await res.json();
 
-      const currentUser = getCurrentUser();
+      allPosts = Array.isArray(data) ? data : [];
+      renderPosts();
+    } catch (error) {
+      console.error("LOAD POSTS ERROR:", error);
+      feedInfo.textContent = "Грешка при зареждане";
+      postsList.innerHTML = `<div class="empty">Стана грешка при зареждане на публикациите.</div>`;
+    }
+  }
 
-      if (!currentUser) {
-        showStatus(postStatus, "Трябва да си влязъл, за да публикуваш.", "error");
+  async function likePost(postId) {
+    const currentUser = getCurrentUserSafe();
+
+    if (!currentUser) {
+      if (typeof showToast === "function") {
+        showToast("Трябва да влезеш, за да харесваш публикации.", "error");
+      } else {
+        alert("Трябва да влезеш, за да харесваш публикации.");
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(`/posts/${postId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userEmail: currentUser.email
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (typeof showToast === "function") {
+          showToast(data.message || "Грешка при харесване.", "error");
+        } else {
+          alert(data.message || "Грешка при харесване.");
+        }
         return;
       }
 
-      const text = postText.value.trim();
+      if (typeof showToast === "function") {
+        showToast(data.message || "Обновено ✅", "success");
+      }
 
-      if (!text) {
-        showStatus(postStatus, "Напиши текст за публикацията.", "error");
+      await loadPosts();
+    } catch (error) {
+      console.error("LIKE POST ERROR:", error);
+    }
+  }
+
+  async function submitComment(event, postId) {
+    event.preventDefault();
+
+    const currentUser = getCurrentUserSafe();
+
+    if (!currentUser) {
+      if (typeof showToast === "function") {
+        showToast("Трябва да влезеш, за да коментираш.", "error");
+      } else {
+        alert("Трябва да влезеш, за да коментираш.");
+      }
+      return;
+    }
+
+    const textarea = document.getElementById(`commentText-${postId}`);
+    const text = textarea ? textarea.value.trim() : "";
+
+    if (!text) return;
+
+    try {
+      const res = await fetch(`/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          authorName: currentUser.name,
+          authorEmail: currentUser.email,
+          text
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (typeof showToast === "function") {
+          showToast(data.message || "Грешка при коментар.", "error");
+        } else {
+          alert(data.message || "Грешка при коментар.");
+        }
         return;
       }
 
+      if (textarea) textarea.value = "";
+
+      if (typeof showToast === "function") {
+        showToast("Коментарът е добавен ✅", "success");
+      }
+
+      await loadPosts();
+    } catch (error) {
+      console.error("COMMENT ERROR:", error);
+    }
+  }
+
+  postForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus(postStatus);
+
+    const currentUser = getCurrentUserSafe();
+
+    if (!currentUser) {
+      showStatus(postStatus, "Трябва да влезеш, за да публикуваш.", "error");
+      return;
+    }
+
+    const text = postText.value.trim();
+
+    if (!text) {
+      showStatus(postStatus, "Напиши текст за публикацията.", "error");
+      return;
+    }
+
+    try {
       const formData = new FormData();
-      formData.append("authorName", currentUser.name);
-      formData.append("authorEmail", currentUser.email);
+      formData.append("authorName", currentUser.name || "Потребител");
+      formData.append("authorEmail", currentUser.email || "");
       formData.append("text", text);
 
       if (postImage.files[0]) {
@@ -112,158 +418,41 @@
         return;
       }
 
-      postText.value = "";
-      postImage.value = "";
-      showStatus(postStatus, "Публикацията е създадена успешно ✅", "success");
-      loadPosts();
-    } catch (error) {
-      console.error("POST ERROR:", error);
-      showStatus(postStatus, "Стана грешка при публикуването.", "error");
-    }
-  }
+      postForm.reset();
+      showStatus(postStatus, "Публикацията е създадена ✅", "success");
 
-  async function likePost(postId) {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      alert("Трябва да си влязъл, за да харесваш публикации.");
-      return;
-    }
-
-    const res = await fetch(`/posts/${postId}/like`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userEmail: currentUser.email
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Грешка при харесване.");
-      return;
-    }
-
-    loadPosts();
-  }
-
-  async function addComment(postId) {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      alert("Трябва да си влязъл, за да коментираш.");
-      return;
-    }
-
-    const commentInput = document.getElementById(`commentInput-${postId}`);
-    const text = commentInput.value.trim();
-
-    if (!text) {
-      alert("Напиши коментар.");
-      return;
-    }
-
-    const res = await fetch(`/posts/${postId}/comments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        authorName: currentUser.name,
-        authorEmail: currentUser.email,
-        text
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Грешка при коментиране.");
-      return;
-    }
-
-    commentInput.value = "";
-    loadPosts();
-  }
-
-  async function loadPosts() {
-    try {
-      const res = await fetch("/posts");
-      const data = await res.json();
-
-      postsList.innerHTML = "";
-
-      if (!data || !data.length) {
-        postsList.innerHTML = '<div class="empty">Все още няма публикации.</div>';
-        return;
+      if (typeof showToast === "function") {
+        showToast("Публикацията е създадена ✅", "success");
       }
 
-      data.forEach(post => {
-        const div = document.createElement("div");
-        div.className = "post-item";
-
-        const currentUser = getCurrentUser();
-        const liked =
-          currentUser &&
-          post.likedBy &&
-          post.likedBy.includes(currentUser.email);
-
-        const commentsHtml = post.comments && post.comments.length
-          ? post.comments.map(comment => `
-              <div class="comment-item">
-                <strong>
-                  <a href="/profile/${encodeURIComponent(comment.authorEmail)}" class="author-link">
-                    ${comment.authorName}
-                  </a>
-                </strong>
-                <div class="meta">${comment.createdAt}</div>
-                <div>${comment.text}</div>
-              </div>
-            `).join("")
-          : '<div class="empty small-empty">Все още няма коментари.</div>';
-
-        div.innerHTML = `
-          <strong>
-            <a href="/profile/${encodeURIComponent(post.authorEmail)}" class="author-link">
-              ${post.authorName}
-            </a>
-          </strong>
-          <div class="meta">${post.createdAt}</div>
-          <p>${post.text}</p>
-          ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Снимка към публикацията" class="post-image">` : ""}
-
-          <div class="post-actions">
-            <button class="like-btn" onclick="likePost(${post.id})">
-              ${liked ? "💔 Премахни лайк" : "❤️ Харесай"}
-            </button>
-            <span class="like-count">❤️ ${post.likes || 0}</span>
-          </div>
-
-          <div class="comments-section">
-            <h4>Коментари</h4>
-            <div class="comments-list">
-              ${commentsHtml}
-            </div>
-
-            <div class="comment-form">
-              <textarea id="commentInput-${post.id}" placeholder="Напиши коментар..."></textarea>
-              <button class="comment-btn" onclick="addComment(${post.id})">Публикувай коментар</button>
-            </div>
-          </div>
-        `;
-
-        postsList.appendChild(div);
-      });
+      await loadPosts();
     } catch (error) {
-      console.error("LOAD POSTS ERROR:", error);
-      postsList.innerHTML = '<div class="empty">Грешка при зареждане на публикациите.</div>';
+      console.error("CREATE POST ERROR:", error);
+      showStatus(postStatus, "Стана грешка при публикуване.", "error");
     }
-  }
+  });
 
-  loadPosts();
+  feedSearchInput.addEventListener("input", renderPosts);
+  feedAuthorInput.addEventListener("input", renderPosts);
+  feedSortSelect.addEventListener("change", renderPosts);
+
+  clearFeedFiltersBtn.addEventListener("click", () => {
+    feedSearchInput.value = "";
+    feedAuthorInput.value = "";
+    feedSortSelect.value = "newest";
+    renderPosts();
+  });
+
+  window.likePost = likePost;
+  window.submitComment = submitComment;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+    updateFeedAccess();
+    loadPosts();
+  });
 </script>
+
 </body>
 </html>

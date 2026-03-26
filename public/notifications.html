@@ -13,21 +13,21 @@
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
-  <a href="/">Начало</a>
-  <a href="/jobs-page">Обяви</a>
-  <a href="/my-jobs-page">Моите обяви</a>
-  <a href="/inbox-page">Поща</a>
-  <a href="/notifications-page">Известия</a>
-    <a href="/favorites-page">Любими</a>
-  <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
-  <a href="/feed-page">Новини</a>
-</div>
+        <a href="/">Начало</a>
+        <a href="/jobs-page">Обяви</a>
+        <a href="/my-jobs-page">Моите обяви</a>
+        <a href="/favorites-page">Любими</a>
+        <a href="/inbox-page">Поща</a>
+        <a class="active" href="/notifications-page">Известия</a>
+        <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
+        <a href="/feed-page">Новини</a>
+      </div>
 
       <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip">Вход</button>
+        <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
         <div id="userDropdown" class="user-dropdown hidden"></div>
       </div>
     </div>
@@ -35,157 +35,236 @@
 </header>
 
 <div class="container">
-  <div class="card">
-    <div class="top-tabs">
-      <button id="allNotificationsBtn" class="top-tab active" type="button">Всички</button>
-      <button id="unreadNotificationsBtn" class="top-tab" type="button">Непрочетени</button>
-    </div>
 
-    <div class="section-head" style="margin-top: 18px;">
+  <section class="card landing-hero-card">
+    <div class="landing-hero-grid">
       <div>
-        <h2>Известия</h2>
-        <div class="small-text">
-          Тук ще виждаш нови съобщения, кандидатури, промени по кандидатури и активност по публикациите.
+        <div class="landing-badge">Всичко важно на едно място</div>
+        <h1 class="landing-title">Известия</h1>
+        <p class="landing-text">
+          Следи нови кандидатури, съобщения, промени по обяви, ревюта и
+          всички важни действия в твоя профил.
+        </p>
+
+        <div class="landing-cta-row">
+          <a href="/inbox-page" class="landing-main-btn">Отвори пощата</a>
+          <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
         </div>
       </div>
 
-      <div class="application-action-buttons">
-        <div id="notificationsCount" class="results-info"></div>
-        <button id="markAllReadBtn" type="button" class="job-card-btn secondary">Маркирай всички</button>
+      <div class="landing-side-panel">
+        <div class="landing-side-card">
+          <div class="landing-side-icon">🔔</div>
+          <div>
+            <h3>Нови известия</h3>
+            <p>Ще виждаш всички нови действия по твоите обяви и профил.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">⚡</div>
+          <div>
+            <h3>Бързи действия</h3>
+            <p>Маркирай всичко като прочетено и отвори свързаната страница.</p>
+          </div>
+        </div>
+
+        <div class="landing-side-card">
+          <div class="landing-side-icon">📬</div>
+          <div>
+            <h3>Свързана поща</h3>
+            <p>Съобщенията и известията работят заедно за по-бърза комуникация.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="notificationsGuestBox" class="card hidden">
+    <div class="empty-state-box">
+      <div class="empty-state-icon">🔐</div>
+      <h3>Трябва да влезеш в профила си</h3>
+      <p>Само влезли потребители могат да виждат своите известия.</p>
+      <div class="empty-state-actions">
+        <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+        <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="notificationsSection" class="hidden">
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Център за известия</h2>
+          <div id="notificationsInfo" class="small-text">Зареждане...</div>
+        </div>
+
+        <div class="job-card-actions">
+          <button id="markAllReadBtn" class="secondary-btn" type="button">Маркирай всички като прочетени</button>
+        </div>
+      </div>
+
+      <div class="favorites-filters">
+        <div class="favorites-filters-grid">
+          <input id="notificationSearchInput" placeholder="Търси по заглавие или текст...">
+
+          <select id="notificationTypeFilter">
+            <option value="">Всички типове</option>
+            <option value="application_new">Нова кандидатура</option>
+            <option value="application_status">Статус кандидатура</option>
+            <option value="message_new">Ново съобщение</option>
+            <option value="review_new">Ново ревю</option>
+            <option value="project_completed">Завършен проект</option>
+            <option value="post_like">Лайк по публикация</option>
+            <option value="post_comment">Коментар по публикация</option>
+            <option value="general">Общи</option>
+          </select>
+
+          <select id="notificationReadFilter">
+            <option value="">Всички</option>
+            <option value="unread">Само непрочетени</option>
+            <option value="read">Само прочетени</option>
+          </select>
+
+          <select id="notificationSortFilter">
+            <option value="newest">Най-нови</option>
+            <option value="oldest">Най-стари</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div id="notificationsList" class="application-cards-list"></div>
-  </div>
+    <section class="card">
+      <div id="notificationsList" class="application-cards-list"></div>
+    </section>
+
+  </section>
+
 </div>
 
 <script src="/app.js"></script>
 <script>
-  updateHeaderUser();
-  updateRoleVisibility();
-
-  const allNotificationsBtn = document.getElementById("allNotificationsBtn");
-  const unreadNotificationsBtn = document.getElementById("unreadNotificationsBtn");
+  const notificationsGuestBox = document.getElementById("notificationsGuestBox");
+  const notificationsSection = document.getElementById("notificationsSection");
+  const notificationsInfo = document.getElementById("notificationsInfo");
   const notificationsList = document.getElementById("notificationsList");
-  const notificationsCount = document.getElementById("notificationsCount");
+
   const markAllReadBtn = document.getElementById("markAllReadBtn");
 
-  let notificationMode = "all";
-  let loadedNotifications = [];
+  const notificationSearchInput = document.getElementById("notificationSearchInput");
+  const notificationTypeFilter = document.getElementById("notificationTypeFilter");
+  const notificationReadFilter = document.getElementById("notificationReadFilter");
+  const notificationSortFilter = document.getElementById("notificationSortFilter");
+
+  let notificationsData = [];
+
+  function escapeHtmlLocal(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
   function getNotificationTypeLabel(type) {
-    if (type === "message_new") return "Ново съобщение";
-    if (type === "application_new") return "Нова кандидатура";
-    if (type === "application_status") return "Промяна по кандидатура";
-    if (type === "post_like") return "Нов лайк";
-    if (type === "post_comment") return "Нов коментар";
-    return "Известие";
+    if (type === "application_new") return "🟦 Нова кандидатура";
+    if (type === "application_status") return "🟨 Статус кандидатура";
+    if (type === "message_new") return "🟪 Ново съобщение";
+    if (type === "review_new") return "🟩 Ново ревю";
+    if (type === "project_completed") return "✅ Завършен проект";
+    if (type === "post_like") return "❤️ Лайк";
+    if (type === "post_comment") return "💬 Коментар";
+    return "🔔 Известие";
   }
 
-  function switchMode(mode) {
-    notificationMode = mode;
-
-    if (mode === "all") {
-      allNotificationsBtn.classList.add("active");
-      unreadNotificationsBtn.classList.remove("active");
-    } else {
-      unreadNotificationsBtn.classList.add("active");
-      allNotificationsBtn.classList.remove("active");
-    }
-
-    renderNotifications();
+  function getNotificationBadgeClass(item) {
+    return item.isRead ? "status-approved" : "status-pending";
   }
 
-  allNotificationsBtn.addEventListener("click", () => switchMode("all"));
-  unreadNotificationsBtn.addEventListener("click", () => switchMode("unread"));
+  function getFilteredNotifications() {
+    const searchValue = notificationSearchInput.value.trim().toLowerCase();
+    const typeValue = notificationTypeFilter.value;
+    const readValue = notificationReadFilter.value;
+    const sortValue = notificationSortFilter.value;
 
-  async function markNotificationRead(notificationId) {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return;
+    let filtered = notificationsData.filter(item => {
+      const title = (item.title || "").toLowerCase();
+      const text = (item.text || "").toLowerCase();
+      const type = item.type || "";
+      const isRead = !!item.isRead;
 
-    const res = await fetch(`/notifications/${notificationId}/read`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        requesterEmail: currentUser.email
-      })
+      const matchesSearch =
+        !searchValue ||
+        title.includes(searchValue) ||
+        text.includes(searchValue);
+
+      const matchesType =
+        !typeValue || type === typeValue;
+
+      const matchesRead =
+        !readValue ||
+        (readValue === "unread" && !isRead) ||
+        (readValue === "read" && isRead);
+
+      return matchesSearch && matchesType && matchesRead;
     });
 
-    await res.json();
-    await loadNotifications();
-  }
-
-  async function markAllRead() {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return;
-
-    const res = await fetch(`/notifications/read-all/${encodeURIComponent(currentUser.email)}`, {
-      method: "PUT"
+    filtered.sort((a, b) => {
+      const aId = Number(a.id) || 0;
+      const bId = Number(b.id) || 0;
+      return sortValue === "oldest" ? aId - bId : bId - aId;
     });
 
-    await res.json();
-    await loadNotifications();
+    return filtered;
   }
-
-  markAllReadBtn.addEventListener("click", markAllRead);
 
   function buildNotificationCard(item) {
-    const unreadClass = !item.isRead ? "pending-card" : "";
-    const badgeClass = !item.isRead ? "status-pending" : "status-approved";
-
     return `
-      <div class="application-status-card ${unreadClass}">
+      <div class="application-status-card ${!item.isRead ? "pending-card" : ""}">
         <div class="application-card-top">
           <div>
-            <h3 class="application-card-title">${item.title || "Известие"}</h3>
+            <h3 class="application-card-title">${escapeHtmlLocal(item.title || "Известие")}</h3>
             <div class="application-card-meta">
               <span>${getNotificationTypeLabel(item.type)}</span>
-              <span>📅 ${item.createdAt || ""}</span>
+              <span>🕒 ${escapeHtmlLocal(item.createdAt || "")}</span>
             </div>
           </div>
 
-          <span class="application-status-badge ${badgeClass}">
+          <div class="application-status-badge ${getNotificationBadgeClass(item)}">
             ${item.isRead ? "Прочетено" : "Ново"}
-          </span>
+          </div>
         </div>
 
         <div class="application-card-body">
-          <p>${item.text || ""}</p>
+          <h4>Детайли</h4>
+          <p>${escapeHtmlLocal(item.text || "")}</p>
         </div>
 
-        <div class="application-card-actions-row">
-          <div class="application-action-buttons">
-            ${
-              item.link
-                ? `<a href="${item.link}" class="job-card-btn">Отвори</a>`
-                : ""
-            }
-            ${
-              !item.isRead
-                ? `<button type="button" onclick="markNotificationRead(${item.id})">Маркирай като прочетено</button>`
-                : ""
-            }
-          </div>
+        <div class="application-action-buttons">
+          ${item.link ? `<a href="${item.link}" class="job-card-btn">Отвори</a>` : ""}
+          ${!item.isRead ? `<button type="button" class="secondary-btn" onclick="markNotificationRead(${item.id})">Маркирай като прочетено</button>` : ""}
         </div>
       </div>
     `;
   }
 
   function renderNotifications() {
-    const filtered = notificationMode === "unread"
-      ? loadedNotifications.filter(item => !item.isRead)
-      : loadedNotifications;
+    const filtered = getFilteredNotifications();
+    const unreadCount = notificationsData.filter(item => !item.isRead).length;
 
-    notificationsCount.textContent = `${filtered.length} известия`;
+    notificationsInfo.textContent = `Общо: ${filtered.length} | Непрочетени: ${unreadCount}`;
 
     if (!filtered.length) {
-      notificationsList.innerHTML = `<div class="empty">${
-        notificationMode === "unread"
-          ? "Нямаш непрочетени известия."
-          : "Все още няма известия."
-      }</div>`;
+      notificationsList.innerHTML = createEmptyStateHTML({
+        icon: "🔔",
+        title: "Няма известия",
+        text: "Когато има нови действия по твоя профил, те ще се появят тук.",
+        buttonText: "Към обявите",
+        buttonHref: "/jobs-page"
+      });
       return;
     }
 
@@ -195,24 +274,110 @@
   async function loadNotifications() {
     const currentUser = getCurrentUser();
 
-    if (!currentUser) {
-      notificationsList.innerHTML = '<div class="empty">Трябва да си влязъл, за да виждаш известията си.</div>';
-      notificationsCount.textContent = "";
+    if (!currentUser?.email) {
+      notificationsGuestBox.classList.remove("hidden");
+      notificationsSection.classList.add("hidden");
       return;
     }
 
-    const res = await fetch(`/notifications/${encodeURIComponent(currentUser.email)}`);
-    const data = await res.json();
+    notificationsGuestBox.classList.add("hidden");
+    notificationsSection.classList.remove("hidden");
 
-    loadedNotifications = data || [];
-    renderNotifications();
+    try {
+      showSkeletons(notificationsList, 4);
 
-    if (typeof updateNotificationBadge === "function") {
-      updateNotificationBadge({ silent: true });
+      const res = await fetch(`/notifications/${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+
+      notificationsData = Array.isArray(data) ? data : [];
+      renderNotifications();
+    } catch (error) {
+      console.error("LOAD NOTIFICATIONS ERROR:", error);
+
+      notificationsList.innerHTML = createEmptyStateHTML({
+        icon: "⚠️",
+        title: "Стана грешка",
+        text: "Не успяхме да заредим известията."
+      });
     }
   }
 
-  loadNotifications();
+  async function markNotificationRead(notificationId) {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.email) return;
+
+    try {
+      const res = await fetch(`/notifications/${notificationId}/read`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          requesterEmail: currentUser.email
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Грешка при маркиране.", "error");
+        return;
+      }
+
+      showToast(data.message || "Известието е маркирано като прочетено ✅", "success");
+      await loadNotifications();
+
+      if (typeof updateNotificationBadge === "function") {
+        updateNotificationBadge({ silent: true });
+      }
+    } catch (error) {
+      console.error("MARK NOTIFICATION READ ERROR:", error);
+      showToast("Стана грешка при маркиране.", "error");
+    }
+  }
+
+  async function markAllNotificationsRead() {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.email) return;
+
+    try {
+      const res = await fetch(`/notifications/read-all/${encodeURIComponent(currentUser.email)}`, {
+        method: "PUT"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Грешка при маркиране.", "error");
+        return;
+      }
+
+      showToast(data.message || "Всички известия са маркирани като прочетени ✅", "success");
+      await loadNotifications();
+
+      if (typeof updateNotificationBadge === "function") {
+        updateNotificationBadge({ silent: true });
+      }
+    } catch (error) {
+      console.error("MARK ALL READ ERROR:", error);
+      showToast("Стана грешка при маркиране.", "error");
+    }
+  }
+
+  window.markNotificationRead = markNotificationRead;
+
+  markAllReadBtn.addEventListener("click", markAllNotificationsRead);
+
+  notificationSearchInput.addEventListener("input", renderNotifications);
+  notificationTypeFilter.addEventListener("change", renderNotifications);
+  notificationReadFilter.addEventListener("change", renderNotifications);
+  notificationSortFilter.addEventListener("change", renderNotifications);
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    updateHeaderUser();
+    updateRoleVisibility();
+    await loadNotifications();
+  });
 </script>
 </body>
 </html>
