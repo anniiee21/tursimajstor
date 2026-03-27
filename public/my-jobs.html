@@ -48,7 +48,7 @@
 
         <div class="landing-cta-row">
           <a href="/jobs-page" class="landing-main-btn">Публикувай нова обява</a>
-          <a href="/profile-page" class="landing-secondary-btn" onclick="return false;">Моят профил</a>
+          <a href="/jobs-page" class="landing-secondary-btn">Към обявите</a>
         </div>
       </div>
 
@@ -112,6 +112,7 @@
           <option value="">Всички типове</option>
           <option value="job">Само работа</option>
           <option value="service">Само услуги</option>
+          <option value="company">Само B2B</option>
         </select>
         <select id="myJobsSortFilter">
           <option value="newest">Най-нови</option>
@@ -201,11 +202,15 @@
   }
 
   function getJobTypeLabel(type) {
-    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
+    if (type === "service") return "🟢 Услуга";
+    if (type === "company") return "🏢 B2B";
+    return "🔵 Работа";
   }
 
   function getJobTypeText(type) {
-    return type === "service" ? "Предлагам услуга" : "Търся човек";
+    if (type === "service") return "Предлагам услуга";
+    if (type === "company") return "Фирма за фирма";
+    return "Търся човек";
   }
 
   function setQuickFilter(filterName) {
@@ -288,7 +293,6 @@
     return `
       <div class="job-market-card ${isPromotedJob(job) ? "job-market-card-premium" : ""}">
         ${isPromotedJob(job) ? `<div class="job-promoted-badge">⭐ Промотирана</div>` : ""}
-
         <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
 
         <div class="job-market-top">

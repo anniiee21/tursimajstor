@@ -13,7 +13,7 @@
     <div class="navbar">
       <h1 class="brand">TursiMajstor</h1>
 
-      <button id="mobileMenuBtn" class="mobile-menu-btn">☰ Меню</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button">☰ Меню</button>
 
       <div id="navLinks" class="nav-links">
         <a href="/">Начало</a>
@@ -26,9 +26,13 @@
         <a href="/feed-page">Новини</a>
       </div>
 
-      <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip">Вход</button>
-        <div id="userDropdown" class="user-dropdown hidden"></div>
+      <div class="header-actions-right">
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button">🌙</button>
+
+        <div class="user-menu">
+          <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
+          <div id="userDropdown" class="user-dropdown hidden"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -38,52 +42,50 @@
 
   <nav class="breadcrumbs">
     <a href="/">Начало</a>
-    <span>•</span>
+    <span>›</span>
     <span>Обяви</span>
   </nav>
 
-  <section class="card jobs-redesign-hero">
-    <div class="jobs-redesign-hero-content">
-      <div class="jobs-redesign-badge">Нова структура на платформата</div>
-      <h1 class="jobs-redesign-title">Избери какво търсиш</h1>
-      <p class="jobs-redesign-text">
-        Разделихме платформата на 3 основни секции, за да намираш по-бързо правилните обяви,
-        услуги и бизнес възможности.
-      </p>
+  <section class="card jobs-bundle-hero">
+    <div class="jobs-bundle-badge">🔥 Всичко на едно място</div>
+    <h1 class="jobs-bundle-title">Работа, услуги и фирми</h1>
+    <p class="jobs-bundle-text">
+      Намери работа, предложи услуга или свържи бизнеса си с други фирми.
+    </p>
 
-      <div class="jobs-top-tabs jobs-top-tabs-3">
-        <button id="tabJobsBtn" class="top-tab active" type="button">Обяви за работа</button>
-        <button id="tabServicesBtn" class="top-tab" type="button">Предлагани услуги</button>
-        <button id="tabCompaniesBtn" class="top-tab hidden" type="button">Фирма за фирма</button>
-      </div>
+    <div class="jobs-bundle-tabs">
+      <button id="tabJobsBtn" class="jobs-bundle-tab active" type="button">💼 Обяви</button>
+      <button id="tabServicesBtn" class="jobs-bundle-tab" type="button">🛠 Услуги</button>
+      <button id="tabCompaniesBtn" class="jobs-bundle-tab hidden" type="button">🏢 B2B</button>
     </div>
   </section>
 
-  <div class="jobs-redesign-layout">
+  <div class="jobs-bundle-layout">
 
-    <aside class="jobs-redesign-sidebar">
-      <div class="jobs-sidebar-head">
+    <aside class="jobs-bundle-sidebar">
+      <div class="jobs-bundle-sidebar-head">
         <h2 id="sidebarTitle">Категории за работа</h2>
         <p id="sidebarSubtitle">Избери категория и подкатегория</p>
       </div>
 
-      <div class="jobs-hover-categories-shell">
-        <div id="jobsCategoryList" class="jobs-hover-categories"></div>
+      <div class="jobs-bundle-sidebar-body">
+        <div id="jobsCategoryList" class="jobs-bundle-categories"></div>
 
-        <div id="jobsSubcategoryPanel" class="jobs-hover-subcategories">
-          <div class="jobs-subcategory-placeholder">
-            Избери категория, за да видиш подкатегориите.
+        <div id="jobsSubcategoryPanel" class="jobs-bundle-subcategories">
+          <div class="jobs-bundle-sub-placeholder">
+            Избери категория отляво, за да видиш подкатегориите.
           </div>
         </div>
       </div>
     </aside>
 
-    <main class="jobs-redesign-main">
+    <main class="jobs-bundle-main">
 
-      <section class="card jobs-filter-card">
-        <div class="jobs-filter-grid jobs-filter-grid-4">
+      <section class="jobs-bundle-filters card">
+        <div class="jobs-bundle-filter-grid">
           <input id="searchInput" placeholder="Търси по заглавие, описание или услуга...">
           <input id="cityFilter" placeholder="Град">
+
           <select id="sortFilter">
             <option value="recommended">Препоръчани</option>
             <option value="newest">Най-нови</option>
@@ -92,14 +94,17 @@
             <option value="budgetAsc">Бюджет: нисък към висок</option>
             <option value="cityAsc">Град: А-Я</option>
           </select>
-          <button id="clearFiltersBtn" type="button" class="secondary-btn">Изчисти филтрите</button>
+
+          <button id="clearFiltersBtn" class="secondary-btn jobs-bundle-clear-btn" type="button">
+            Изчисти филтрите
+          </button>
         </div>
 
-        <div class="marketplace-quick-filters">
-          <button id="filterAllBtn" type="button" class="quick-filter-btn active">Всички</button>
-          <button id="filterPremiumBtn" type="button" class="quick-filter-btn">Само premium</button>
-          <button id="filterWithImageBtn" type="button" class="quick-filter-btn">Със снимки</button>
-          <button id="filterBudgetBtn" type="button" class="quick-filter-btn">С бюджет</button>
+        <div class="jobs-bundle-quick-filters">
+          <button id="filterAllBtn" class="jobs-bundle-pill active" type="button">Всички</button>
+          <button id="filterPremiumBtn" class="jobs-bundle-pill" type="button">Само premium</button>
+          <button id="filterWithImageBtn" class="jobs-bundle-pill" type="button">Със снимки</button>
+          <button id="filterBudgetBtn" class="jobs-bundle-pill" type="button">С бюджет</button>
         </div>
 
         <div class="active-filter-row">
@@ -111,9 +116,20 @@
       <section class="card">
         <div class="section-head">
           <div>
-            <h2 id="featuredSectionTitle">⭐ Top обяви</h2>
+            <h2>🤖 Препоръчани за теб</h2>
+            <div class="small-text">Подбрани според твоя профил, умения и град.</div>
+          </div>
+        </div>
+
+        <div id="recommendedList" class="job-cards-grid"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2 id="featuredSectionTitle">⭐ Top обяви за работа</h2>
             <div id="featuredSectionText" class="small-text">
-              Най-видимите и най-интересните предложения в тази секция.
+              Най-видимите предложения за работа и търсене на изпълнители.
             </div>
           </div>
         </div>
@@ -124,9 +140,9 @@
       <section class="card">
         <div class="section-head">
           <div>
-            <h2 id="mainSectionTitle">Всички резултати</h2>
+            <h2 id="mainSectionTitle">Всички обяви за работа</h2>
             <div id="mainSectionText" class="small-text">
-              Разгледай всички активни резултати според избраните филтри.
+              Разгледай всички налични обяви според избраните филтри.
             </div>
           </div>
         </div>
@@ -134,11 +150,11 @@
         <div id="jobsList" class="job-cards-grid"></div>
       </section>
 
-      <section class="card" id="publishPanel">
+      <section class="card">
         <div class="publish-shell">
           <div class="publish-intro">
-            <h3 id="publishTitle">Публикувай нова обява</h3>
-            <p id="publishText">Добави съдържание, снимки и публикувай в правилната секция.</p>
+            <h3 id="publishTitle">Публикувай обява за работа</h3>
+            <p id="publishText">Търсиш човек, екип или изпълнител? Публикувай тук.</p>
           </div>
 
           <form id="jobForm" class="publish-form-clean">
@@ -213,32 +229,32 @@
 <script src="/app.js"></script>
 <script>
   const JOB_CATEGORIES = {
-    "Строителство": ["Боядисване", "Шпакловка", "Гипсокартон", "Плочки и настилки", "Покриви", "Изолация", "ВиК", "Електро", "Дограма", "Къртене и извозване"],
-    "Красота": ["Фризьорство", "Маникюр", "Педикюр", "Грим", "Козметика", "Мигли и вежди", "Масажи"],
-    "IT": ["Web Developer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "System Administrator", "DevOps", "QA Testing", "Graphic Design", "UI/UX Design", "SEO Specialist"],
-    "Маркетинг": ["Социални мрежи", "Performance Marketing", "Копирайтинг", "Имейл маркетинг", "Брандинг", "PR"],
-    "Образование": ["Частни уроци", "Езиково обучение", "Подготовка за матури", "Подготовка за кандидатстване", "Онлайн обучение"],
-    "Логистика": ["Куриерски услуги", "Доставка", "Леки товари", "Тежкотоварен транспорт", "Складови услуги"],
-    "Дом и ремонти": ["Почистване", "Домашен майстор", "Мебели по поръчка", "Монтаж", "Ремонт на техника"],
-    "Събития": ["Фото и видео", "DJ", "Украса", "Кетъринг", "Водещи"],
-    "Авто услуги": ["Автосервиз", "Боядисване", "Пътна помощ", "Гуми", "Авто диагностика"]
+    "Строителство": ["Боядисване","Шпакловка","Гипсокартон","Плочки и настилки","Покриви","Изолация","ВиК","Електро","Дограма","Къртене и извозване"],
+    "Красота": ["Фризьорство","Маникюр","Педикюр","Грим","Козметика","Мигли и вежди","Масажи"],
+    "IT": ["Web Developer","Frontend Developer","Backend Developer","Full Stack Developer","System Administrator","DevOps","QA Testing","Graphic Design","UI/UX Design","SEO Specialist"],
+    "Маркетинг": ["Социални мрежи","Performance Marketing","Копирайтинг","Имейл маркетинг","Брандинг","PR"],
+    "Образование": ["Частни уроци","Езиково обучение","Подготовка за матури","Подготовка за кандидатстване","Онлайн обучение"],
+    "Логистика": ["Куриерски услуги","Доставка","Леки товари","Тежкотоварен транспорт","Складови услуги"],
+    "Дом и ремонти": ["Почистване","Домашен майстор","Мебели по поръчка","Монтаж","Ремонт на техника"],
+    "Събития": ["Фото и видео","DJ","Украса","Кетъринг","Водещи"],
+    "Авто услуги": ["Автосервиз","Боядисване","Пътна помощ","Гуми","Авто диагностика"]
   };
 
   const SERVICE_CATEGORIES = {
-    "Дигитални услуги": ["Уеб сайт", "Онлайн магазин", "Лого дизайн", "Реклама", "SEO", "Видео монтаж", "Социални мрежи"],
-    "Строителни услуги": ["Боядисване", "Шпакловка", "Плочки", "Ремонт на баня", "Покриви", "ВиК", "Електро"],
-    "Красота и стил": ["Фризьор", "Маникюр", "Грим", "Козметик", "Масаж"],
-    "Обучение и консултации": ["Уроци по английски", "Математика", "Бизнес консултации", "Кариерни консултации", "Счетоводство"],
-    "Фото, видео и дизайн": ["Фотограф", "Видео оператор", "Монтаж", "Графичен дизайн", "Презентации"],
-    "Домашни услуги": ["Почистване", "Гладене", "Градинарство", "Домашен помощник"]
+    "Дигитални услуги": ["Уеб сайт","Онлайн магазин","Лого дизайн","Реклама","SEO","Видео монтаж","Социални мрежи"],
+    "Строителни услуги": ["Боядисване","Шпакловка","Плочки","Ремонт на баня","Покриви","ВиК","Електро"],
+    "Красота и стил": ["Фризьор","Маникюр","Грим","Козметик","Масаж"],
+    "Обучение и консултации": ["Уроци по английски","Математика","Бизнес консултации","Кариерни консултации","Счетоводство"],
+    "Фото, видео и дизайн": ["Фотограф","Видео оператор","Монтаж","Графичен дизайн","Презентации"],
+    "Домашни услуги": ["Почистване","Гладене","Градинарство","Домашен помощник"]
   };
 
   const COMPANY_CATEGORIES = {
-    "Строителни партньорства": ["Подизпълнители", "Груб строеж", "Довършителни работи", "Инсталации", "Доставка на материали"],
-    "Транспорт и логистика": ["Спедиция", "Транспортни фирми", "Складови бази", "Дистрибуция", "Куриерски партньори"],
-    "Производство": ["Металообработка", "Дървообработка", "Текстил", "Пластмаса", "Опаковки"],
-    "Офис и поддръжка": ["Почистване", "Консумативи", "Офис оборудване", "Охрана", "Техническа поддръжка"],
-    "Бизнес услуги": ["Счетоводни къщи", "Правни услуги", "Маркетинг агенции", "HR услуги", "IT поддръжка"]
+    "Строителни партньорства": ["Подизпълнители","Груб строеж","Довършителни работи","Инсталации","Доставка на материали"],
+    "Транспорт и логистика": ["Спедиция","Транспортни фирми","Складови бази","Дистрибуция","Куриерски партньори"],
+    "Производство": ["Металообработка","Дървообработка","Текстил","Пластмаса","Опаковки"],
+    "Офис и поддръжка": ["Почистване","Консумативи","Офис оборудване","Охрана","Техническа поддръжка"],
+    "Бизнес услуги": ["Счетоводни къщи","Правни услуги","Маркетинг агенции","HR услуги","IT поддръжка"]
   };
 
   const sectionConfigs = {
@@ -248,7 +264,7 @@
       featuredTitle: "⭐ Top обяви за работа",
       featuredText: "Най-видимите предложения за работа и търсене на изпълнители.",
       mainTitle: "Всички обяви за работа",
-      mainText: "Разгледай всички налични обяви за работа според избраните филтри.",
+      mainText: "Разгледай всички налични обяви според избраните филтри.",
       publishTitle: "Публикувай обява за работа",
       publishText: "Търсиш човек, екип или изпълнител? Публикувай тук.",
       categories: JOB_CATEGORIES,
@@ -281,9 +297,9 @@
   };
 
   let currentTab = "jobs";
-  let hoveredCategory = "";
   let selectedCategory = "";
   let selectedSubcategory = "";
+  let hoveredCategory = "";
   let activeQuickFilter = "all";
   let allJobs = [];
 
@@ -317,13 +333,20 @@
   const filterWithImageBtn = document.getElementById("filterWithImageBtn");
   const filterBudgetBtn = document.getElementById("filterBudgetBtn");
 
+  const recommendedList = document.getElementById("recommendedList");
   const featuredList = document.getElementById("featuredList");
   const jobsList = document.getElementById("jobsList");
   const activeCategoryLabel = document.getElementById("activeCategoryLabel");
   const resultsInfo = document.getElementById("resultsInfo");
+  const jobForm = document.getElementById("jobForm");
 
-  function getCurrentSectionConfig() {
-    return sectionConfigs[currentTab];
+  function escapeHtml(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
   function getCurrentUserSafe() {
@@ -344,6 +367,10 @@
     }
   }
 
+  function getCurrentSectionConfig() {
+    return sectionConfigs[currentTab];
+  }
+
   function getTypeLabel(type) {
     if (type === "service") return "🟢 Услуга";
     if (type === "company") return "🏢 B2B";
@@ -357,7 +384,12 @@
   }
 
   function isPromotedJob(job) {
-    return !!(job && job.isPromoted && job.promotedUntil && new Date(job.promotedUntil) > new Date());
+    return !!(
+      job &&
+      job.isPromoted &&
+      job.promotedUntil &&
+      new Date(job.promotedUntil) > new Date()
+    );
   }
 
   function buildGalleryPreview(job) {
@@ -382,26 +414,64 @@
 
         <div class="job-market-top">
           <div>
-            <h4 class="job-market-title">${job.title || "Без заглавие"}</h4>
+            <h4 class="job-market-title">${escapeHtml(job.title || "Без заглавие")}</h4>
             <div class="job-market-meta">
-              <span>📍 ${job.city || "Без град"}</span>
-              <span>🏷 ${job.category || "Без категория"}${job.subcategory ? " / " + job.subcategory : ""}</span>
+              <span>📍 ${escapeHtml(job.city || "Без град")}</span>
+              <span>🏷 ${escapeHtml(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}</span>
               <span>📌 ${getTypeText(job.type)}</span>
             </div>
-            ${isPromotedJob(job) ? `<div class="job-promoted-inline">⭐ До ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>` : ""}
+            ${isPromotedJob(job)
+              ? `<div class="job-promoted-inline">⭐ До ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>`
+              : ""}
           </div>
 
-          ${job.budget ? `<div class="job-budget-badge">${job.budget} лв</div>` : ""}
+          ${job.budget ? `<div class="job-budget-badge">${escapeHtml(String(job.budget))} лв</div>` : ""}
         </div>
 
         ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
         ${buildGalleryPreview(job)}
 
-        <p class="job-market-desc">${job.description || ""}</p>
+        <p class="job-market-desc">${escapeHtml(job.description || "")}</p>
 
         <div class="job-card-actions">
           <a href="/job/${job.id}" class="job-card-btn">Виж</a>
-          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Профил</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail || "")}" class="job-card-btn secondary">Профил</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildAICard(job) {
+    return `
+      <div class="job-market-card ai-card">
+        <div class="ai-badge">🤖 ${job.aiScore || 0}% match</div>
+
+        <div class="job-type-badge">${getTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${escapeHtml(job.title || "Без заглавие")}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${escapeHtml(job.city || "Без град")}</span>
+              <span>🏷 ${escapeHtml(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}</span>
+            </div>
+          </div>
+
+          ${job.budget ? `<div class="job-budget-badge">${escapeHtml(String(job.budget))} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+        ${buildGalleryPreview(job)}
+
+        <p class="job-market-desc">${escapeHtml(job.description || "")}</p>
+
+        <div class="ai-reasons">
+          ${(job.aiReasons || []).map(reason => `<span class="profile-chip">${escapeHtml(reason)}</span>`).join("")}
+        </div>
+
+        <div class="job-card-actions" style="margin-top:14px;">
+          <a href="/job/${job.id}" class="job-card-btn">Виж</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail || "")}" class="job-card-btn secondary">Профил</a>
         </div>
       </div>
     `;
@@ -434,128 +504,6 @@
     return sorted;
   }
 
-  function populatePublishCategories() {
-    const config = getCurrentSectionConfig();
-    categorySelect.innerHTML = `<option value="">Избери категория</option>`;
-
-    Object.keys(config.categories).forEach(categoryName => {
-      const option = document.createElement("option");
-      option.value = categoryName;
-      option.textContent = categoryName;
-      categorySelect.appendChild(option);
-    });
-
-    subcategorySelect.innerHTML = `<option value="">Избери подкатегория</option>`;
-    jobType.value = config.jobType;
-  }
-
-  function populatePublishSubcategories(categoryName) {
-    const config = getCurrentSectionConfig();
-    subcategorySelect.innerHTML = `<option value="">Избери подкатегория</option>`;
-
-    if (!categoryName || !config.categories[categoryName]) return;
-
-    config.categories[categoryName].forEach(sub => {
-      const option = document.createElement("option");
-      option.value = sub;
-      option.textContent = sub;
-      subcategorySelect.appendChild(option);
-    });
-  }
-
-  function renderHoverCategories() {
-    const config = getCurrentSectionConfig();
-    const categories = config.categories;
-
-    jobsCategoryList.innerHTML = `
-      <button type="button" class="jobs-hover-category-btn ${!selectedCategory ? "active" : ""}" data-category="">
-        Всички
-      </button>
-    `;
-
-    Object.keys(categories).forEach(categoryName => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `jobs-hover-category-btn ${selectedCategory === categoryName ? "active" : ""}`;
-      button.textContent = categoryName;
-
-      button.addEventListener("mouseenter", () => {
-        hoveredCategory = categoryName;
-        renderSubcategoryPanel();
-      });
-
-      button.addEventListener("click", () => {
-        selectedCategory = categoryName;
-        selectedSubcategory = "";
-        hoveredCategory = categoryName;
-        renderHoverCategories();
-        renderSubcategoryPanel();
-        updateActiveCategoryLabel();
-        filterAndRender();
-      });
-
-      jobsCategoryList.appendChild(button);
-    });
-
-    const allBtn = jobsCategoryList.querySelector('[data-category=""]');
-    if (allBtn) {
-      allBtn.addEventListener("mouseenter", () => {
-        hoveredCategory = "";
-        renderSubcategoryPanel();
-      });
-
-      allBtn.addEventListener("click", () => {
-        selectedCategory = "";
-        selectedSubcategory = "";
-        hoveredCategory = "";
-        renderHoverCategories();
-        renderSubcategoryPanel();
-        updateActiveCategoryLabel();
-        filterAndRender();
-      });
-    }
-  }
-
-  function renderSubcategoryPanel() {
-    const config = getCurrentSectionConfig();
-    const categoryToShow = hoveredCategory || selectedCategory;
-
-    if (!categoryToShow || !config.categories[categoryToShow]) {
-      jobsSubcategoryPanel.innerHTML = `
-        <div class="jobs-subcategory-placeholder">
-          Избери категория, за да видиш подкатегориите.
-        </div>
-      `;
-      return;
-    }
-
-    jobsSubcategoryPanel.innerHTML = `
-      <div class="jobs-subcategory-panel-title">${categoryToShow}</div>
-      <div class="jobs-subcategory-grid">
-        <button type="button" class="jobs-subcategory-btn ${selectedCategory === categoryToShow && !selectedSubcategory ? "active" : ""}" data-subcategory="">
-          Всички в ${categoryToShow}
-        </button>
-
-        ${config.categories[categoryToShow].map(sub => `
-          <button type="button" class="jobs-subcategory-btn ${selectedSubcategory === sub ? "active" : ""}" data-subcategory="${sub}">
-            ${sub}
-          </button>
-        `).join("")}
-      </div>
-    `;
-
-    jobsSubcategoryPanel.querySelectorAll(".jobs-subcategory-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        selectedCategory = categoryToShow;
-        selectedSubcategory = btn.dataset.subcategory || "";
-        renderHoverCategories();
-        renderSubcategoryPanel();
-        updateActiveCategoryLabel();
-        filterAndRender();
-      });
-    });
-  }
-
   function updateSectionTexts() {
     const config = getCurrentSectionConfig();
     sidebarTitle.textContent = config.sidebarTitle;
@@ -580,13 +528,120 @@
     activeCategoryLabel.textContent = label;
   }
 
+  function populatePublishCategories() {
+    const config = getCurrentSectionConfig();
+    const categories = config.categories;
+
+    categorySelect.innerHTML = `<option value="">Избери категория</option>`;
+    Object.keys(categories).forEach(categoryName => {
+      const option = document.createElement("option");
+      option.value = categoryName;
+      option.textContent = categoryName;
+      categorySelect.appendChild(option);
+    });
+
+    subcategorySelect.innerHTML = `<option value="">Избери подкатегория</option>`;
+    jobType.value = config.jobType;
+  }
+
+  function populatePublishSubcategories(categoryName) {
+    const config = getCurrentSectionConfig();
+    const categories = config.categories;
+
+    subcategorySelect.innerHTML = `<option value="">Избери подкатегория</option>`;
+    if (!categoryName || !categories[categoryName]) return;
+
+    categories[categoryName].forEach(sub => {
+      const option = document.createElement("option");
+      option.value = sub;
+      option.textContent = sub;
+      subcategorySelect.appendChild(option);
+    });
+  }
+
+  function renderCategories() {
+    const config = getCurrentSectionConfig();
+    const categoryNames = Object.keys(config.categories || {});
+
+    jobsCategoryList.innerHTML = `
+      <button class="jobs-bundle-cat-btn ${!selectedCategory ? "active" : ""}" data-category="" type="button">Всички</button>
+      ${categoryNames.map(name => `
+        <button class="jobs-bundle-cat-btn ${selectedCategory === name ? "active" : ""}" data-category="${escapeHtml(name)}" type="button">${escapeHtml(name)}</button>
+      `).join("")}
+    `;
+
+    jobsCategoryList.querySelectorAll(".jobs-bundle-cat-btn").forEach(btn => {
+      const categoryName = btn.dataset.category || "";
+
+      btn.addEventListener("mouseenter", () => {
+        hoveredCategory = categoryName;
+        renderSubcategories();
+      });
+
+      btn.addEventListener("click", () => {
+        selectedCategory = categoryName;
+        selectedSubcategory = "";
+        hoveredCategory = categoryName;
+        renderCategories();
+        renderSubcategories();
+        updateActiveCategoryLabel();
+        filterAndRender();
+      });
+    });
+  }
+
+  function renderSubcategories() {
+    const config = getCurrentSectionConfig();
+    const categories = config.categories || {};
+    const categoryToShow = hoveredCategory || selectedCategory;
+
+    if (!categoryToShow || !categories[categoryToShow]) {
+      jobsSubcategoryPanel.innerHTML = `
+        <div class="jobs-bundle-sub-placeholder">
+          Избери категория отляво, за да видиш подкатегориите.
+        </div>
+      `;
+      return;
+    }
+
+    jobsSubcategoryPanel.innerHTML = `
+      <div class="jobs-bundle-sub-title">${escapeHtml(categoryToShow)}</div>
+      <div class="jobs-bundle-sub-grid">
+        <button type="button" class="jobs-bundle-sub-btn ${selectedCategory === categoryToShow && !selectedSubcategory ? "active" : ""}" data-subcategory="">
+          Всички в ${escapeHtml(categoryToShow)}
+        </button>
+        ${categories[categoryToShow].map(sub => `
+          <button type="button" class="jobs-bundle-sub-btn ${selectedSubcategory === sub ? "active" : ""}" data-subcategory="${escapeHtml(sub)}">
+            ${escapeHtml(sub)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+
+    jobsSubcategoryPanel.querySelectorAll(".jobs-bundle-sub-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedCategory = categoryToShow;
+        selectedSubcategory = btn.dataset.subcategory || "";
+        renderCategories();
+        renderSubcategories();
+        updateActiveCategoryLabel();
+        filterAndRender();
+      });
+    });
+  }
+
   function setActiveQuickFilter(filterName) {
     activeQuickFilter = filterName;
-    [filterAllBtn, filterPremiumBtn, filterWithImageBtn, filterBudgetBtn].forEach(btn => btn.classList.remove("active"));
+
+    [filterAllBtn, filterPremiumBtn, filterWithImageBtn, filterBudgetBtn].forEach(btn => {
+      btn.classList.remove("active");
+    });
+
     if (filterName === "all") filterAllBtn.classList.add("active");
     if (filterName === "premium") filterPremiumBtn.classList.add("active");
     if (filterName === "withImage") filterWithImageBtn.classList.add("active");
     if (filterName === "withBudget") filterBudgetBtn.classList.add("active");
+
     updateActiveCategoryLabel();
     filterAndRender();
   }
@@ -594,6 +649,45 @@
   function getVisibleItemsByTab() {
     const config = getCurrentSectionConfig();
     return allJobs.filter(item => item.type === config.jobType);
+  }
+
+  async function loadRecommendedJobs() {
+    const user = getCurrentUserSafe();
+
+    if (!recommendedList) return;
+
+    if (!user) {
+      recommendedList.innerHTML = `
+        <div class="empty jobs-bundle-empty-full">
+          Влез в профила си, за да видиш AI препоръки 🤖
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const res = await fetch(`/jobs/recommended/${encodeURIComponent(user.email)}`);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || !data.length) {
+        recommendedList.innerHTML = `
+          <div class="empty jobs-bundle-empty-full">
+            Нямаме препоръки още 💡<br>
+            Попълни профила си
+          </div>
+        `;
+        return;
+      }
+
+      recommendedList.innerHTML = data.map(buildAICard).join("");
+    } catch (error) {
+      console.error("AI LOAD ERROR:", error);
+      recommendedList.innerHTML = `
+        <div class="empty jobs-bundle-empty-full">
+          Грешка при зареждане на AI препоръките.
+        </div>
+      `;
+    }
   }
 
   function filterAndRender() {
@@ -607,9 +701,14 @@
         (item.description || "").toLowerCase().includes(searchValue) ||
         (item.subcategory || "").toLowerCase().includes(searchValue);
 
-      const matchesCity = !cityValue || (item.city || "").toLowerCase().includes(cityValue);
-      const matchesCategory = !selectedCategory || item.category === selectedCategory;
-      const matchesSubcategory = !selectedSubcategory || item.subcategory === selectedSubcategory;
+      const matchesCity =
+        !cityValue || (item.city || "").toLowerCase().includes(cityValue);
+
+      const matchesCategory =
+        !selectedCategory || item.category === selectedCategory;
+
+      const matchesSubcategory =
+        !selectedSubcategory || item.subcategory === selectedSubcategory;
 
       const matchesQuick =
         activeQuickFilter === "all" ||
@@ -629,11 +728,11 @@
 
     featuredList.innerHTML = featured.length
       ? featured.map(item => buildCard(item, true)).join("")
-      : `<div class="empty">Няма top резултати по тези филтри.</div>`;
+      : `<div class="empty jobs-bundle-empty-full">Няма top резултати по тези филтри.</div>`;
 
     jobsList.innerHTML = regular.length
       ? regular.map(item => buildCard(item, false)).join("")
-      : `<div class="empty">Няма намерени резултати в тази секция.</div>`;
+      : `<div class="empty jobs-bundle-empty-full">Няма намерени резултати в тази секция.</div>`;
   }
 
   async function loadAllJobs() {
@@ -644,8 +743,8 @@
       filterAndRender();
     } catch (error) {
       console.error("LOAD ALL JOBS ERROR:", error);
-      featuredList.innerHTML = `<div class="empty">Грешка при зареждане.</div>`;
-      jobsList.innerHTML = `<div class="empty">Грешка при зареждане.</div>`;
+      featuredList.innerHTML = `<div class="empty jobs-bundle-empty-full">Грешка при зареждане.</div>`;
+      jobsList.innerHTML = `<div class="empty jobs-bundle-empty-full">Грешка при зареждане.</div>`;
     }
   }
 
@@ -663,22 +762,45 @@
     selectedCategory = "";
     selectedSubcategory = "";
     hoveredCategory = "";
+    activeQuickFilter = "all";
+
+    [filterAllBtn, filterPremiumBtn, filterWithImageBtn, filterBudgetBtn].forEach(btn => {
+      btn.classList.remove("active");
+    });
+    filterAllBtn.classList.add("active");
 
     updateSectionTexts();
     populatePublishCategories();
-    renderHoverCategories();
-    renderSubcategoryPanel();
+    renderCategories();
+    renderSubcategories();
     updateActiveCategoryLabel();
     filterAndRender();
   }
 
-  categorySelect.addEventListener("change", () => {
-    populatePublishSubcategories(categorySelect.value);
-  });
+  function applyInitialTabFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+
+    if (tab === "services") {
+      setTab("services");
+      return;
+    }
+
+    if (tab === "companies") {
+      setTab("companies");
+      return;
+    }
+
+    setTab("jobs");
+  }
 
   tabJobsBtn.addEventListener("click", () => setTab("jobs"));
   tabServicesBtn.addEventListener("click", () => setTab("services"));
   tabCompaniesBtn.addEventListener("click", () => setTab("companies"));
+
+  categorySelect.addEventListener("change", () => {
+    populatePublishSubcategories(categorySelect.value);
+  });
 
   filterAllBtn.addEventListener("click", () => setActiveQuickFilter("all"));
   filterPremiumBtn.addEventListener("click", () => setActiveQuickFilter("premium"));
@@ -698,16 +820,18 @@
     cityFilter.value = "";
     sortFilter.value = "recommended";
 
-    [filterAllBtn, filterPremiumBtn, filterWithImageBtn, filterBudgetBtn].forEach(btn => btn.classList.remove("active"));
+    [filterAllBtn, filterPremiumBtn, filterWithImageBtn, filterBudgetBtn].forEach(btn => {
+      btn.classList.remove("active");
+    });
     filterAllBtn.classList.add("active");
 
-    renderHoverCategories();
-    renderSubcategoryPanel();
+    renderCategories();
+    renderSubcategories();
     updateActiveCategoryLabel();
     filterAndRender();
   });
 
-  document.getElementById("jobForm").addEventListener("submit", async (e) => {
+  jobForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const currentUser = getCurrentUserSafe();
@@ -737,7 +861,9 @@
 
       if (image) formData.append("image", image);
       if (galleryFiles?.length) {
-        for (const file of galleryFiles) formData.append("gallery", file);
+        for (const file of galleryFiles) {
+          formData.append("gallery", file);
+        }
       }
 
       const res = await fetch("/jobs", {
@@ -746,32 +872,34 @@
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         alert(data.message || "Грешка при публикуване.");
         return;
       }
 
-      e.target.reset();
+      jobForm.reset();
       populatePublishCategories();
       alert("Публикувано успешно ✅");
       await loadAllJobs();
-    } catch (error) { 
+      await loadRecommendedJobs();
+    } catch (error) {
       console.error("PUBLISH ERROR:", error);
       alert("Стана грешка при публикуване.");
     }
   });
 
   document.addEventListener("DOMContentLoaded", async () => {
-    updateHeaderUser();
-    updateRoleVisibility();
+    if (typeof initAppShell === "function") {
+      initAppShell();
+    } else {
+      if (typeof updateHeaderUser === "function") updateHeaderUser();
+      if (typeof updateRoleVisibility === "function") updateRoleVisibility();
+    }
+
     ensureCompanyTabVisibility();
-    updateSectionTexts();
-    populatePublishCategories();
-    renderHoverCategories();
-    renderSubcategoryPanel();
-    updateActiveCategoryLabel();
+    applyInitialTabFromUrl();
     await loadAllJobs();
+    await loadRecommendedJobs();
   });
 </script>
 </body>

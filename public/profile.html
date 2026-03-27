@@ -424,6 +424,7 @@
     if (role === "professional") return "Професионален профил";
     if (role === "freelancer") return "Свободна практика";
     if (role === "company") return "Фирма";
+    if (role === "admin") return "Админ";
     if (role === "client") return "Личен профил";
     if (role === "worker") return "Свободна практика";
     return role || "Потребител";
@@ -888,12 +889,19 @@
       const emailFromUrl = getProfileEmailFromUrl();
       if (!emailFromUrl) return;
 
-      const res = await fetch(`/api/profile/${encodeURIComponent(emailFromUrl)}?t=${Date.now()}`, {
-        cache: "no-store"
-      });
+      const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+
+      const res = await fetch(
+        `/api/profile/${encodeURIComponent(emailFromUrl)}?t=${Date.now()}&requesterEmail=${encodeURIComponent(currentUser?.email || "")}`,
+        {
+          cache: "no-store"
+        }
+      );
 
       if (!res.ok) {
         profileDescription.textContent = "Профилът не можа да бъде зареден.";
+        if (profileName) profileName.textContent = "Профилът не е намерен";
+        if (breadcrumbProfileLabel) breadcrumbProfileLabel.textContent = "Профил";
         return;
       }
 
@@ -901,8 +909,6 @@
       const user = data.user || {};
 
       loadedProfileUser = user;
-
-      const currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : null;
 
       isOwnerProfile = !!(
         currentUser &&

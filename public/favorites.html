@@ -105,13 +105,13 @@
       <div class="favorites-filters">
         <div class="favorites-filters-grid">
           <input id="favoritesSearchInput" placeholder="Търси по заглавие или описание...">
-
           <input id="favoritesCityFilter" placeholder="Филтър по град">
 
           <select id="favoritesTypeFilter">
             <option value="">Всички типове</option>
             <option value="job">Само работа</option>
             <option value="service">Само услуги</option>
+            <option value="company">Само B2B</option>
           </select>
 
           <select id="favoritesSortFilter">
@@ -179,11 +179,15 @@
   }
 
   function getJobTypeLabel(type) {
-    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
+    if (type === "service") return "🟢 Услуга";
+    if (type === "company") return "🏢 B2B";
+    return "🔵 Работа";
   }
 
   function getJobTypeText(type) {
-    return type === "service" ? "Предлага услуга" : "Търси човек";
+    if (type === "service") return "Предлага услуга";
+    if (type === "company") return "Фирма за фирма";
+    return "Търси човек";
   }
 
   function setActiveQuickFilter(filterName) {
@@ -239,22 +243,10 @@
     });
 
     filtered.sort((a, b) => {
-      if (sortValue === "oldest") {
-        return (Number(a.id) || 0) - (Number(b.id) || 0);
-      }
-
-      if (sortValue === "budgetDesc") {
-        return (Number(b.budget) || 0) - (Number(a.budget) || 0);
-      }
-
-      if (sortValue === "budgetAsc") {
-        return (Number(a.budget) || 0) - (Number(b.budget) || 0);
-      }
-
-      if (sortValue === "cityAsc") {
-        return (a.city || "").localeCompare((b.city || ""), "bg");
-      }
-
+      if (sortValue === "oldest") return (Number(a.id) || 0) - (Number(b.id) || 0);
+      if (sortValue === "budgetDesc") return (Number(b.budget) || 0) - (Number(a.budget) || 0);
+      if (sortValue === "budgetAsc") return (Number(a.budget) || 0) - (Number(b.budget) || 0);
+      if (sortValue === "cityAsc") return (a.city || "").localeCompare((b.city || ""), "bg");
       return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
 
@@ -280,7 +272,6 @@
     return `
       <div class="job-market-card ${isPromotedJob(job) ? "job-market-card-premium" : ""}">
         ${isPromotedJob(job) ? `<div class="job-promoted-badge">⭐ Premium</div>` : ""}
-
         <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
 
         <div class="job-market-top">
@@ -291,7 +282,6 @@
               <span>🏷 ${escapeHtmlLocal(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtmlLocal(job.subcategory) : ""}</span>
               <span>📌 ${getJobTypeText(job.type)}</span>
             </div>
-
             ${isPromotedJob(job)
               ? `<div class="job-promoted-inline">⭐ До ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>`
               : ""}

@@ -26,9 +26,13 @@
         <a href="/feed-page">Новини</a>
       </div>
 
-      <div class="user-menu">
-        <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
-        <div id="userDropdown" class="user-dropdown hidden"></div>
+      <div class="header-actions-right">
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button">🌙</button>
+
+        <div class="user-menu">
+          <button id="userMenuBtn" class="user-chip" type="button">Вход</button>
+          <div id="userDropdown" class="user-dropdown hidden"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -156,34 +160,23 @@
   const favoriteBtn = document.getElementById("favoriteBtn");
   const favoriteStatus = document.getElementById("favoriteStatus");
 
-  const applyForm = document.getElementById("applyForm");
-  const applyStatus = document.getElementById("applyStatus");
-  const applyMessage = document.getElementById("applyMessage");
-  const applyCvFile = document.getElementById("applyCvFile");
-  const applyMessageLabel = document.getElementById("applyMessageLabel");
-  const applySubmitBtn = document.getElementById("applySubmitBtn");
-  const applyGuestBox = document.getElementById("applyGuestBox");
-  const applyRegisterBtn = document.getElementById("applyRegisterBtn");
-  const applyGuestText = document.getElementById("applyGuestText");
-
   const contactForm = document.getElementById("contactForm");
   const contactStatus = document.getElementById("contactStatus");
-  const contactSubject = document.getElementById("contactSubject");
-  const contactMessage = document.getElementById("contactMessage");
   const contactGuestBox = document.getElementById("contactGuestBox");
   const contactRegisterBtn = document.getElementById("contactRegisterBtn");
   const contactGuestText = document.getElementById("contactGuestText");
 
-  let loadedJob = null;
-  let loadedOwner = null;
+  const applyForm = document.getElementById("applyForm");
+  const applyStatus = document.getElementById("applyStatus");
+  const applyGuestBox = document.getElementById("applyGuestBox");
+  const applyRegisterBtn = document.getElementById("applyRegisterBtn");
+  const applyGuestText = document.getElementById("applyGuestText");
+
+  let currentJob = null;
+  let currentOwner = null;
   let isFavorite = false;
-  let activeMainImage = "";
 
-  function getJobIdFromUrl() {
-    return Number(window.location.pathname.split("/job/")[1] || 0);
-  }
-
-  function escapeHtmlLocal(value = "") {
+  function escapeHtml(value = "") {
     return String(value)
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
@@ -192,12 +185,19 @@
       .replaceAll("'", "&#039;");
   }
 
-  function normalizeLink(url = "") {
-    if (!url) return "";
-    const trimmed = String(url).trim();
-    if (!trimmed) return "";
-    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
-    return "https://" + trimmed;
+  function normalizeEmailSafe(email = "") {
+    return String(email || "").trim().toLowerCase();
+  }
+
+  function getCurrentUserSafe() {
+    return typeof getCurrentUser === "function" ? getCurrentUser() : null;
+  }
+
+  function getJobIdFromUrl() {
+    const parts = window.location.pathname.split("/job/");
+    const rawId = parts[1] || "";
+    const id = Number(rawId);
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 
   function isPromotedJob(job) {
@@ -209,88 +209,292 @@
     );
   }
 
-  function getJobTypeLabel(type) {
-    return type === "service" ? "🟢 Услуга" : "🔵 Работа";
+  function getTypeLabel(type) {
+    if (type === "service") return "🟢 Услуга";
+    if (type === "company") return "🏢 B2B";
+    return "🔵 Работа";
   }
 
-  function getJobTypeText(type) {
-    return type === "service" ? "Предлага услуга" : "Търси човек";
+  function getTypeText(type) {
+    if (type === "service") return "Предлага услуга";
+    if (type === "company") return "Фирма за фирма";
+    return "Търси човек";
   }
 
-  function getProfileTypeLabel(role) {
-    if (role === "personal") return "Личен профил";
-    if (role === "freelancer") return "Свободна практика";
-    if (role === "professional") return "Професионален профил";
-    if (role === "company") return "Фирма";
-    if (role === "client") return "Личен профил";
-    if (role === "worker") return "Свободна практика";
-    return "Потребител";
+  function buildGallery(job) {
+    const allImages = [job.imageUrl, ...(job.gallery || [])].filter(Boolean);
+
+    if (!allImages.length) return "";
+
+    const mainImage = allImages[0];
+
+    return `
+      <div class="job-details-gallery">
+        <img id="mainGalleryImage" src="${mainImage}" alt="Основна снимка" class="job-main-gallery-image">
+
+        ${allImages.length > 1 ? `
+          <div class="job-thumbs-row" style="margin-top:12px;">
+            ${allImages.map((img, index) => `
+              <img
+                src="${img}"
+                alt="Снимка ${index + 1}"
+                class="job-gallery-thumb ${index === 0 ? "active" : ""}"
+                data-gallery-image="${img}"
+              >
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+    `;
   }
 
-  function getApplyRedirectRole(type) {
-    return type === "service" ? "personal" : "freelancer";
+  function renderJob(job) {
+    document.title = `TursiMajstor - ${job.title || "Детайл на обява"}`;
+
+    jobDetailsCard.innerHTML = `
+      <div class="job-detail-category">${getTypeLabel(job.type)}</div>
+      <h1 class="job-details-title">${escapeHtml(job.title || "Без заглавие")}</h1>
+
+      <div class="job-details-meta">
+        <span>📍 ${escapeHtml(job.city || "Без град")}</span>
+        <span>🏷 ${escapeHtml(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}</span>
+        <span>📌 ${getTypeText(job.type)}</span>
+        ${job.budget ? `<span>💰 ${escapeHtml(String(job.budget))} лв</span>` : ""}
+        ${isPromotedJob(job) ? `<span>⭐ Premium до ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</span>` : ""}
+      </div>
+
+      ${buildGallery(job)}
+
+      <div class="job-detail-body">
+        <h3>Описание</h3>
+        <p>${escapeHtml(job.description || "Няма описание.")}</p>
+      </div>
+    `;
+
+    const mainGalleryImage = document.getElementById("mainGalleryImage");
+    const thumbs = jobDetailsCard.querySelectorAll("[data-gallery-image]");
+
+    thumbs.forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        if (mainGalleryImage) {
+          mainGalleryImage.src = thumb.getAttribute("data-gallery-image");
+        }
+
+        thumbs.forEach(t => t.classList.remove("active"));
+        thumb.classList.add("active");
+      });
+    });
   }
 
-  function getApplyText(type) {
-    if (type === "service") {
-      return {
-        messageLabel: "Съобщение към услугата",
-        messagePlaceholder: "Опиши от какво имаш нужда, за кога и какво очакваш...",
-        submit: "Изпрати заявка",
-        guestText: "За да заявиш услуга, създай личен профил или фирмен профил."
-      };
+  function renderAuthor(owner) {
+    if (!owner) {
+      authorCard.innerHTML = `
+        <div class="empty-state-box">
+          <div class="empty-state-icon">👤</div>
+          <h3>Авторът няма профил</h3>
+          <p>Все още няма налична допълнителна информация.</p>
+        </div>
+      `;
+      return;
     }
 
-    return {
-      messageLabel: "Съобщение към кандидатурата",
-      messagePlaceholder: "Напиши кратко представяне, опит, умения и защо си подходящ...",
-      submit: "Кандидатствай",
-      guestText: "За да кандидатстваш по обява, създай профил за свободна практика или фирма."
-    };
+    authorCard.innerHTML = `
+      <div class="author-card-top">
+        ${owner.profileImage
+          ? `<img src="${owner.profileImage}" alt="Профил" class="author-card-image">`
+          : `<div class="author-card-placeholder">👤</div>`}
+        <div>
+          <h3 style="margin:0 0 6px;">${escapeHtml(owner.name || "Потребител")}</h3>
+          <div class="meta">${escapeHtml(owner.email || "")}</div>
+          <div class="author-role-badge">${escapeHtml(owner.role || "Профил")}</div>
+        </div>
+      </div>
+
+      <div class="author-card-content">
+        <p>${escapeHtml(owner.description || "Няма добавено описание.")}</p>
+
+        <div class="author-mini-meta">
+          ${owner.showPhone && owner.phone ? `<span>📞 ${escapeHtml(owner.phone)}</span>` : ""}
+          ${owner.workCities ? `<span>📍 ${escapeHtml(owner.workCities)}</span>` : ""}
+          ${owner.workingHours ? `<span>🕒 ${escapeHtml(owner.workingHours)}</span>` : ""}
+        </div>
+
+        <div class="author-card-actions job-card-actions" style="margin-top:16px;">
+          <a href="/profile/${encodeURIComponent(owner.email)}" class="job-card-btn">Виж профила</a>
+        </div>
+      </div>
+    `;
   }
 
-  function getAllJobImages(job) {
-    return [job?.imageUrl, ...((job?.gallery) || [])].filter(Boolean);
+  function renderRelated(related) {
+    if (!Array.isArray(related) || !related.length) {
+      relatedJobs.innerHTML = `<div class="empty jobs-bundle-empty-full">Няма подобни обяви.</div>`;
+      return;
+    }
+
+    relatedJobs.innerHTML = related.map(job => `
+      <div class="job-market-card ${isPromotedJob(job) ? "job-market-card-premium" : ""}">
+        ${isPromotedJob(job) ? `<div class="job-promoted-badge">⭐ Промотирана</div>` : ""}
+        <div class="job-type-badge">${getTypeLabel(job.type)}</div>
+
+        <div class="job-market-top">
+          <div>
+            <h4 class="job-market-title">${escapeHtml(job.title || "Без заглавие")}</h4>
+            <div class="job-market-meta">
+              <span>📍 ${escapeHtml(job.city || "Без град")}</span>
+              <span>🏷 ${escapeHtml(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtml(job.subcategory) : ""}</span>
+            </div>
+          </div>
+          ${job.budget ? `<div class="job-budget-badge">${escapeHtml(String(job.budget))} лв</div>` : ""}
+        </div>
+
+        ${job.imageUrl ? `<img src="${job.imageUrl}" alt="Снимка към обявата" class="job-image">` : ""}
+        <p class="job-market-desc">${escapeHtml(job.description || "")}</p>
+
+        <div class="job-card-actions">
+          <a href="/job/${job.id}" class="job-card-btn">Виж</a>
+          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Профил</a>
+        </div>
+      </div>
+    `).join("");
   }
 
-  function renderFavoriteButton() {
-    favoriteBtn.textContent = isFavorite ? "💔 Премахни от любими" : "❤️ Запази в любими";
+  function updateFavoriteButton() {
+    favoriteBtn.textContent = isFavorite ? "💔 Премахни от любими" : "❤️ Запази";
   }
 
   async function loadFavoriteState() {
-    const currentUser = getCurrentUser();
+    const currentUser = getCurrentUserSafe();
 
-    if (!currentUser || !loadedJob) {
+    if (!currentUser?.email || !currentJob?.id) {
       isFavorite = false;
-      renderFavoriteButton();
+      updateFavoriteButton();
       return;
     }
 
     try {
-      const res = await fetch(`/favorites/check?email=${encodeURIComponent(currentUser.email)}&jobId=${loadedJob.id}`);
+      const res = await fetch(`/favorites/check?email=${encodeURIComponent(currentUser.email)}&jobId=${currentJob.id}`);
       const data = await res.json();
       isFavorite = !!data.isFavorite;
-      renderFavoriteButton();
+      updateFavoriteButton();
     } catch (error) {
-      console.error("FAVORITE STATE ERROR:", error);
+      console.error("FAVORITE CHECK ERROR:", error);
       isFavorite = false;
-      renderFavoriteButton();
+      updateFavoriteButton();
     }
   }
 
-  async function toggleFavorite() {
-    clearStatus(favoriteStatus);
+  function updateGuestBlocks() {
+    const currentUser = getCurrentUserSafe();
+    const redirectUrl = `/job/${currentJob?.id || ""}`;
 
-    const currentUser = getCurrentUser();
+    if (!currentUser?.email) {
+      contactGuestBox.classList.remove("hidden");
+      contactForm.classList.add("hidden");
+      applyGuestBox.classList.remove("hidden");
+      applyForm.classList.add("hidden");
 
-    if (!currentUser) {
-      showStatus(favoriteStatus, "Трябва да си влязъл, за да запазваш любими.", "error");
-      showToast("Трябва да си влязъл, за да запазваш любими.", "error");
+      contactGuestText.textContent = "Създай профил, за да изпратиш запитване към автора на обявата.";
+      applyGuestText.textContent = "Създай профил и след това изпрати кандидатура по обявата.";
+
+      contactRegisterBtn.href = `/account-page?mode=register&redirect=${encodeURIComponent(redirectUrl)}`;
+      applyRegisterBtn.href = `/account-page?mode=register&redirect=${encodeURIComponent(redirectUrl)}`;
       return;
     }
 
-    if (!loadedJob) {
-      showStatus(favoriteStatus, "Обявата не е заредена.", "error");
+    if (currentJob && normalizeEmailSafe(currentUser.email) === normalizeEmailSafe(currentJob.ownerEmail)) {
+      contactGuestBox.classList.remove("hidden");
+      contactForm.classList.add("hidden");
+      applyGuestBox.classList.remove("hidden");
+      applyForm.classList.add("hidden");
+
+      contactGuestText.textContent = "Не можеш да изпратиш запитване към собствената си обява.";
+      applyGuestText.textContent = "Не можеш да кандидатстваш по собствената си обява.";
+      return;
+    }
+
+    contactGuestBox.classList.add("hidden");
+    contactForm.classList.remove("hidden");
+    applyGuestBox.classList.add("hidden");
+    applyForm.classList.remove("hidden");
+  }
+
+  async function loadJob() {
+    const jobId = getJobIdFromUrl();
+
+    if (!jobId) {
+      jobDetailsCard.innerHTML = `
+        <div class="empty-state-box">
+          <div class="empty-state-icon">⚠️</div>
+          <h3>Невалидна обява</h3>
+          <p>Липсва валидно ID на обявата.</p>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/jobs/${jobId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        jobDetailsCard.innerHTML = `
+          <div class="empty-state-box">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Обявата не е заредена</h3>
+            <p>${escapeHtml(data.message || "Стана грешка при зареждане.")}</p>
+          </div>
+        `;
+        return;
+      }
+
+      currentJob = data.job || null;
+      currentOwner = data.owner || null;
+
+      if (!currentJob) {
+        jobDetailsCard.innerHTML = `
+          <div class="empty-state-box">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Обявата не е заредена</h3>
+            <p>Липсват данни за обявата.</p>
+          </div>
+        `;
+        return;
+      }
+
+      renderJob(currentJob);
+      renderAuthor(currentOwner);
+      renderRelated(data.related || []);
+      updateGuestBlocks();
+      await loadFavoriteState();
+    } catch (error) {
+      console.error("LOAD JOB ERROR:", error);
+      jobDetailsCard.innerHTML = `
+        <div class="empty-state-box">
+          <div class="empty-state-icon">⚠️</div>
+          <h3>Обявата не е заредена</h3>
+          <p>Възникна техническа грешка при зареждането.</p>
+        </div>
+      `;
+    }
+  }
+
+  favoriteBtn.addEventListener("click", async () => {
+    if (typeof clearStatus === "function") clearStatus(favoriteStatus);
+
+    const currentUser = getCurrentUserSafe();
+
+    if (!currentUser?.email) {
+      if (typeof showStatus === "function") {
+        showStatus(favoriteStatus, "Трябва да влезеш, за да добавяш любими.", "error");
+      }
+      return;
+    }
+
+    if (!currentJob?.id) {
+      if (typeof showStatus === "function") {
+        showStatus(favoriteStatus, "Обявата още не е заредена.", "error");
+      }
       return;
     }
 
@@ -302,370 +506,71 @@
         },
         body: JSON.stringify({
           userEmail: currentUser.email,
-          jobId: loadedJob.id
+          jobId: currentJob.id
         })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        showStatus(favoriteStatus, data.message || "Грешка при запис в любими.", "error");
-        showToast(data.message || "Грешка при запис в любими.", "error");
+        if (typeof showStatus === "function") {
+          showStatus(favoriteStatus, data.message || "Грешка при добавяне в любими.", "error");
+        }
         return;
       }
 
       isFavorite = !!data.isFavorite;
-      renderFavoriteButton();
-      showStatus(favoriteStatus, data.message || "Обновено ✅", "success");
-      showToast(data.message || "Обновено ✅", "success");
+      updateFavoriteButton();
+
+      if (typeof showStatus === "function") {
+        showStatus(favoriteStatus, data.message || "Обновено ✅", "success");
+      }
+
+      if (typeof showToast === "function") {
+        showToast(data.message || "Обновено ✅", "success");
+      }
     } catch (error) {
       console.error("TOGGLE FAVORITE ERROR:", error);
-      showStatus(favoriteStatus, "Стана грешка при запис в любими.", "error");
-      showToast("Стана грешка при запис в любими.", "error");
-    }
-  }
-
-  function updateApplyAccess() {
-    const currentUser = getCurrentUser();
-    if (!loadedJob) return;
-
-    const applyText = getApplyText(loadedJob.type);
-    const redirectRole = getApplyRedirectRole(loadedJob.type);
-
-    applyMessageLabel.textContent = applyText.messageLabel;
-    applyMessage.placeholder = applyText.messagePlaceholder;
-    applySubmitBtn.textContent = applyText.submit;
-    applyGuestText.textContent = applyText.guestText;
-
-    if (!currentUser) {
-      applyGuestBox.classList.remove("hidden");
-      applyForm.classList.add("hidden");
-      applyRegisterBtn.href = `/account-page?role=${redirectRole}`;
-
-      contactGuestBox.classList.remove("hidden");
-      contactForm.classList.add("hidden");
-      contactRegisterBtn.href = `/account-page?role=${redirectRole}`;
-      contactGuestText.textContent = "Създай профил, за да изпратиш запитване към автора на обявата.";
-      return;
-    }
-
-    if (currentUser.email === loadedJob.ownerEmail) {
-      applyGuestBox.classList.remove("hidden");
-      applyForm.classList.add("hidden");
-      applyRegisterBtn.href = `/my-jobs-page`;
-      applyGuestText.textContent = "Това е твоя обява. Не можеш да кандидатстваш по нея.";
-
-      contactGuestBox.classList.remove("hidden");
-      contactForm.classList.add("hidden");
-      contactRegisterBtn.href = `/profile/${encodeURIComponent(currentUser.email)}`;
-      contactGuestText.textContent = "Това е твоя обява. Не можеш да изпратиш запитване до себе си.";
-      return;
-    }
-
-    applyGuestBox.classList.add("hidden");
-    applyForm.classList.remove("hidden");
-
-    contactGuestBox.classList.add("hidden");
-    contactForm.classList.remove("hidden");
-  }
-
-  function buildRelatedCard(job) {
-    const images = getAllJobImages(job);
-
-    return `
-      <div class="job-market-card ${isPromotedJob(job) ? "job-market-card-premium" : ""}">
-        ${isPromotedJob(job) ? `<div class="job-promoted-badge">⭐ Промотирана</div>` : ""}
-        <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
-
-        <div class="job-market-top">
-          <div>
-            <h4 class="job-market-title">${escapeHtmlLocal(job.title || "Без заглавие")}</h4>
-            <div class="job-market-meta">
-              <span>📍 ${escapeHtmlLocal(job.city || "Без град")}</span>
-              <span>🏷 ${escapeHtmlLocal(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtmlLocal(job.subcategory) : ""}</span>
-            </div>
-          </div>
-          ${job.budget ? `<div class="job-budget-badge">${escapeHtmlLocal(String(job.budget))} лв</div>` : ""}
-        </div>
-
-        ${images[0] ? `<img src="${images[0]}" alt="Снимка към обявата" class="job-image">` : ""}
-
-        <p class="job-market-desc">${escapeHtmlLocal(job.description || "")}</p>
-
-        <div class="job-card-actions">
-          <a href="/job/${job.id}" class="job-card-btn">Виж обявата</a>
-        </div>
-      </div>
-    `;
-  }
-
-  function changeMainImage(newImage) {
-    activeMainImage = newImage;
-
-    const mainImageEl = document.getElementById("jobMainGalleryImage");
-    if (mainImageEl) {
-      mainImageEl.src = newImage;
-    }
-
-    document.querySelectorAll(".job-gallery-thumb").forEach(thumb => {
-      thumb.classList.remove("active");
-      if (thumb.dataset.image === newImage) {
-        thumb.classList.add("active");
+      if (typeof showStatus === "function") {
+        showStatus(favoriteStatus, "Стана грешка при запазване.", "error");
       }
-    });
-  }
-
-  window.changeMainImage = changeMainImage;
-
-  function buildImageGallery(job) {
-    const images = getAllJobImages(job);
-
-    if (!images.length) return "";
-
-    activeMainImage = images[0];
-
-    return `
-      <div class="job-details-gallery">
-        <img id="jobMainGalleryImage" src="${images[0]}" alt="Основна снимка" class="job-main-gallery-image">
-
-        <div class="job-thumbs-row">
-          ${images.map((img, index) => `
-            <img
-              src="${img}"
-              alt="Снимка ${index + 1}"
-              class="job-gallery-thumb ${index === 0 ? "active" : ""}"
-              data-image="${img}"
-              onclick="changeMainImage('${String(img).replaceAll("'", "\\'")}')"
-            >
-          `).join("")}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderJobDetails(job, owner) {
-    const currentUser = getCurrentUser();
-    const isOwner = currentUser && currentUser.email === job.ownerEmail;
-
-    jobDetailsCard.innerHTML = `
-      <div class="job-type-badge">${getJobTypeLabel(job.type)}</div>
-
-      <div class="job-details-top">
-        <div>
-          <div class="job-detail-category">
-            ${escapeHtmlLocal(job.category || "Без категория")}${job.subcategory ? " / " + escapeHtmlLocal(job.subcategory) : ""}
-          </div>
-
-          <h1 class="job-details-title">${escapeHtmlLocal(job.title || "Без заглавие")}</h1>
-
-          ${
-            isPromotedJob(job)
-              ? `<div class="job-promoted-inline">⭐ Промотирана до ${new Date(job.promotedUntil).toLocaleDateString("bg-BG")}</div>`
-              : ""
-          }
-
-          <div class="job-details-meta">
-            <span>📍 ${escapeHtmlLocal(job.city || "Без град")}</span>
-            ${job.budget ? `<span>💰 ${escapeHtmlLocal(String(job.budget))} лв</span>` : ""}
-            <span>📌 ${getJobTypeText(job.type)}</span>
-            <span>🆔 #${escapeHtmlLocal(String(job.id || ""))}</span>
-          </div>
-        </div>
-      </div>
-
-      ${buildImageGallery(job)}
-
-      <div class="job-detail-body">
-        <h3>Описание</h3>
-        <p>${escapeHtmlLocal(job.description || "Няма описание.")}</p>
-      </div>
-
-      <div class="job-detail-actions">
-        <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Виж автора</a>
-        <a href="/inbox-page" class="job-card-btn secondary">Отвори поща</a>
-        ${isOwner ? `<a href="/applications-page" class="job-card-btn secondary">Виж кандидатурите</a>` : ""}
-      </div>
-    `;
-
-    authorCard.innerHTML = `
-      <div class="author-card-top">
-        ${
-          owner && owner.profileImage
-            ? `<img src="${owner.profileImage}" alt="Профил" class="author-card-image">`
-            : `<div class="author-card-placeholder">👤</div>`
-        }
-
-        <div>
-          <h3>${escapeHtmlLocal(owner?.name || "Потребител")}</h3>
-          <div class="author-role-badge">${escapeHtmlLocal(getProfileTypeLabel(owner?.role))}</div>
-        </div>
-      </div>
-
-      <div class="author-card-content">
-        <p>${escapeHtmlLocal(owner?.description || "Все още няма описание на профила.")}</p>
-
-        <div class="author-mini-meta">
-          <div>📧 ${escapeHtmlLocal(owner?.email || job.ownerEmail)}</div>
-          ${owner?.profession ? `<div>💼 ${escapeHtmlLocal(owner.profession)}</div>` : ""}
-          ${owner?.companyId ? `<div>🏢 ЕИК: ${escapeHtmlLocal(owner.companyId)}</div>` : ""}
-          ${owner?.contactName ? `<div>👤 Контакт: ${escapeHtmlLocal(owner.contactName)}</div>` : ""}
-          ${owner?.manager ? `<div>📌 Представител: ${escapeHtmlLocal(owner.manager)}</div>` : ""}
-          <div>${owner?.showPhone && owner?.phone ? "📞 " + escapeHtmlLocal(owner.phone) : "📞 Телефонът е скрит"}</div>
-        </div>
-      </div>
-
-      <div class="author-card-actions">
-        <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn">Виж профила</a>
-      </div>
-    `;
-  }
-
-  async function loadJob() {
-    try {
-      const id = getJobIdFromUrl();
-
-      if (!id) {
-        jobDetailsCard.innerHTML = createEmptyStateHTML({
-          icon: "⚠️",
-          title: "Невалидна обява",
-          text: "Линкът към тази обява не е валиден.",
-          buttonText: "Към обявите",
-          buttonHref: "/jobs-page"
-        });
-
-        authorCard.innerHTML = createEmptyStateHTML({
-          icon: "👤",
-          title: "Няма профил",
-          text: "Няма информация за автора."
-        });
-
-        relatedJobs.innerHTML = createEmptyStateHTML({
-          icon: "📭",
-          title: "Няма подобни обяви",
-          text: "Няма какво да покажем в момента."
-        });
-        return;
-      }
-
-      showSkeletons(jobDetailsCard, 1);
-      showSkeletons(authorCard, 1);
-      showSkeletons(relatedJobs, 2);
-
-      const res = await fetch(`/api/jobs/${id}`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        jobDetailsCard.innerHTML = createEmptyStateHTML({
-          icon: "😕",
-          title: "Обявата не е намерена",
-          text: "Възможно е да е изтрита или линкът да е грешен.",
-          buttonText: "Към обявите",
-          buttonHref: "/jobs-page"
-        });
-
-        authorCard.innerHTML = createEmptyStateHTML({
-          icon: "👤",
-          title: "Няма информация за автора",
-          text: "Профилът не може да бъде зареден."
-        });
-
-        relatedJobs.innerHTML = createEmptyStateHTML({
-          icon: "📭",
-          title: "Няма подобни обяви",
-          text: "Все още няма предложения в тази секция."
-        });
-        return;
-      }
-
-      const { job, owner, related } = data;
-      loadedJob = job;
-      loadedOwner = owner || null;
-
-      renderJobDetails(job, owner);
-
-      if (!related || !related.length) {
-        relatedJobs.innerHTML = createEmptyStateHTML({
-          icon: "🧭",
-          title: "Няма подобни обяви",
-          text: "Все още няма други обяви в тази категория.",
-          buttonText: "Виж всички обяви",
-          buttonHref: "/jobs-page"
-        });
-      } else {
-        relatedJobs.innerHTML = related.map(buildRelatedCard).join("");
-      }
-
-      updateApplyAccess();
-      await loadFavoriteState();
-    } catch (error) {
-      console.error("DETAILS ERROR:", error);
-
-      jobDetailsCard.innerHTML = createEmptyStateHTML({
-        icon: "⚠️",
-        title: "Стана грешка",
-        text: "Не успяхме да заредим обявата.",
-        buttonText: "Към обявите",
-        buttonHref: "/jobs-page"
-      });
-
-      authorCard.innerHTML = createEmptyStateHTML({
-        icon: "👤",
-        title: "Стана грешка",
-        text: "Не успяхме да заредим профила."
-      });
-
-      relatedJobs.innerHTML = createEmptyStateHTML({
-        icon: "📭",
-        title: "Стана грешка",
-        text: "Не успяхме да заредим подобните обяви."
-      });
     }
-  }
-
-  favoriteBtn.addEventListener("click", toggleFavorite);
+  });
 
   contactForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    clearStatus(contactStatus);
+    if (typeof clearStatus === "function") clearStatus(contactStatus);
 
-    const currentUser = getCurrentUser();
+    const currentUser = getCurrentUserSafe();
 
-    if (!currentUser) {
-      const redirectRole = loadedJob ? getApplyRedirectRole(loadedJob.type) : "personal";
-      window.location.href = `/account-page?role=${redirectRole}`;
-      return;
-    }
-
-    if (!loadedJob) {
-      showStatus(contactStatus, "Обявата не е заредена.", "error");
-      return;
-    }
-
-    if (currentUser.email === loadedJob.ownerEmail) {
-      showStatus(contactStatus, "Не можеш да изпратиш запитване до себе си.", "error");
-      showToast("Не можеш да изпратиш запитване до себе си.", "error");
-      return;
-    }
-
-    const subject = contactSubject.value.trim() || `Запитване за обява: ${loadedJob.title}`;
-    const text = contactMessage.value.trim();
-
-    if (!text) {
-      showStatus(contactStatus, "Напиши съобщение.", "error");
+    if (!currentUser?.email || !currentJob?.id) {
+      if (typeof showStatus === "function") {
+        showStatus(contactStatus, "Трябва да влезеш, за да изпратиш съобщение.", "error");
+      }
       return;
     }
 
     try {
+      const subject = document.getElementById("contactSubject").value.trim();
+      const text = document.getElementById("contactMessage").value.trim();
+
+      if (!text) {
+        if (typeof showStatus === "function") {
+          showStatus(contactStatus, "Напиши съобщение.", "error");
+        }
+        return;
+      }
+
       const res = await fetch("/messages/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          jobId: loadedJob.id,
+          jobId: currentJob.id,
           senderEmail: currentUser.email,
-          senderName: currentUser.name,
-          receiverEmail: loadedJob.ownerEmail,
+          senderName: currentUser.name || "Потребител",
+          receiverEmail: currentJob.ownerEmail,
           subject,
           text
         })
@@ -674,70 +579,61 @@
       const data = await res.json();
 
       if (!res.ok) {
-        showStatus(contactStatus, data.message || "Грешка при изпращане.", "error");
-        showToast(data.message || "Грешка при изпращане.", "error");
+        if (typeof showStatus === "function") {
+          showStatus(contactStatus, data.message || "Грешка при изпращане.", "error");
+        }
         return;
       }
 
       contactForm.reset();
-      showStatus(contactStatus, "Запитването е изпратено успешно ✅", "success");
-      showToast("Запитването е изпратено успешно ✅", "success");
+
+      if (typeof showStatus === "function") {
+        showStatus(contactStatus, data.message || "Запитването е изпратено ✅", "success");
+      }
+
+      if (typeof showToast === "function") {
+        showToast(data.message || "Запитването е изпратено ✅", "success");
+      }
     } catch (error) {
       console.error("CONTACT ERROR:", error);
-      showStatus(contactStatus, "Стана грешка при изпращане.", "error");
-      showToast("Стана грешка при изпращане.", "error");
+      if (typeof showStatus === "function") {
+        showStatus(contactStatus, "Стана грешка при изпращане.", "error");
+      }
     }
   });
 
   applyForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    clearStatus(applyStatus);
+    if (typeof clearStatus === "function") clearStatus(applyStatus);
 
-    const currentUser = getCurrentUser();
+    const currentUser = getCurrentUserSafe();
 
-    if (!currentUser) {
-      if (loadedJob) {
-        const redirectRole = getApplyRedirectRole(loadedJob.type);
-        window.location.href = `/account-page?role=${redirectRole}`;
-      } else {
-        window.location.href = "/account-page";
+    if (!currentUser?.email || !currentJob?.id) {
+      if (typeof showStatus === "function") {
+        showStatus(applyStatus, "Трябва да влезеш, за да кандидатстваш.", "error");
       }
       return;
     }
 
-    if (!loadedJob) {
-      showStatus(applyStatus, "Обявата не е заредена.", "error");
-      return;
-    }
-
-    if (currentUser.email === loadedJob.ownerEmail) {
-      showStatus(applyStatus, "Не можеш да кандидатстваш по собствената си обява.", "error");
-      showToast("Не можеш да кандидатстваш по собствената си обява.", "error");
-      return;
-    }
-
-    const message = applyMessage.value.trim();
-
-    if (!message) {
-      showStatus(
-        applyStatus,
-        loadedJob.type === "service"
-          ? "Напиши съобщение към услугата."
-          : "Напиши съобщение към кандидатурата.",
-        "error"
-      );
-      return;
-    }
-
     try {
+      const message = document.getElementById("applyMessage").value.trim();
+      const cvFile = document.getElementById("applyCvFile").files[0];
+
+      if (!message) {
+        if (typeof showStatus === "function") {
+          showStatus(applyStatus, "Напиши съобщение към кандидатурата.", "error");
+        }
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("jobId", loadedJob.id);
-      formData.append("name", currentUser.name);
+      formData.append("jobId", currentJob.id);
+      formData.append("name", currentUser.name || "Потребител");
       formData.append("email", currentUser.email);
       formData.append("message", message);
 
-      if (applyCvFile.files[0]) {
-        formData.append("cvFile", applyCvFile.files[0]);
+      if (cvFile) {
+        formData.append("cvFile", cvFile);
       }
 
       const res = await fetch("/apply", {
@@ -748,34 +644,40 @@
       const data = await res.json();
 
       if (!res.ok) {
-        showStatus(applyStatus, data.message || "Грешка при изпращане.", "error");
-        showToast(data.message || "Грешка при изпращане.", "error");
+        if (typeof showStatus === "function") {
+          showStatus(applyStatus, data.message || "Грешка при кандидатстване.", "error");
+        }
         return;
       }
 
       applyForm.reset();
-      const successMessage = loadedJob.type === "service"
-        ? "Заявката е изпратена успешно ✅"
-        : "Кандидатурата е изпратена успешно ✅";
 
-      showStatus(applyStatus, successMessage, "success");
-      showToast(successMessage, "success");
+      if (typeof showStatus === "function") {
+        showStatus(applyStatus, data.message || "Кандидатурата е изпратена ✅", "success");
+      }
+
+      if (typeof showToast === "function") {
+        showToast(data.message || "Кандидатурата е изпратена ✅", "success");
+      }
     } catch (error) {
       console.error("APPLY ERROR:", error);
-      showStatus(applyStatus, "Стана грешка при изпращане.", "error");
-      showToast("Стана грешка при изпращане.", "error");
+      if (typeof showStatus === "function") {
+        showStatus(applyStatus, "Стана грешка при кандидатстване.", "error");
+      }
     }
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    updateHeaderUser();
-    updateRoleVisibility();
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (typeof initAppShell === "function") {
+      initAppShell();
+    } else {
+      if (typeof updateHeaderUser === "function") updateHeaderUser();
+      if (typeof updateRoleVisibility === "function") updateRoleVisibility();
+    }
 
-    enableFormAutosave(contactForm, ["contactSubject", "contactMessage"]);
-    enableFormAutosave(applyForm, ["applyMessage"]);
-
-    loadJob();
+    await loadJob();
   });
 </script>
+
 </body>
 </html>
