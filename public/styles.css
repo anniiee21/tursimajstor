@@ -5687,3 +5687,779 @@ body.dark-mode .admin-badge-danger {
     font-size: 28px;
   }
 }
+
+/* =========================
+   ADMIN PANEL
+========================= */
+
+/* Tabs */
+.favorites-quick-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.favorites-quick-tab {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--card-bg, #1f2937);
+  color: var(--text-color, #fff);
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+.favorites-quick-tab:hover {
+  background: #374151;
+}
+
+.favorites-quick-tab.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* Filters */
+.favorites-filters {
+  margin-top: 14px;
+}
+
+.favorites-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.favorites-filters input,
+.favorites-filters select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #374151; 
+  background: #111827;
+  color: #fff;
+}
+
+/* Cards (reuse but tweak) */
+.application-status-card {
+  background: #111827;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #1f2937;
+  transition: 0.2s;
+}
+
+.application-status-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
+
+.application-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.application-card-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.application-card-meta {
+  font-size: 13px;
+  opacity: 0.7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.application-card-body {
+  margin-top: 10px;
+}
+
+.application-card-body p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+/* Status badges */
+.application-status-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status-approved {
+  background: #065f46;
+  color: #10b981;
+}
+
+.status-pending {
+  background: #78350f;
+  color: #f59e0b;
+}
+
+.status-rejected {
+  background: #7f1d1d;
+  color: #ef4444;
+}
+
+/* Card variants */
+.pending-card {
+  border-color: #f59e0b33;
+}
+
+.approved-card {
+  border-color: #10b98133;
+}
+
+.rejected-card {
+  border-color: #ef444433;
+}
+
+/* Buttons */
+.secondary-btn {
+  background: #1f2937;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #374151;
+}
+
+.danger-btn {
+  background: #7f1d1d;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.danger-btn:hover {
+  background: #991b1b;
+}
+
+/* Action buttons row */
+.application-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Stats cards */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.quick-action-card {
+  background: #111827;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  border: 1px solid #1f2937;
+  transition: 0.2s;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
+
+.quick-action-icon {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.quick-action-card h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.quick-action-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* Ads form */
+.page-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.page-form-grid input,
+.page-form-grid select,
+textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  color: #fff;
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  margin-top: 8px;
+}
+
+/* Job cards tweaks */
+.job-market-card {
+  transition: 0.2s;
+}
+
+.job-market-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Empty state */
+.empty-state-box {
+  text-align: center;
+  padding: 30px 10px;
+  opacity: 0.8;
+}
+
+.empty-state-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .application-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .application-action-buttons {
+    flex-direction: column;
+  }
+}
+
+/* =========================
+   ADMIN PANEL
+========================= */
+
+#adminMainWrap .application-status-card input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+#adminMainWrap .application-card-title label {
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#adminMainWrap .quick-actions-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+#adminMainWrap .quick-action-card h3 {
+  font-size: 30px;
+  margin: 6px 0 4px;
+}
+
+#adminMainWrap .quick-action-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 1200px) {
+  #adminMainWrap .quick-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  #adminMainWrap .quick-actions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  #adminMainWrap .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   ADMIN PANEL LIGHT MODE TUNE
+========================= */
+
+/* основни admin cards в light mode */
+.admin-stat-card,
+.admin-management-card,
+.admin-table-card,
+.admin-list-card,
+.admin-panel-card,
+.admin-section-card,
+.admin-filter-bar,
+.admin-toolbar,
+.admin-tabs-wrap {
+  background: linear-gradient(180deg, #ffffff, #f4f8ff);
+  border: 1px solid #d9e5f3;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* статистическите тъмни квадратчета да станат по-светли */
+.admin-stat-box,
+.admin-stat-mini-card,
+.admin-overview-card,
+.admin-metric-card {
+  background: linear-gradient(180deg, #eaf2ff, #dfeafe);
+  border: 1px solid #c9daf6;
+  color: #0f172a;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.08);
+}
+
+.admin-stat-box h3,
+.admin-stat-box h4,
+.admin-stat-box strong,
+.admin-stat-mini-card h3,
+.admin-overview-card h3,
+.admin-metric-card h3 {
+  color: #0f172a;
+}
+
+.admin-stat-box p,
+.admin-stat-box span,
+.admin-stat-mini-card p,
+.admin-overview-card p,
+.admin-metric-card p {
+  color: #475569;
+}
+
+/* големите числа */
+.admin-stat-number,
+.admin-metric-number,
+.admin-overview-number {
+  color: #1d4ed8;
+}
+
+/* табовете */
+.admin-tab-btn,
+.admin-panel-tab,
+.admin-switch-btn {
+  background: linear-gradient(180deg, #eef4ff, #e2ebfb);
+  color: #1e293b;
+  border: 1px solid #cbdcf3;
+  box-shadow: none;
+}
+
+.admin-tab-btn:hover,
+.admin-panel-tab:hover,
+.admin-switch-btn:hover {
+  background: linear-gradient(180deg, #e3efff, #d8e8ff);
+  border-color: #9ec5ff;
+}
+
+.admin-tab-btn.active,
+.admin-panel-tab.active,
+.admin-switch-btn.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
+}
+
+/* filter bar / select / inputs */
+.admin-filter-bar input,
+.admin-filter-bar select,
+.admin-toolbar input,
+.admin-toolbar select,
+.admin-table-card input,
+.admin-table-card select {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cfdced;
+}
+
+.admin-filter-bar input::placeholder,
+.admin-toolbar input::placeholder,
+.admin-table-card input::placeholder {
+  color: #64748b;
+}
+
+.admin-filter-bar input:focus,
+.admin-filter-bar select:focus,
+.admin-toolbar input:focus,
+.admin-toolbar select:focus,
+.admin-table-card input:focus,
+.admin-table-card select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+/* редовете / картите в списъците */
+.admin-user-row,
+.admin-job-row,
+.admin-post-row,
+.admin-report-row,
+.admin-ad-row,
+.admin-item-row,
+.admin-list-item {
+  background: linear-gradient(180deg, #f8fbff, #eef4fc);
+  border: 1px solid #d7e4f4;
+  color: #0f172a;
+}
+
+.admin-user-row h3,
+.admin-job-row h3,
+.admin-post-row h3,
+.admin-report-row h3,
+.admin-ad-row h3,
+.admin-item-row h3,
+.admin-list-item h3,
+.admin-user-row strong,
+.admin-job-row strong,
+.admin-post-row strong,
+.admin-report-row strong,
+.admin-ad-row strong,
+.admin-item-row strong,
+.admin-list-item strong {
+  color: #0f172a;
+}
+
+.admin-user-row p,
+.admin-job-row p,
+.admin-post-row p,
+.admin-report-row p,
+.admin-ad-row p,
+.admin-item-row p,
+.admin-list-item p,
+.admin-user-row .meta,
+.admin-job-row .meta,
+.admin-post-row .meta,
+.admin-report-row .meta,
+.admin-ad-row .meta,
+.admin-item-row .meta,
+.admin-list-item .meta {
+  color: #526277;
+}
+
+/* badges */
+.admin-status-badge,
+.admin-role-badge,
+.admin-type-badge {
+  background: #e8f1ff;
+  color: #1d4ed8;
+  border: 1px solid #c9dcff;
+}
+
+.admin-status-badge.success,
+.admin-status-badge.active {
+  background: #e8fff3;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.admin-status-badge.warning,
+.admin-status-badge.pending {
+  background: #fff7e8;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.admin-status-badge.danger,
+.admin-status-badge.blocked {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+/* action buttons в admin списъците */
+.admin-actions .secondary-btn,
+.admin-actions .danger-btn,
+.admin-actions .job-card-btn,
+.admin-list-item .secondary-btn,
+.admin-list-item .danger-btn,
+.admin-list-item .job-card-btn {
+  box-shadow: none;
+}
+
+.admin-actions .secondary-btn,
+.admin-list-item .secondary-btn {
+  background: linear-gradient(180deg, #eef4ff, #dde9ff);
+  color: #1e40af;
+  border: 1px solid #c6d8fb;
+}
+
+.admin-actions .secondary-btn:hover,
+.admin-list-item .secondary-btn:hover {
+  background: linear-gradient(180deg, #e2edff, #d4e4ff);
+}
+
+.admin-actions .danger-btn,
+.admin-list-item .danger-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+/* header hero на admin */
+.admin-hero-card,
+.admin-dashboard-hero {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff, #f7fbff);
+  border: 1px solid #dbe7f5;
+}
+
+/* ако имаш много тъмни section wrappers */
+.admin-dark-surface,
+.admin-dark-card,
+.admin-deep-card {
+  background: linear-gradient(180deg, #edf4ff, #e2ecfb);
+  border: 1px solid #cfddf4;
+  color: #0f172a;
+}
+
+/* dark mode да си остане както е */
+body.dark-mode .admin-stat-card,
+body.dark-mode .admin-management-card,
+body.dark-mode .admin-table-card,
+body.dark-mode .admin-list-card,
+body.dark-mode .admin-panel-card,
+body.dark-mode .admin-section-card,
+body.dark-mode .admin-filter-bar,
+body.dark-mode .admin-toolbar,
+body.dark-mode .admin-tabs-wrap,
+body.dark-mode .admin-stat-box,
+body.dark-mode .admin-stat-mini-card,
+body.dark-mode .admin-overview-card,
+body.dark-mode .admin-metric-card,
+body.dark-mode .admin-user-row,
+body.dark-mode .admin-job-row,
+body.dark-mode .admin-post-row,
+body.dark-mode .admin-report-row,
+body.dark-mode .admin-ad-row,
+body.dark-mode .admin-item-row,
+body.dark-mode .admin-list-item,
+body.dark-mode .admin-dark-surface,
+body.dark-mode .admin-dark-card,
+body.dark-mode .admin-deep-card {
+  background: unset;
+  border: unset;
+  color: unset;
+  box-shadow: unset;
+}
+
+/* =========================================
+   ADMIN PANEL — LIGHT MODE SOFTER / PRO
+========================================= */
+
+#adminMainWrap .landing-hero-card {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+#adminMainWrap .landing-side-card {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid #dbe7f5;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+#adminMainWrap .landing-side-icon {
+  background: linear-gradient(135deg, #eef4ff, #e0ecff);
+}
+
+#adminMainWrap .card {
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid #dbe7f5;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+#adminMainWrap .favorites-filters {
+  background: linear-gradient(180deg, #f8fbff, #f3f8ff);
+  border: 1px solid #dbe7f5;
+}
+
+#adminMainWrap .favorites-filters input,
+#adminMainWrap .favorites-filters select,
+#adminMainWrap textarea,
+#adminMainWrap input,
+#adminMainWrap select {
+  background: #ffffff;
+  border: 1px solid #cfddee;
+  color: #1e293b;
+}
+
+#adminMainWrap .favorites-filters input:focus,
+#adminMainWrap .favorites-filters select:focus,
+#adminMainWrap textarea:focus,
+#adminMainWrap input:focus,
+#adminMainWrap select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+#adminMainWrap .favorites-quick-tab {
+  background: linear-gradient(180deg, #ffffff, #f3f7fd);
+  color: #1e293b;
+  border: 1px solid #cfddee;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+#adminMainWrap .favorites-quick-tab:hover {
+  background: linear-gradient(180deg, #eff6ff, #e7f0ff);
+  border-color: #93c5fd;
+}
+
+#adminMainWrap .favorites-quick-tab.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+}
+
+#adminStatsGrid.quick-actions-grid {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+#adminStatsGrid .quick-action-card {
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+  border: 1px solid #d7e3f3;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+}
+
+#adminStatsGrid .quick-action-icon {
+  background: linear-gradient(135deg, #eef4ff, #ddeaff);
+}
+
+#adminMainWrap .application-status-card {
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  border: 1px solid #d9e4f2;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+}
+
+#adminMainWrap .application-status-card:hover {
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
+}
+
+#adminMainWrap .application-card-title {
+  color: #0f172a;
+}
+
+#adminMainWrap .application-card-meta {
+  color: #64748b;
+}
+
+#adminMainWrap .application-card-body p {
+  color: #334155;
+}
+
+#adminMainWrap .status-approved {
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+#adminMainWrap .status-pending {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+#adminMainWrap .status-rejected {
+  background: #fff1f2;
+  color: #b91c1c;
+  border: 1px solid #fecdd3;
+}
+
+#adminMainWrap .small-text {
+  color: #64748b;
+}
+
+#adminMainWrap .section-head h2,
+#adminMainWrap .section-head h3 {
+  color: #0f172a;
+}
+
+#adminMainWrap .empty,
+#adminMainWrap .small-empty,
+#adminMainWrap .empty-state-box {
+  background: linear-gradient(180deg, #f8fbff, #f3f7fd);
+  border: 1px dashed #c9d8ea;
+  color: #64748b;
+}
+
+#adminMainWrap .job-card-btn.secondary,
+#adminMainWrap .landing-secondary-btn {
+  background: linear-gradient(180deg, #ffffff, #f3f7fd);
+  color: #1e293b;
+  border: 1px solid #cfddee;
+}
+
+#adminMainWrap .job-card-btn.secondary:hover,
+#adminMainWrap .landing-secondary-btn:hover {
+  background: #eef6ff;
+  border-color: #93c5fd;
+}
+
+#adminMainWrap .boost-modal-dialog {
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  border: 1px solid #dbe7f5;
+}
+
+#adminMainWrap .boost-close-btn {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #dbe7f5;
+}
+
+/* по-приятни admin list cards при светла тема */
+body:not(.dark-mode) #adminJobsList .application-status-card,
+body:not(.dark-mode) #adminUsersList .application-status-card,
+body:not(.dark-mode) #adminPostsList .application-status-card,
+body:not(.dark-mode) #adminReportsList .application-status-card,
+body:not(.dark-mode) #adminAdsList .application-status-card {
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  border: 1px solid #dbe7f5;
+  color: #1e293b;
+}
+
+/* ако има cards със силно тъмни бутони вътре */
+body:not(.dark-mode) #adminMainWrap .secondary-btn {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: white;
+}
+
+body:not(.dark-mode) #adminMainWrap .danger-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+/* responsive */
+@media (max-width: 1200px) {
+  #adminStatsGrid.quick-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  #adminStatsGrid.quick-actions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

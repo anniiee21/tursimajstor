@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TursiMajstor - Админ панел</title>
+  <title>TursiMajstor - Admin Panel</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
         <a href="/notifications-page">Известия</a>
         <a id="applicationsNavLink" href="/applications-page">Кандидатури</a>
         <a href="/feed-page">Новини</a>
-        <a class="active" href="/admin-page">Админ</a>
+        <a class="active" id="adminNavLink" href="/admin-page">Админ</a>
       </div>
 
       <div class="header-actions-right">
@@ -44,1036 +44,274 @@
   <nav class="breadcrumbs">
     <a href="/">Начало</a>
     <span>•</span>
-    <span>Админ панел</span>
+    <span>Admin Panel</span>
   </nav>
-
-  <section class="card admin-hero-card">
-    <div class="admin-hero-top">
-      <div>
-        <div class="admin-hero-badge">Модерация • Статистика • Банери</div>
-        <h1 class="admin-hero-title">Админ панел</h1>
-        <p class="admin-hero-text">
-          Управлявай обяви, публикации, сигнали, профили, реклами и общата активност в платформата.
-        </p>
-      </div>
-
-      <div class="admin-hero-side">
-        <div class="admin-mini-stat">
-          <div class="admin-mini-stat-label">Статус</div>
-          <div id="adminStatusMini" class="admin-mini-stat-value">Проверка...</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section id="adminDeniedBox" class="card hidden">
     <div class="empty-state-box">
       <div class="empty-state-icon">🔒</div>
-      <h3>Нямаш достъп до админ панела</h3>
-      <p>Тази секция е достъпна само за профили с роля admin.</p>
-      <a href="/account-page" class="landing-main-btn">Вход / Регистрация</a>
+      <h3>Нямаш достъп</h3>
+      <p>Тази страница е достъпна само за администратор.</p>
+      <a href="/" class="landing-main-btn">Към началото</a>
     </div>
   </section>
 
   <section id="adminMainWrap" class="hidden">
 
-    <section class="card">
-      <div class="section-head">
+    <section class="card landing-hero-card">
+      <div class="landing-hero-grid">
         <div>
-          <h2>Статистика</h2>
-          <div class="small-text">Жив преглед на платформата.</div>
-        </div>
-      </div>
-
-      <div class="admin-stats-grid">
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Общо обяви</div>
-          <div id="statTotalJobs" class="admin-stat-value">0</div>
+          <div class="landing-badge">Скрита административна зона</div>
+          <h1 class="landing-title">Admin Panel</h1>
+          <p class="landing-text">
+            Управлявай обяви, профили, публикации, реклами, доклади и преглеждай
+            статистика за платформата от едно място.
+          </p>
         </div>
 
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Видими обяви</div>
-          <div id="statVisibleJobs" class="admin-stat-value">0</div>
-        </div>
+        <div class="landing-side-panel">
+          <div class="landing-side-card">
+            <div class="landing-side-icon">📊</div>
+            <div>
+              <h3>Статистика</h3>
+              <p>Следи броя обяви, кандидатури, профили и публикации.</p>
+            </div>
+          </div>
 
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Скрити обяви</div>
-          <div id="statHiddenJobs" class="admin-stat-value">0</div>
-        </div>
+          <div class="landing-side-card">
+            <div class="landing-side-icon">🛡️</div>
+            <div>
+              <h3>Модерация</h3>
+              <p>Скривай, изтривай и контролирай съдържанието в платформата.</p>
+            </div>
+          </div>
 
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Кандидатури</div>
-          <div id="statApplications" class="admin-stat-value">0</div>
-        </div>
-
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Активни профили</div>
-          <div id="statProfiles" class="admin-stat-value">0</div>
-        </div>
-
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Публикации</div>
-          <div id="statPosts" class="admin-stat-value">0</div>
-        </div>
-
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Сигнали</div>
-          <div id="statReports" class="admin-stat-value">0</div>
-        </div>
-
-        <div class="admin-stat-card">
-          <div class="admin-stat-label">Активни банери</div>
-          <div id="statBanners" class="admin-stat-value">0</div>
+          <div class="landing-side-card">
+            <div class="landing-side-icon">📢</div>
+            <div>
+              <h3>Реклами</h3>
+              <p>Управлявай банери и рекламни карета по сайта.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="card">
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="jobs" type="button">Обяви</button>
-        <button class="admin-tab" data-tab="posts" type="button">Публикации</button>
-        <button class="admin-tab" data-tab="reports" type="button">Сигнали</button>
-        <button class="admin-tab" data-tab="banners" type="button">Банери</button>
-        <button class="admin-tab" data-tab="users" type="button">Профили</button>
+      <div class="section-head">
+        <div>
+          <h2>Обща статистика</h2>
+          <div class="small-text">Live overview на платформата.</div>
+        </div>
+      </div>
+
+      <div id="adminStatsGrid" class="quick-actions-grid"></div>
+    </section>
+
+    <section class="card">
+      <div class="favorites-quick-tabs">
+        <button id="adminTabJobs" class="favorites-quick-tab active" type="button">Обяви</button>
+        <button id="adminTabUsers" class="favorites-quick-tab" type="button">Профили</button>
+        <button id="adminTabPosts" class="favorites-quick-tab" type="button">Публикации</button>
+        <button id="adminTabReports" class="favorites-quick-tab" type="button">Доклади</button>
+        <button id="adminTabAds" class="favorites-quick-tab" type="button">Реклами</button>
       </div>
     </section>
 
     <!-- JOBS -->
-    <section class="card admin-tab-panel" data-panel="jobs">
+    <section id="adminJobsPanel" class="card">
       <div class="section-head">
         <div>
-          <h2>Модерация на обяви</h2>
-          <div id="jobsAdminInfo" class="small-text">Зареждане...</div>
+          <h2>Управление на обяви</h2>
+          <div id="adminJobsInfo" class="small-text">Зареждане...</div>
+        </div>
+
+        <div class="job-card-actions">
+          <button id="bulkHideJobsBtn" class="secondary-btn" type="button">Скрий избраните</button>
+          <button id="bulkDeleteJobsBtn" class="danger-btn" type="button">Изтрий избраните</button>
         </div>
       </div>
 
       <div class="favorites-filters">
         <div class="favorites-filters-grid">
-          <input id="adminJobsSearch" placeholder="Търси по заглавие, имейл, град...">
-          <select id="adminJobsVisibilityFilter">
-            <option value="">Всички</option>
-            <option value="visible">Само видими</option>
-            <option value="hidden">Само скрити</option>
-            <option value="unapproved">Само неодобрени</option>
-          </select>
+          <input id="adminJobsSearch" placeholder="Търси по заглавие, описание или град...">
           <select id="adminJobsTypeFilter">
             <option value="">Всички типове</option>
             <option value="job">Работа</option>
             <option value="service">Услуга</option>
             <option value="company">B2B</option>
           </select>
-          <select id="adminJobsSort">
+          <select id="adminJobsStatusFilter">
+            <option value="">Всички статуси</option>
+            <option value="visible">Само видими</option>
+            <option value="hidden">Само скрити</option>
+            <option value="premium">Само premium</option>
+          </select>
+          <select id="adminJobsSortFilter">
             <option value="newest">Най-нови</option>
             <option value="oldest">Най-стари</option>
           </select>
         </div>
       </div>
 
-      <div id="adminJobsList" class="admin-cards-list"></div>
+      <div id="adminJobsList" class="application-cards-list"></div>
+    </section>
+
+    <!-- USERS -->
+    <section id="adminUsersPanel" class="card hidden">
+      <div class="section-head">
+        <div>
+          <h2>Управление на профили</h2>
+          <div id="adminUsersInfo" class="small-text">Зареждане...</div>
+        </div>
+      </div>
+
+      <div class="favorites-filters">
+        <div class="favorites-filters-grid">
+          <input id="adminUsersSearch" placeholder="Търси по име, имейл или роля...">
+          <select id="adminUsersRoleFilter">
+            <option value="">Всички роли</option>
+            <option value="personal">Личен профил</option>
+            <option value="freelancer">Свободна практика</option>
+            <option value="professional">Професионален профил</option>
+            <option value="company">Фирма</option>
+            <option value="admin">Админ</option>
+          </select>
+          <select id="adminUsersStatusFilter">
+            <option value="">Всички статуси</option>
+            <option value="active">Само активни</option>
+            <option value="blocked">Само блокирани</option>
+          </select>
+          <select id="adminUsersSortFilter">
+            <option value="newest">Най-нови</option>
+            <option value="oldest">Най-стари</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="adminUsersList" class="application-cards-list"></div>
     </section>
 
     <!-- POSTS -->
-    <section class="card admin-tab-panel hidden" data-panel="posts">
+    <section id="adminPostsPanel" class="card hidden">
       <div class="section-head">
         <div>
           <h2>Модерация на публикации</h2>
-          <div id="postsAdminInfo" class="small-text">Зареждане...</div>
+          <div id="adminPostsInfo" class="small-text">Зареждане...</div>
         </div>
       </div>
 
       <div class="favorites-filters">
         <div class="favorites-filters-grid">
-          <input id="adminPostsSearch" placeholder="Търси по автор или текст...">
-          <select id="adminPostsVisibilityFilter">
-            <option value="">Всички</option>
-            <option value="visible">Само видими</option>
-            <option value="hidden">Само скрити</option>
-          </select>
-          <select id="adminPostsSort">
+          <input id="adminPostsSearch" placeholder="Търси по текст или автор...">
+          <select id="adminPostsSortFilter">
             <option value="newest">Най-нови</option>
             <option value="oldest">Най-стари</option>
           </select>
         </div>
       </div>
 
-      <div id="adminPostsList" class="admin-cards-list"></div>
+      <div id="adminPostsList" class="application-cards-list"></div>
     </section>
 
     <!-- REPORTS -->
-    <section class="card admin-tab-panel hidden" data-panel="reports">
+    <section id="adminReportsPanel" class="card hidden">
       <div class="section-head">
         <div>
-          <h2>Сигнали / Докладвания</h2>
-          <div id="reportsAdminInfo" class="small-text">Зареждане...</div>
+          <h2>Докладвания</h2>
+          <div id="adminReportsInfo" class="small-text">Зареждане...</div>
         </div>
       </div>
 
       <div class="favorites-filters">
         <div class="favorites-filters-grid">
-          <input id="adminReportsSearch" placeholder="Търси по причина, тип, reporter...">
-          <select id="adminReportsStatusFilter">
-            <option value="">Всички статуси</option>
-            <option value="open">Open</option>
-            <option value="resolved">Resolved</option>
-            <option value="dismissed">Dismissed</option>
-          </select>
+          <input id="adminReportsSearch" placeholder="Търси по причина, тип или имейл...">
           <select id="adminReportsTypeFilter">
             <option value="">Всички типове</option>
             <option value="job">Обява</option>
             <option value="profile">Профил</option>
             <option value="post">Публикация</option>
           </select>
-          <select id="adminReportsSort">
-            <option value="newest">Най-нови</option>
-            <option value="oldest">Най-стари</option>
+          <select id="adminReportsStatusFilter">
+            <option value="">Всички статуси</option>
+            <option value="pending">Чакащи</option>
+            <option value="resolved">Решени</option>
           </select>
         </div>
       </div>
 
-      <div id="adminReportsList" class="admin-cards-list"></div>
+      <div id="adminReportsList" class="application-cards-list"></div>
     </section>
 
-    <!-- BANNERS -->
-    <section class="card admin-tab-panel hidden" data-panel="banners">
+    <!-- ADS -->
+    <section id="adminAdsPanel" class="card hidden">
       <div class="section-head">
         <div>
-          <h2>Банери / Реклами</h2>
-          <div id="bannersAdminInfo" class="small-text">Зареждане...</div>
+          <h2>Управление на реклами</h2>
+          <div id="adminAdsInfo" class="small-text">Добавяй и управлявай банери.</div>
         </div>
       </div>
 
-      <div class="admin-banner-form-wrap">
-        <div id="bannerStatus" class="status-box"></div>
+      <div id="adminAdsStatus" class="status-box"></div>
 
-        <div class="page-form-grid">
-          <div>
-            <label for="bannerTitle">Заглавие</label>
-            <input id="bannerTitle" placeholder="Пример: Премиум реклама">
-          </div>
-
-          <div>
-            <label for="bannerPlacement">Позиция</label>
-            <select id="bannerPlacement">
-              <option value="jobs-top">Jobs top</option>
-              <option value="jobs-bottom">Jobs bottom</option>
-              <option value="job-details-sidebar">Job details sidebar</option>
-              <option value="profile-sidebar">Profile sidebar</option>
-            </select>
-          </div>
-        </div>
-
-        <label for="bannerText">Текст</label>
-        <textarea id="bannerText" placeholder="Текст на банера"></textarea>
-
-        <div class="page-form-grid">
-          <div>
-            <label for="bannerButtonText">Текст на бутона</label>
-            <input id="bannerButtonText" placeholder="Пример: Разгледай">
-          </div>
-
-          <div>
-            <label for="bannerButtonHref">Линк на бутона</label>
-            <input id="bannerButtonHref" placeholder="/jobs-page">
-          </div>
-        </div>
-
-        <label class="smart-checkbox">
-          <input type="checkbox" id="bannerIsActive" checked>
-          Банерът да е активен
-        </label>
-
-        <button id="createBannerBtn" type="button">Добави банер</button>
-      </div>
-
-      <div id="adminBannersList" class="admin-cards-list" style="margin-top:18px;"></div>
-    </section>
-
-    <!-- USERS -->
-    <section class="card admin-tab-panel hidden" data-panel="users">
-      <div class="section-head">
+      <div class="page-form-grid">
         <div>
-          <h2>Профили</h2>
-          <div id="usersAdminInfo" class="small-text">Зареждане...</div>
+          <label for="adTitle">Заглавие</label>
+          <input id="adTitle" placeholder="Пример: Реклама на седмицата">
+        </div>
+
+        <div>
+          <label for="adLink">Линк</label>
+          <input id="adLink" placeholder="https://...">
         </div>
       </div>
 
-      <div class="favorites-filters">
-        <div class="favorites-filters-grid">
-          <input id="adminUsersSearch" placeholder="Търси по име, имейл, роля...">
-          <select id="adminUsersRoleFilter">
-            <option value="">Всички роли</option>
-            <option value="personal">personal</option>
-            <option value="freelancer">freelancer</option>
-            <option value="professional">professional</option>
-            <option value="company">company</option>
-            <option value="admin">admin</option>
+      <label for="adText">Текст</label>
+      <textarea id="adText" placeholder="Кратко описание на рекламата"></textarea>
+
+      <div class="page-form-grid">
+        <div>
+          <label for="adType">Тип</label>
+          <select id="adType">
+            <option value="primary">Primary</option>
+            <option value="secondary">Secondary</option>
           </select>
-          <select id="adminUsersSort">
-            <option value="newest">Най-нови</option>
-            <option value="oldest">Най-стари</option>
-          </select>
+        </div>
+
+        <div>
+          <label for="adImage">Снимка</label>
+          <input id="adImage" type="file" accept="image/*">
         </div>
       </div>
 
-      <div id="adminUsersList" class="admin-cards-list"></div>
+      <button id="createAdBtn" type="button">Добави реклама</button>
+
+      <div id="adminAdsList" class="application-cards-list" style="margin-top:18px;"></div>
     </section>
 
   </section>
 </div>
 
+<div id="adminConfirmModal" class="boost-modal hidden">
+  <div class="boost-modal-backdrop" id="adminConfirmBackdrop"></div>
+
+  <div class="boost-modal-dialog">
+    <button id="adminConfirmCloseBtn" class="boost-close-btn" type="button">✕</button>
+
+    <div class="boost-modal-header">
+      <div class="boost-modal-badge">Потвърждение</div>
+      <h2 id="adminConfirmTitle">Сигурен ли си?</h2>
+      <p id="adminConfirmText">Това действие може да промени съдържанието.</p>
+    </div>
+
+    <div class="boost-modal-footer">
+      <button id="adminConfirmCancelBtn" class="job-card-btn secondary boost-footer-btn" type="button">Отказ</button>
+      <button id="adminConfirmOkBtn" class="danger-btn boost-footer-btn" type="button">Потвърди</button>
+    </div>
+  </div>
+</div>
+
 <script src="/app.js"></script>
-<script>
-  const adminDeniedBox = document.getElementById("adminDeniedBox");
-  const adminMainWrap = document.getElementById("adminMainWrap");
-  const adminStatusMini = document.getElementById("adminStatusMini");
-
-  const statTotalJobs = document.getElementById("statTotalJobs");
-  const statVisibleJobs = document.getElementById("statVisibleJobs");
-  const statHiddenJobs = document.getElementById("statHiddenJobs");
-  const statApplications = document.getElementById("statApplications");
-  const statProfiles = document.getElementById("statProfiles");
-  const statPosts = document.getElementById("statPosts");
-  const statReports = document.getElementById("statReports");
-  const statBanners = document.getElementById("statBanners");
-
-  const jobsAdminInfo = document.getElementById("jobsAdminInfo");
-  const postsAdminInfo = document.getElementById("postsAdminInfo");
-  const reportsAdminInfo = document.getElementById("reportsAdminInfo");
-  const bannersAdminInfo = document.getElementById("bannersAdminInfo");
-  const usersAdminInfo = document.getElementById("usersAdminInfo");
-
-  const adminJobsList = document.getElementById("adminJobsList");
-  const adminPostsList = document.getElementById("adminPostsList");
-  const adminReportsList = document.getElementById("adminReportsList");
-  const adminBannersList = document.getElementById("adminBannersList");
-  const adminUsersList = document.getElementById("adminUsersList");
-
-  let adminJobsData = [];
-  let adminPostsData = [];
-  let adminReportsData = [];
-  let adminBannersData = [];
-  let adminUsersData = [];
-
-  function escapeHtml(value = "") {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function getCurrentAdmin() {
-    return typeof getCurrentUser === "function" ? getCurrentUser() : null;
-  }
-
-  function ensureAdminAccessUI() {
-    const currentUser = getCurrentAdmin();
-
-    if (!currentUser || currentUser.role !== "admin") {
-      adminDeniedBox.classList.remove("hidden");
-      adminMainWrap.classList.add("hidden");
-      adminStatusMini.textContent = "Няма достъп";
-      return false;
-    }
-
-    adminDeniedBox.classList.add("hidden");
-    adminMainWrap.classList.remove("hidden");
-    adminStatusMini.textContent = "Admin";
-    return true;
-  }
-
-  function switchAdminTab(tabName) {
-    document.querySelectorAll(".admin-tab").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === tabName);
-    });
-
-    document.querySelectorAll(".admin-tab-panel").forEach(panel => {
-      panel.classList.toggle("hidden", panel.dataset.panel !== tabName);
-    });
-  }
-
-  async function fetchAdminJson(url, options = {}) {
-    const currentUser = getCurrentAdmin();
-
-    const finalOptions = {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        "Content-Type": options.body instanceof FormData ? undefined : "application/json"
-      }
-    };
-
-    if (finalOptions.headers["Content-Type"] === undefined) {
-      delete finalOptions.headers["Content-Type"];
-    }
-
-    const separator = url.includes("?") ? "&" : "?";
-    const finalUrl = `${url}${separator}requesterEmail=${encodeURIComponent(currentUser.email)}`;
-
-    const res = await fetch(finalUrl, finalOptions);
-    const data = await res.json();
-    return { res, data };
-  }
-
-  async function loadStats() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/stats");
-
-      if (!res.ok) return;
-
-      statTotalJobs.textContent = data.totalJobs || 0;
-      statVisibleJobs.textContent = data.visibleJobs || 0;
-      statHiddenJobs.textContent = data.hiddenJobs || 0;
-      statApplications.textContent = data.totalApplications || 0;
-      statProfiles.textContent = data.activeProfiles || 0;
-      statPosts.textContent = data.totalPosts || 0;
-      statReports.textContent = data.totalReports || 0;
-      statBanners.textContent = data.activeBanners || 0;
-    } catch (error) {
-      console.error("ADMIN STATS ERROR:", error);
-    }
-  }
-
-  async function loadAdminJobs() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/jobs");
-      if (!res.ok) return;
-
-      adminJobsData = Array.isArray(data) ? data : [];
-      renderAdminJobs();
-    } catch (error) {
-      console.error("ADMIN JOBS ERROR:", error);
-    }
-  }
-
-  async function loadAdminPosts() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/posts");
-      if (!res.ok) return;
-
-      adminPostsData = Array.isArray(data) ? data : [];
-      renderAdminPosts();
-    } catch (error) {
-      console.error("ADMIN POSTS ERROR:", error);
-    }
-  }
-
-  async function loadAdminReports() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/reports");
-      if (!res.ok) return;
-
-      adminReportsData = Array.isArray(data) ? data : [];
-      renderAdminReports();
-    } catch (error) {
-      console.error("ADMIN REPORTS ERROR:", error);
-    }
-  }
-
-  async function loadAdminBanners() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/banners");
-      if (!res.ok) return;
-
-      adminBannersData = Array.isArray(data) ? data : [];
-      renderAdminBanners();
-    } catch (error) {
-      console.error("ADMIN BANNERS ERROR:", error);
-    }
-  }
-
-  async function loadAdminUsers() {
-    try {
-      const { res, data } = await fetchAdminJson("/api/admin/users");
-      if (!res.ok) return;
-
-      adminUsersData = Array.isArray(data) ? data : [];
-      renderAdminUsers();
-    } catch (error) {
-      console.error("ADMIN USERS ERROR:", error);
-    }
-  }
-
-  function getFilteredAdminJobs() {
-    const search = (document.getElementById("adminJobsSearch").value || "").trim().toLowerCase();
-    const visibility = document.getElementById("adminJobsVisibilityFilter").value;
-    const type = document.getElementById("adminJobsTypeFilter").value;
-    const sort = document.getElementById("adminJobsSort").value;
-
-    let items = adminJobsData.filter(job => {
-      const matchesSearch =
-        !search ||
-        (job.title || "").toLowerCase().includes(search) ||
-        (job.city || "").toLowerCase().includes(search) ||
-        (job.ownerEmail || "").toLowerCase().includes(search);
-
-      const matchesType = !type || job.type === type;
-
-      const matchesVisibility =
-        !visibility ||
-        (visibility === "visible" && !job.isHidden && job.isApproved !== false) ||
-        (visibility === "hidden" && !!job.isHidden) ||
-        (visibility === "unapproved" && job.isApproved === false);
-
-      return matchesSearch && matchesType && matchesVisibility;
-    });
-
-    items.sort((a, b) => {
-      const aId = Number(a.id) || 0;
-      const bId = Number(b.id) || 0;
-      return sort === "oldest" ? aId - bId : bId - aId;
-    });
-
-    return items;
-  }
-
-  function renderAdminJobs() {
-    const items = getFilteredAdminJobs();
-    jobsAdminInfo.textContent = `Общо: ${items.length}`;
-
-    if (!items.length) {
-      adminJobsList.innerHTML = `<div class="empty">Няма намерени обяви.</div>`;
-      return;
-    }
-
-    adminJobsList.innerHTML = items.map(job => `
-      <div class="admin-item-card">
-        <div class="admin-item-top">
-          <div>
-            <h3>${escapeHtml(job.title || "Обява")}</h3>
-            <div class="admin-item-meta">
-              <span>📍 ${escapeHtml(job.city || "")}</span>
-              <span>📧 ${escapeHtml(job.ownerEmail || "")}</span>
-              <span>🏷 ${escapeHtml(job.type || "job")}</span>
-              <span>🧾 reports: ${Number(job.reportCount || 0)}</span>
-            </div>
-          </div>
-
-          <div class="admin-badges-row">
-            <span class="admin-badge ${job.isHidden ? "admin-badge-danger" : "admin-badge-success"}">
-              ${job.isHidden ? "Скрита" : "Видима"}
-            </span>
-            <span class="admin-badge ${job.isApproved === false ? "admin-badge-warning" : "admin-badge-success"}">
-              ${job.isApproved === false ? "Неодобрена" : "Одобрена"}
-            </span>
-          </div>
-        </div>
-
-        <p class="admin-item-text">${escapeHtml(job.description || "")}</p>
-
-        <div class="admin-actions-row">
-          <button type="button" class="secondary-btn" onclick="toggleJobApproval(${job.id}, ${job.isApproved === false})">
-            ${job.isApproved === false ? "Одобри" : "Спри одобрение"}
-          </button>
-
-          <button type="button" class="${job.isHidden ? "secondary-btn" : "danger-btn"}" onclick="toggleJobHidden(${job.id}, ${!job.isHidden})">
-            ${job.isHidden ? "Покажи" : "Скрий"}
-          </button>
-
-          <a href="/job/${job.id}" class="job-card-btn">Отвори</a>
-          <a href="/profile/${encodeURIComponent(job.ownerEmail)}" class="job-card-btn secondary">Профил</a>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function getFilteredAdminPosts() {
-    const search = (document.getElementById("adminPostsSearch").value || "").trim().toLowerCase();
-    const visibility = document.getElementById("adminPostsVisibilityFilter").value;
-    const sort = document.getElementById("adminPostsSort").value;
-
-    let items = adminPostsData.filter(post => {
-      const matchesSearch =
-        !search ||
-        (post.text || "").toLowerCase().includes(search) ||
-        (post.authorName || "").toLowerCase().includes(search) ||
-        (post.authorEmail || "").toLowerCase().includes(search);
-
-      const matchesVisibility =
-        !visibility ||
-        (visibility === "visible" && !post.isHidden) ||
-        (visibility === "hidden" && !!post.isHidden);
-
-      return matchesSearch && matchesVisibility;
-    });
-
-    items.sort((a, b) => {
-      const aId = Number(a.id) || 0;
-      const bId = Number(b.id) || 0;
-      return sort === "oldest" ? aId - bId : bId - aId;
-    });
-
-    return items;
-  }
-
-  function renderAdminPosts() {
-    const items = getFilteredAdminPosts();
-    postsAdminInfo.textContent = `Общо: ${items.length}`;
-
-    if (!items.length) {
-      adminPostsList.innerHTML = `<div class="empty">Няма намерени публикации.</div>`;
-      return;
-    }
-
-    adminPostsList.innerHTML = items.map(post => `
-      <div class="admin-item-card">
-        <div class="admin-item-top">
-          <div>
-            <h3>${escapeHtml(post.authorName || "Потребител")}</h3>
-            <div class="admin-item-meta">
-              <span>📧 ${escapeHtml(post.authorEmail || "")}</span>
-              <span>❤️ ${Number(post.likes || 0)}</span>
-              <span>💬 ${Array.isArray(post.comments) ? post.comments.length : 0}</span>
-              <span>🧾 reports: ${Number(post.reportCount || 0)}</span>
-            </div>
-          </div>
-
-          <div class="admin-badges-row">
-            <span class="admin-badge ${post.isHidden ? "admin-badge-danger" : "admin-badge-success"}">
-              ${post.isHidden ? "Скрита" : "Видима"}
-            </span>
-          </div>
-        </div>
-
-        <p class="admin-item-text">${escapeHtml(post.text || "")}</p>
-
-        <div class="admin-actions-row">
-          <button type="button" class="${post.isHidden ? "secondary-btn" : "danger-btn"}" onclick="togglePostHidden(${post.id}, ${!post.isHidden})">
-            ${post.isHidden ? "Покажи" : "Скрий"}
-          </button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function getFilteredAdminReports() {
-    const search = (document.getElementById("adminReportsSearch").value || "").trim().toLowerCase();
-    const status = document.getElementById("adminReportsStatusFilter").value;
-    const type = document.getElementById("adminReportsTypeFilter").value;
-    const sort = document.getElementById("adminReportsSort").value;
-
-    let items = adminReportsData.filter(item => {
-      const matchesSearch =
-        !search ||
-        (item.reason || "").toLowerCase().includes(search) ||
-        (item.note || "").toLowerCase().includes(search) ||
-        (item.reporterEmail || "").toLowerCase().includes(search) ||
-        (item.targetLabel || "").toLowerCase().includes(search);
-
-      const matchesStatus = !status || item.status === status;
-      const matchesType = !type || item.targetType === type;
-
-      return matchesSearch && matchesStatus && matchesType;
-    });
-
-    items.sort((a, b) => {
-      const aId = Number(a.id) || 0;
-      const bId = Number(b.id) || 0;
-      return sort === "oldest" ? aId - bId : bId - aId;
-    });
-
-    return items;
-  }
-
-  function renderAdminReports() {
-    const items = getFilteredAdminReports();
-    reportsAdminInfo.textContent = `Общо: ${items.length}`;
-
-    if (!items.length) {
-      adminReportsList.innerHTML = `<div class="empty">Няма сигнали.</div>`;
-      return;
-    }
-
-    adminReportsList.innerHTML = items.map(item => `
-      <div class="admin-item-card">
-        <div class="admin-item-top">
-          <div>
-            <h3>${escapeHtml(item.targetLabel || "Signal")}</h3>
-            <div class="admin-item-meta">
-              <span>Тип: ${escapeHtml(item.targetType || "")}</span>
-              <span>Reporter: ${escapeHtml(item.reporterEmail || "")}</span>
-              <span>Причина: ${escapeHtml(item.reason || "")}</span>
-            </div>
-          </div>
-
-          <div class="admin-badges-row">
-            <span class="admin-badge ${
-              item.status === "resolved"
-                ? "admin-badge-success"
-                : item.status === "dismissed"
-                ? "admin-badge-danger"
-                : "admin-badge-warning"
-            }">${escapeHtml(item.status || "open")}</span>
-          </div>
-        </div>
-
-        ${item.note ? `<p class="admin-item-text">${escapeHtml(item.note)}</p>` : ""}
-
-        <div class="admin-actions-row">
-          <button type="button" class="secondary-btn" onclick="updateReportStatus(${item.id}, 'resolved')">Resolved</button>
-          <button type="button" class="danger-btn" onclick="updateReportStatus(${item.id}, 'dismissed')">Dismissed</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function renderAdminBanners() {
-    bannersAdminInfo.textContent = `Общо: ${adminBannersData.length}`;
-
-    if (!adminBannersData.length) {
-      adminBannersList.innerHTML = `<div class="empty">Няма банери.</div>`;
-      return;
-    }
-
-    adminBannersList.innerHTML = adminBannersData.map(item => `
-      <div class="admin-item-card">
-        <div class="admin-item-top">
-          <div>
-            <h3>${escapeHtml(item.title || "Банер")}</h3>
-            <div class="admin-item-meta">
-              <span>Позиция: ${escapeHtml(item.placement || "")}</span>
-              <span>Бутон: ${escapeHtml(item.buttonText || "")}</span>
-              <span>Линк: ${escapeHtml(item.buttonHref || "")}</span>
-            </div>
-          </div>
-
-          <div class="admin-badges-row">
-            <span class="admin-badge ${item.isActive ? "admin-badge-success" : "admin-badge-danger"}">
-              ${item.isActive ? "Активен" : "Неактивен"}
-            </span>
-          </div>
-        </div>
-
-        <p class="admin-item-text">${escapeHtml(item.text || "")}</p>
-
-        <div class="admin-actions-row">
-          <button type="button" class="${item.isActive ? "danger-btn" : "secondary-btn"}" onclick="toggleBannerActive(${item.id}, ${!item.isActive})">
-            ${item.isActive ? "Деактивирай" : "Активирай"}
-          </button>
-
-          <button type="button" class="danger-btn" onclick="deleteBanner(${item.id})">Изтрий</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function getFilteredAdminUsers() {
-    const search = (document.getElementById("adminUsersSearch").value || "").trim().toLowerCase();
-    const role = document.getElementById("adminUsersRoleFilter").value;
-    const sort = document.getElementById("adminUsersSort").value;
-
-    let items = adminUsersData.filter(user => {
-      const matchesSearch =
-        !search ||
-        (user.name || "").toLowerCase().includes(search) ||
-        (user.email || "").toLowerCase().includes(search) ||
-        (user.role || "").toLowerCase().includes(search);
-
-      const matchesRole = !role || user.role === role;
-
-      return matchesSearch && matchesRole;
-    });
-
-    items.sort((a, b) => {
-      const aId = Number(a.id) || 0;
-      const bId = Number(b.id) || 0;
-      return sort === "oldest" ? aId - bId : bId - aId;
-    });
-
-    return items;
-  }
-
-  function renderAdminUsers() {
-    const items = getFilteredAdminUsers();
-    usersAdminInfo.textContent = `Общо: ${items.length}`;
-
-    if (!items.length) {
-      adminUsersList.innerHTML = `<div class="empty">Няма профили.</div>`;
-      return;
-    }
-
-    adminUsersList.innerHTML = items.map(user => `
-      <div class="admin-item-card">
-        <div class="admin-item-top">
-          <div>
-            <h3>${escapeHtml(user.name || "Потребител")}</h3>
-            <div class="admin-item-meta">
-              <span>📧 ${escapeHtml(user.email || "")}</span>
-              <span>Роля: ${escapeHtml(user.role || "")}</span>
-              <span>Обяви: ${Number(user.jobsCount || 0)}</span>
-              <span>Публикации: ${Number(user.postsCount || 0)}</span>
-              <span>Ревюта: ${Number(user.reviewsCount || 0)}</span>
-            </div>
-          </div>
-
-          <div class="admin-badges-row">
-            <span class="admin-badge admin-badge-success">${escapeHtml(user.role || "")}</span>
-          </div>
-        </div>
-
-        <p class="admin-item-text">${escapeHtml(user.description || "Няма описание.")}</p>
-
-        <div class="admin-actions-row">
-          <a href="/profile/${encodeURIComponent(user.email)}" class="job-card-btn">Отвори профил</a>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  async function toggleJobApproval(jobId, nextApproved) {
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/jobs/${jobId}/moderation`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          isApproved: nextApproved,
-          isHidden: undefined
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Обновено ✅", "success");
-      await Promise.all([loadAdminJobs(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function toggleJobHidden(jobId, nextHidden) {
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/jobs/${jobId}/moderation`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          isHidden: nextHidden
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Обновено ✅", "success");
-      await Promise.all([loadAdminJobs(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function togglePostHidden(postId, nextHidden) {
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/posts/${postId}/moderation`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          isHidden: nextHidden
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Обновено ✅", "success");
-      await Promise.all([loadAdminPosts(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function updateReportStatus(reportId, status) {
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/reports/${reportId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          status
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Статусът е обновен ✅", "success");
-      await Promise.all([loadAdminReports(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function createBanner() {
-    const currentUser = getCurrentAdmin();
-    const bannerStatus = document.getElementById("bannerStatus");
-    clearStatus(bannerStatus);
-
-    try {
-      const res = await fetch("/api/admin/banners", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          title: document.getElementById("bannerTitle").value.trim(),
-          text: document.getElementById("bannerText").value.trim(),
-          buttonText: document.getElementById("bannerButtonText").value.trim(),
-          buttonHref: document.getElementById("bannerButtonHref").value.trim(),
-          placement: document.getElementById("bannerPlacement").value,
-          isActive: document.getElementById("bannerIsActive").checked
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showStatus(bannerStatus, data.message || "Грешка при добавяне.", "error");
-        return;
-      }
-
-      document.getElementById("bannerTitle").value = "";
-      document.getElementById("bannerText").value = "";
-      document.getElementById("bannerButtonText").value = "";
-      document.getElementById("bannerButtonHref").value = "";
-      document.getElementById("bannerPlacement").value = "jobs-top";
-      document.getElementById("bannerIsActive").checked = true;
-
-      showStatus(bannerStatus, data.message || "Банерът е добавен ✅", "success");
-      showToast(data.message || "Банерът е добавен ✅", "success");
-
-      await Promise.all([loadAdminBanners(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-      showStatus(bannerStatus, "Стана грешка.", "error");
-    }
-  }
-
-  async function toggleBannerActive(bannerId, nextActive) {
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/banners/${bannerId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requesterEmail: currentUser.email,
-          isActive: nextActive
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Банерът е обновен ✅", "success");
-      await Promise.all([loadAdminBanners(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function deleteBanner(bannerId) {
-    const confirmed = confirm("Сигурен ли си, че искаш да изтриеш този банер?");
-    if (!confirmed) return;
-
-    try {
-      const currentUser = getCurrentAdmin();
-
-      const res = await fetch(`/api/admin/banners/${bannerId}?requesterEmail=${encodeURIComponent(currentUser.email)}`, {
-        method: "DELETE"
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.message || "Грешка.", "error");
-        return;
-      }
-
-      showToast(data.message || "Банерът е изтрит ✅", "success");
-      await Promise.all([loadAdminBanners(), loadStats()]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  window.toggleJobApproval = toggleJobApproval;
-  window.toggleJobHidden = toggleJobHidden;
-  window.togglePostHidden = togglePostHidden;
-  window.updateReportStatus = updateReportStatus;
-  window.toggleBannerActive = toggleBannerActive;
-  window.deleteBanner = deleteBanner;
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    if (typeof initAppShell === "function") {
-      initAppShell();
-    }
-
-    if (!ensureAdminAccessUI()) return;
-
-    document.querySelectorAll(".admin-tab").forEach(btn => {
-      btn.addEventListener("click", () => switchAdminTab(btn.dataset.tab));
-    });
-
-    document.getElementById("createBannerBtn").addEventListener("click", createBanner);
-
-    document.getElementById("adminJobsSearch").addEventListener("input", renderAdminJobs);
-    document.getElementById("adminJobsVisibilityFilter").addEventListener("change", renderAdminJobs);
-    document.getElementById("adminJobsTypeFilter").addEventListener("change", renderAdminJobs);
-    document.getElementById("adminJobsSort").addEventListener("change", renderAdminJobs);
-
-    document.getElementById("adminPostsSearch").addEventListener("input", renderAdminPosts);
-    document.getElementById("adminPostsVisibilityFilter").addEventListener("change", renderAdminPosts);
-    document.getElementById("adminPostsSort").addEventListener("change", renderAdminPosts);
-
-    document.getElementById("adminReportsSearch").addEventListener("input", renderAdminReports);
-    document.getElementById("adminReportsStatusFilter").addEventListener("change", renderAdminReports);
-    document.getElementById("adminReportsTypeFilter").addEventListener("change", renderAdminReports);
-    document.getElementById("adminReportsSort").addEventListener("change", renderAdminReports);
-
-    document.getElementById("adminUsersSearch").addEventListener("input", renderAdminUsers);
-    document.getElementById("adminUsersRoleFilter").addEventListener("change", renderAdminUsers);
-    document.getElementById("adminUsersSort").addEventListener("change", renderAdminUsers);
-
-    await Promise.all([
-      loadStats(),
-      loadAdminJobs(),
-      loadAdminPosts(),
-      loadAdminReports(),
-      loadAdminBanners(),
-      loadAdminUsers()
-    ]);
-  });
-</script>
-
+<script src="/admin.js"></script>
 </body>
 </html>

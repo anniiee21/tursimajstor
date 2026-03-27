@@ -4,13 +4,18 @@ const multer = require("multer");
 const fs = require("fs");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
 /* =========================
-   FILE UPLOADS
+   UPLOADS
 ========================= */
 const uploadsDir = path.join(__dirname, "public", "uploads");
 
@@ -23,21 +28,49 @@ const storage = multer.diskStorage({
     cb(null, uploadsDir);
   },
   filename: function (req, file, cb) {
-    const safeName = String(file.originalname || "file").replace(/\s+/g, "-");
-    cb(null, `${Date.now()}-${safeName}`);
+    const safeOriginal = String(file.originalname || "file").replace(/\s+/g, "-");
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}-${safeOriginal}`);
   }
 });
 
 const upload = multer({ storage });
 
 /* =========================
-   IN-MEMORY DATABASE
+   IN-MEMORY DATA
 ========================= */
+const ADMIN_EMAIL = "admin@tursimajstor.bg";
+const ADMIN_PASSWORD = "admin123";
+
 const BOOST_PLANS = {
   3: { days: 3, price: 9, name: "Mini Boost" },
   7: { days: 7, price: 19, name: "Standard Boost" },
   30: { days: 30, price: 49, name: "Power Boost" }
 };
+
+let users = [
+  {
+    id: 1,
+    name: "Админ",
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD,
+    role: "admin",
+    description: "Системен администратор",
+    profileImage: "",
+    coverImage: "",
+    showPhone: false,
+    phone: "",
+    workCities: "",
+    workingHours: "",
+    website: "",
+    facebook: "",
+    instagram: "",
+    youtube: "",
+    videoUrl: "",
+    faq: "",
+    services: "",
+    isBlocked: false
+  }
+];
 
 let jobs = [
   {
@@ -54,139 +87,100 @@ let jobs = [
     gallery: [],
     isPromoted: false,
     promotedUntil: null,
-    isApproved: true,
     isHidden: false,
-    adminNote: ""
-  },
-  {
-    id: 2,
-    title: "Боядисване на стена",
-    description: "Предлагам боядисване на стени, тавани и освежителни ремонти.",
-    city: "София",
-    budget: 300,
-    category: "Строителство",
-    subcategory: "Боядисване",
-    ownerEmail: "worker@example.com",
-    type: "service",
-    imageUrl: "",
-    gallery: [],
-    isPromoted: false,
-    promotedUntil: null,
-    isApproved: true,
-    isHidden: false,
-    adminNote: ""
-  }
-];
-
-let applications = [];
-let users = [
-  {
-    id: 1,
-    name: "Админ",
-    email: "admin@tursimajstor.bg",
-    password: "admin123",
-    role: "admin",
-    description: "Системен администратор",
-    phone: "",
-    showPhone: false,
-    profileImage: "",
-    contactName: "",
-    companyId: "",
-    manager: "",
-    profession: "",
-    coverImage: "",
-    services: "",
-    workCities: "",
-    workingHours: "",
-    website: "",
-    facebook: "",
-    instagram: "",
-    youtube: "",
-    videoUrl: "",
-    faq: ""
-  },
-  {
-    id: 2,
-    name: "Client Example",
-    email: "client@example.com",
-    password: "123456",
-    role: "personal",
-    description: "Примерен клиент",
-    phone: "",
-    showPhone: false,
-    profileImage: "",
-    contactName: "",
-    companyId: "",
-    manager: "",
-    profession: "Строителство",
-    coverImage: "",
-    services: "",
-    workCities: "Плевен",
-    workingHours: "",
-    website: "",
-    facebook: "",
-    instagram: "",
-    youtube: "",
-    videoUrl: "",
-    faq: ""
-  },
-  {
-    id: 3,
-    name: "Worker Example",
-    email: "worker@example.com",
-    password: "123456",
-    role: "freelancer",
-    description: "Предлагам ремонти и боядисване.",
-    phone: "",
-    showPhone: false,
-    profileImage: "",
-    contactName: "",
-    companyId: "",
-    manager: "",
-    profession: "Строителство",
-    coverImage: "",
-    services: "Боядисване, Шпакловка",
-    workCities: "София",
-    workingHours: "",
-    website: "",
-    facebook: "",
-    instagram: "",
-    youtube: "",
-    videoUrl: "",
-    faq: ""
-  }
-];
-let posts = [];
-let inboxMessages = [];
-let notifications = [];
-let favorites = [];
-let reviews = [];
-let completedProjects = [];
-let portfolioItems = [];
-let reports = [];
-let banners = [
-  {
-    id: 1,
-    title: "Промотирай бизнеса си",
-    text: "Покажи услугите си пред повече клиенти с premium обява.",
-    buttonText: "Разгледай",
-    buttonHref: "/jobs-page",
-    placement: "job-details-sidebar",
-    isActive: true,
     createdAt: new Date().toLocaleString("bg-BG")
   }
 ];
 
+let applications = [];
+let favorites = [];
+let inboxMessages = [];
+let notifications = [];
+let posts = [];
+let completedProjects = [];
+let portfolioItems = [];
+let reports = [];
+let ads = [];
+
 /* =========================
    HELPERS
 ========================= */
-function getNextId(collection) {
-  if (!Array.isArray(collection) || !collection.length) return 1;
-  return Math.max(...collection.map(item => Number(item.id) || 0)) + 1;
-}
-
 function normalizeEmail(email = "") {
   return String(email || "").trim().toLowerCase();
+}
+
+function getNextId(arr) {
+  return Array.isArray(arr) && arr.length
+    ? Math.max(...arr.map(item => Number(item.id) || 0)) + 1
+    : 1;
+}
+
+function isAdminEmail(email = "") {
+  return normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL);
+}
+
+function publicUser(user) {
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    description: user.description || "",
+    profileImage: user.profileImage || "",
+    coverImage: user.coverImage || "",
+    showPhone: !!user.showPhone,
+    phone: user.phone || "",
+    workCities: user.workCities || "",
+    workingHours: user.workingHours || "",
+    services: user.services || "",
+    website: user.website || "",
+    facebook: user.facebook || "",
+    instagram: user.instagram || "",
+    youtube: user.youtube || "",
+    videoUrl: user.videoUrl || "",
+    faq: user.faq || "",
+    isBlocked: !!user.isBlocked
+  };
+}
+
+function normalizeJobPromotion(job) {
+  if (!job) return job;
+
+  if (
+    job.isPromoted &&
+    job.promotedUntil &&
+    new Date(job.promotedUntil) <= new Date()
+  ) {
+    job.isPromoted = false;
+    job.promotedUntil = null;
+  }
+
+  return job;
+}
+
+function isJobPromoted(job) {
+  return !!(
+    job &&
+    job.isPromoted &&
+    job.promotedUntil &&
+    new Date(job.promotedUntil) > new Date()
+  );
+}
+
+function sortJobsForMarketplace(items) {
+  items.forEach(normalizeJobPromotion);
+
+  return items.sort((a, b) => {
+    const aPromoted = isJobPromoted(a);
+    const bPromoted = isJobPromoted(b);
+
+    if (aPromoted && !bPromoted) return -1;
+    if (!aPromoted && bPromoted) return 1;
+
+    return (Number(b.id) || 0) - (Number(a.id) || 0);
+  });
 }
 
 function createNotification({ userEmail, type, title, text, link }) {
@@ -204,92 +198,33 @@ function createNotification({ userEmail, type, title, text, link }) {
   });
 }
 
-function getRatingSummaryByEmail(userEmail) {
-  const normalized = normalizeEmail(userEmail);
-  const userReviews = reviews.filter(r => normalizeEmail(r.workerEmail) === normalized);
-
-  if (!userReviews.length) {
-    return {
-      average: 0,
-      count: 0
-    };
-  }
-
-  const average =
-    userReviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
-    userReviews.length;
-
-  return {
-    average: Number(average.toFixed(1)),
-    count: userReviews.length
-  };
-}
-
-function isJobPromoted(job) {
-  return !!(
-    job &&
-    job.isPromoted &&
-    job.promotedUntil &&
-    new Date(job.promotedUntil) > new Date()
-  );
-}
-
-function normalizeJobPromotion(job) {
-  if (!job) return job;
-
-  if (job.isPromoted && job.promotedUntil && new Date(job.promotedUntil) <= new Date()) {
-    job.isPromoted = false;
-    job.promotedUntil = null;
-  }
-
-  return job;
-}
-
-function sortJobsForMarketplace(items) {
-  items.forEach(normalizeJobPromotion);
-
-  return items.sort((a, b) => {
-    const aPromoted = isJobPromoted(a);
-    const bPromoted = isJobPromoted(b);
-
-    if (aPromoted && !bPromoted) return -1;
-    if (!aPromoted && bPromoted) return 1;
-
-    return (Number(b.id) || 0) - (Number(a.id) || 0);
-  });
-}
-
 function getBoostPlan(days) {
   return BOOST_PLANS[Number(days)] || null;
 }
 
-function publicUser(user) {
-  if (!user) return null;
+function requireAdmin(req, res, next) {
+  const requesterEmail =
+    String(
+      req.query.requesterEmail ||
+      req.body?.requesterEmail ||
+      req.headers["x-admin-email"] ||
+      ""
+    ).trim().toLowerCase();
 
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    description: user.description || "",
-    phone: user.phone || "",
-    showPhone: !!user.showPhone,
-    profileImage: user.profileImage || "",
-    contactName: user.contactName || "",
-    companyId: user.companyId || "",
-    manager: user.manager || "",
-    profession: user.profession || "",
-    coverImage: user.coverImage || "",
-    services: user.services || "",
-    workCities: user.workCities || "",
-    workingHours: user.workingHours || "",
-    website: user.website || "",
-    facebook: user.facebook || "",
-    instagram: user.instagram || "",
-    youtube: user.youtube || "",
-    videoUrl: user.videoUrl || "",
-    faq: user.faq || ""
-  };
+  console.log("ADMIN CHECK:", {
+    method: req.method,
+    url: req.originalUrl,
+    queryEmail: req.query.requesterEmail || "",
+    bodyEmail: req.body?.requesterEmail || "",
+    headerEmail: req.headers["x-admin-email"] || "",
+    finalEmail: requesterEmail
+  });
+
+  if (requesterEmail !== "admin@tursimajstor.bg") {
+    return res.status(403).json({ message: "Нямаш достъп." });
+  }
+
+  next();
 }
 
 function updateEmailAcrossCollections(oldEmail, newEmail) {
@@ -297,138 +232,51 @@ function updateEmailAcrossCollections(oldEmail, newEmail) {
   const newNormalized = normalizeEmail(newEmail);
 
   users.forEach(user => {
-    if (normalizeEmail(user.email) === oldNormalized) {
-      user.email = newNormalized;
-    }
+    if (normalizeEmail(user.email) === oldNormalized) user.email = newNormalized;
   });
 
   jobs.forEach(job => {
-    if (normalizeEmail(job.ownerEmail) === oldNormalized) {
-      job.ownerEmail = newNormalized;
-    }
-  });
-
-  posts.forEach(post => {
-    if (normalizeEmail(post.authorEmail) === oldNormalized) {
-      post.authorEmail = newNormalized;
-    }
+    if (normalizeEmail(job.ownerEmail) === oldNormalized) job.ownerEmail = newNormalized;
   });
 
   applications.forEach(app => {
-    if (normalizeEmail(app.email) === oldNormalized) {
-      app.email = newNormalized;
-    }
+    if (normalizeEmail(app.email) === oldNormalized) app.email = newNormalized;
+  });
+
+  favorites.forEach(fav => {
+    if (normalizeEmail(fav.userEmail) === oldNormalized) fav.userEmail = newNormalized;
   });
 
   inboxMessages.forEach(msg => {
-    if (normalizeEmail(msg.senderEmail) === oldNormalized) {
-      msg.senderEmail = newNormalized;
-    }
-    if (normalizeEmail(msg.receiverEmail) === oldNormalized) {
-      msg.receiverEmail = newNormalized;
-    }
+    if (normalizeEmail(msg.senderEmail) === oldNormalized) msg.senderEmail = newNormalized;
+    if (normalizeEmail(msg.receiverEmail) === oldNormalized) msg.receiverEmail = newNormalized;
   });
 
   notifications.forEach(item => {
-    if (normalizeEmail(item.userEmail) === oldNormalized) {
-      item.userEmail = newNormalized;
-    }
+    if (normalizeEmail(item.userEmail) === oldNormalized) item.userEmail = newNormalized;
   });
 
-  favorites.forEach(item => {
-    if (normalizeEmail(item.userEmail) === oldNormalized) {
-      item.userEmail = newNormalized;
-    }
-  });
-
-  reviews.forEach(item => {
-    if (normalizeEmail(item.workerEmail) === oldNormalized) {
-      item.workerEmail = newNormalized;
-    }
-    if (normalizeEmail(item.reviewerEmail) === oldNormalized) {
-      item.reviewerEmail = newNormalized;
-    }
+  posts.forEach(post => {
+    if (normalizeEmail(post.authorEmail) === oldNormalized) post.authorEmail = newNormalized;
   });
 
   completedProjects.forEach(item => {
-    if (normalizeEmail(item.workerEmail) === oldNormalized) {
-      item.workerEmail = newNormalized;
-    }
-    if (normalizeEmail(item.ownerEmail) === oldNormalized) {
-      item.ownerEmail = newNormalized;
-    }
+    if (normalizeEmail(item.workerEmail) === oldNormalized) item.workerEmail = newNormalized;
+    if (normalizeEmail(item.ownerEmail) === oldNormalized) item.ownerEmail = newNormalized;
   });
 
   portfolioItems.forEach(item => {
-    if (normalizeEmail(item.ownerEmail) === oldNormalized) {
-      item.ownerEmail = newNormalized;
-    }
+    if (normalizeEmail(item.ownerEmail) === oldNormalized) item.ownerEmail = newNormalized;
   });
 
   reports.forEach(item => {
-    if (normalizeEmail(item.reporterEmail) === oldNormalized) {
-      item.reporterEmail = newNormalized;
-    }
-    if (normalizeEmail(item.targetEmail) === oldNormalized) {
-      item.targetEmail = newNormalized;
-    }
-  });
-}
-
-function isAdminEmail(email = "") {
-  return users.some(
-    user => normalizeEmail(user.email) === normalizeEmail(email) && user.role === "admin"
-  );
-}
-
-function getRequesterEmail(req) {
-  return normalizeEmail(
-    req.body?.requesterEmail ||
-    req.query?.requesterEmail ||
-    req.headers["x-requester-email"] ||
-    ""
-  );
-}
-
-function requireAdmin(req, res) {
-  const requesterEmail = getRequesterEmail(req);
-
-  if (!requesterEmail || !isAdminEmail(requesterEmail)) {
-    res.status(403).json({
-      message: "Нямаш достъп до admin секцията."
-    });
-    return null;
-  }
-
-  return requesterEmail;
-}
-
-function isJobVisibleToPublic(job) {
-  if (!job) return false;
-  normalizeJobPromotion(job);
-  return job.isHidden !== true && job.isApproved !== false;
-}
-
-function isPostVisibleToPublic(post) {
-  return !!post && post.isHidden !== true;
-}
-
-function getReportCountForTarget(targetType, matcher) {
-  return reports.filter(
-    item => item.targetType === targetType && item.status === "open" && matcher(item)
-  ).length;
-}
-
-function getPublicBannersByPlacement(placement = "") {
-  return banners.filter(item => {
-    if (!item.isActive) return false;
-    if (placement && item.placement !== placement) return false;
-    return true;
+    if (normalizeEmail(item.reporterEmail) === oldNormalized) item.reporterEmail = newNormalized;
+    if (normalizeEmail(item.targetEmail) === oldNormalized) item.targetEmail = newNormalized;
   });
 }
 
 /* =========================
-   PAGES
+   PAGE ROUTES
 ========================= */
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -438,16 +286,24 @@ app.get("/account-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "account.html"));
 });
 
-app.get("/applications-page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "applications.html"));
+app.get("/jobs-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "jobs.html"));
 });
 
-app.get("/feed-page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "feed.html"));
+app.get("/job/:id", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "job-details.html"));
+});
+
+app.get("/favorites-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "favorites.html"));
 });
 
 app.get("/my-jobs-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "my-jobs.html"));
+});
+
+app.get("/applications-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "applications.html"));
 });
 
 app.get("/inbox-page", (req, res) => {
@@ -458,20 +314,12 @@ app.get("/notifications-page", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "notifications.html"));
 });
 
-app.get("/favorites-page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "favorites.html"));
+app.get("/feed-page", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "feed.html"));
 });
 
 app.get("/profile/:email", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "profile.html"));
-});
-
-app.get("/job/:id", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "job-details.html"));
-});
-
-app.get("/jobs-page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "jobs.html"));
 });
 
 app.get("/my-notes-page", (req, res) => {
@@ -483,85 +331,223 @@ app.get("/admin-page", (req, res) => {
 });
 
 /* =========================
+   AUTH
+========================= */
+app.post("/register", upload.single("profileImage"), (req, res) => {
+  const {
+    name,
+    email,
+    password,
+    role,
+    description,
+    phone,
+    showPhone,
+    workCities,
+    workingHours,
+    services,
+    coverImage,
+    website,
+    facebook,
+    instagram,
+    youtube,
+    videoUrl,
+    faq
+  } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "Попълни всички задължителни полета." });
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+
+  if (users.some(u => normalizeEmail(u.email) === normalizedEmail)) {
+    return res.status(400).json({ message: "Имейлът вече съществува." });
+  }
+
+  const newUser = {
+    id: getNextId(users),
+    name: name.trim(),
+    email: normalizedEmail,
+    password,
+    role: normalizedEmail === normalizeEmail(ADMIN_EMAIL) ? "admin" : (role || "personal"),
+    description: description || "",
+    profileImage: req.file ? `/uploads/${req.file.filename}` : "",
+    coverImage: coverImage || "",
+    showPhone: showPhone === "true" || showPhone === true,
+    phone: phone || "",
+    workCities: workCities || "",
+    workingHours: workingHours || "",
+    services: services || "",
+    website: website || "",
+    facebook: facebook || "",
+    instagram: instagram || "",
+    youtube: youtube || "",
+    videoUrl: videoUrl || "",
+    faq: faq || "",
+    isBlocked: false
+  };
+
+  users.push(newUser);
+
+  res.json({
+    message: "Регистрация успешна ✅",
+    user: publicUser(newUser)
+  });
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find(
+    u =>
+      normalizeEmail(u.email) === normalizeEmail(email) &&
+      u.password === password
+  );
+
+  if (!user) {
+    return res.status(401).json({ message: "Невалидни данни." });
+  }
+
+  if (user.isBlocked) {
+    return res.status(403).json({ message: "Профилът е блокиран." });
+  }
+
+  res.json({
+    message: "Вход успешен ✅",
+    user: publicUser(user)
+  });
+});
+
+/* =========================
+   PROFILE
+========================= */
+app.get("/api/profile/:email", (req, res) => {
+  const email = normalizeEmail(decodeURIComponent(req.params.email));
+  const user = users.find(u => normalizeEmail(u.email) === email);
+
+  const userPosts = posts.filter(p => normalizeEmail(p.authorEmail) === email);
+  const userJobs = jobs.filter(j => normalizeEmail(j.ownerEmail) === email);
+  const userPortfolio = portfolioItems.filter(p => normalizeEmail(p.ownerEmail) === email);
+  const userCompletedProjects = completedProjects.filter(c => normalizeEmail(c.workerEmail) === email);
+
+  res.json({
+    user: user
+      ? publicUser(user)
+      : {
+          name: "Потребител",
+          email,
+          role: "personal",
+          description: "",
+          profileImage: "",
+          coverImage: "",
+          showPhone: false,
+          phone: "",
+          workCities: "",
+          workingHours: "",
+          services: "",
+          website: "",
+          facebook: "",
+          instagram: "",
+          youtube: "",
+          videoUrl: "",
+          faq: "",
+          isBlocked: false
+        },
+    posts: userPosts,
+    jobs: userJobs,
+    portfolio: userPortfolio,
+    completedProjects: userCompletedProjects,
+    reviews: [],
+    rating: { average: 0, count: 0 }
+  });
+});
+
+app.put(
+  "/api/profile/:email",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "coverImageFile", maxCount: 1 }
+  ]),
+  (req, res) => {
+    const currentEmail = normalizeEmail(decodeURIComponent(req.params.email));
+    const user = users.find(u => normalizeEmail(u.email) === currentEmail);
+
+    if (!user) {
+      return res.status(404).json({ message: "Потребителят не е намерен." });
+    }
+
+    const {
+      name,
+      email,
+      description,
+      phone,
+      showPhone,
+      coverImage,
+      workCities,
+      workingHours,
+      services,
+      website,
+      facebook,
+      instagram,
+      youtube,
+      videoUrl,
+      faq
+    } = req.body;
+
+    const newEmail = email ? normalizeEmail(email) : currentEmail;
+
+    if (newEmail !== currentEmail) {
+      const exists = users.find(u => normalizeEmail(u.email) === newEmail);
+      if (exists) {
+        return res.status(400).json({ message: "Имейлът вече се използва." });
+      }
+      updateEmailAcrossCollections(currentEmail, newEmail);
+    }
+
+    user.name = name || user.name;
+    user.email = newEmail;
+    user.description = description || "";
+    user.phone = phone || "";
+    user.showPhone = showPhone === "true" || showPhone === true;
+    user.workCities = workCities || "";
+    user.workingHours = workingHours || "";
+    user.services = services || "";
+    user.website = website || "";
+    user.facebook = facebook || "";
+    user.instagram = instagram || "";
+    user.youtube = youtube || "";
+    user.videoUrl = videoUrl || "";
+    user.faq = faq || "";
+
+    if (req.files?.profileImage?.[0]) {
+      user.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
+    }
+
+    if (req.files?.coverImageFile?.[0]) {
+      user.coverImage = `/uploads/${req.files.coverImageFile[0].filename}`;
+    } else {
+      user.coverImage = coverImage || user.coverImage || "";
+    }
+
+    res.json({
+      message: "Профилът е обновен ✅",
+      user: publicUser(user)
+    });
+  }
+);
+
+/* =========================
    JOBS
 ========================= */
 app.get("/jobs", (req, res) => {
-  const visibleJobs = jobs.filter(isJobVisibleToPublic);
-  const sortedJobs = sortJobsForMarketplace([...visibleJobs]);
-  res.json(sortedJobs);
-});
-
-app.get("/jobs/recommended/:email", (req, res) => {
-  const { email } = req.params;
-
-  try {
-    const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(email));
-
-    if (!user) {
-      return res.json([]);
-    }
-
-    const userCity = (user.workCities || "").toLowerCase();
-    const userCategory = (user.profession || "").toLowerCase();
-    const userSkills = (user.services || "")
-      .toLowerCase()
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    const visibleJobs = jobs.filter(isJobVisibleToPublic);
-
-    const scored = visibleJobs.map(job => {
-      let score = 0;
-      let reasons = [];
-
-      if (job.category && userCategory && job.category.toLowerCase().includes(userCategory)) {
-        score += 40;
-        reasons.push("Съвпада с твоята професия");
-      }
-
-      if (
-        userSkills.some(skill =>
-          (job.subcategory || "").toLowerCase().includes(skill) ||
-          (job.description || "").toLowerCase().includes(skill)
-        )
-      ) {
-        score += 25;
-        reasons.push("Съвпада с твои умения");
-      }
-
-      if (job.city && userCity && job.city.toLowerCase().includes(userCity)) {
-        score += 20;
-        reasons.push("В твоя град");
-      }
-
-      if (job.budget) {
-        score += 5;
-      }
-
-      return {
-        ...job,
-        aiScore: score,
-        aiReasons: reasons
-      };
-    });
-
-    const recommended = scored
-      .filter(j => j.aiScore > 20)
-      .sort((a, b) => b.aiScore - a.aiScore)
-      .slice(0, 6);
-
-    res.json(recommended);
-  } catch (err) {
-    console.error("AI ERROR:", err);
-    res.status(500).json([]);
-  }
+  const visibleJobs = jobs.filter(job => !job.isHidden);
+  res.json(sortJobsForMarketplace([...visibleJobs]));
 });
 
 app.get("/my-jobs/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
-  const myJobs = jobs.filter(job => normalizeEmail(job.ownerEmail) === email);
-  res.json(sortJobsForMarketplace([...myJobs]));
+  const items = jobs.filter(job => normalizeEmail(job.ownerEmail) === email);
+  res.json(sortJobsForMarketplace([...items]));
 });
 
 app.post(
@@ -583,16 +569,11 @@ app.post(
     } = req.body;
 
     if (!title || !description || !city || !category || !ownerEmail) {
-      return res.status(400).json({
-        message: "Попълни всички задължителни полета."
-      });
+      return res.status(400).json({ message: "Попълни всички задължителни полета." });
     }
 
     const imageFile = req.files?.image?.[0] || null;
     const galleryFiles = req.files?.gallery || [];
-
-    const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : "";
-    const gallery = galleryFiles.map(file => `/uploads/${file.filename}`);
 
     const newJob = {
       id: getNextId(jobs),
@@ -604,19 +585,18 @@ app.post(
       subcategory: subcategory || "",
       ownerEmail: normalizeEmail(ownerEmail),
       type: type || "job",
-      imageUrl,
-      gallery,
+      imageUrl: imageFile ? `/uploads/${imageFile.filename}` : "",
+      gallery: galleryFiles.map(file => `/uploads/${file.filename}`),
       isPromoted: false,
       promotedUntil: null,
-      isApproved: true,
       isHidden: false,
-      adminNote: ""
+      createdAt: new Date().toLocaleString("bg-BG")
     };
 
     jobs.push(newJob);
 
-    res.status(201).json({
-      message: "Обявата е създадена успешно ✅",
+    res.json({
+      message: "Обявата е публикувана ✅",
       job: newJob
     });
   }
@@ -624,50 +604,26 @@ app.post(
 
 app.get("/api/jobs/:id", (req, res) => {
   const jobId = Number(req.params.id);
-  const requesterEmail = normalizeEmail(req.query.requesterEmail || "");
-
-  if (!Number.isFinite(jobId)) {
-    return res.status(400).json({
-      message: "Невалидно ID на обявата."
-    });
-  }
-
   const job = jobs.find(j => Number(j.id) === jobId);
 
   if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
+    return res.status(404).json({ message: "Обявата не е намерена." });
   }
 
-  const isOwner = requesterEmail && normalizeEmail(job.ownerEmail) === requesterEmail;
-  const isAdmin = requesterEmail && isAdminEmail(requesterEmail);
-
-  if (!isJobVisibleToPublic(job) && !isOwner && !isAdmin) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  normalizeJobPromotion(job);
-
-  const owner =
-    users.find(u => normalizeEmail(u.email) === normalizeEmail(job.ownerEmail)) || null;
+  const owner = users.find(u => normalizeEmail(u.email) === normalizeEmail(job.ownerEmail));
 
   const related = sortJobsForMarketplace(
-    jobs
-      .filter(j => Number(j.id) !== jobId && j.category === job.category)
-      .filter(isJobVisibleToPublic)
-      .slice()
+    jobs.filter(j =>
+      Number(j.id) !== jobId &&
+      !j.isHidden &&
+      j.category === job.category
+    ).slice()
   ).slice(0, 4);
 
   res.json({
     job,
-    owner: publicUser(owner),
-    related,
-    banners: {
-      sidebar: getPublicBannersByPlacement("job-details-sidebar")
-    }
+    owner: owner ? publicUser(owner) : null,
+    related
   });
 });
 
@@ -679,6 +635,12 @@ app.put(
   ]),
   (req, res) => {
     const jobId = Number(req.params.id);
+    const job = jobs.find(j => Number(j.id) === jobId);
+
+    if (!job) {
+      return res.status(404).json({ message: "Обявата не е намерена." });
+    }
+
     const {
       requesterEmail,
       title,
@@ -690,33 +652,17 @@ app.put(
       type
     } = req.body;
 
-    const job = jobs.find(j => j.id === jobId);
-
-    if (!job) {
-      return res.status(404).json({
-        message: "Обявата не е намерена."
-      });
+    if (normalizeEmail(requesterEmail) !== normalizeEmail(job.ownerEmail)) {
+      return res.status(403).json({ message: "Нямаш право да редактираш тази обява." });
     }
 
-    if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-      return res.status(403).json({
-        message: "Нямаш право да редактираш тази обява."
-      });
-    }
-
-    if (!title || !description || !city || !category) {
-      return res.status(400).json({
-        message: "Попълни всички задължителни полета."
-      });
-    }
-
-    job.title = title.trim();
-    job.description = description.trim();
-    job.city = city.trim();
+    job.title = title || job.title;
+    job.description = description || job.description;
+    job.city = city || job.city;
     job.budget = budget ? Number(budget) : 0;
-    job.category = category.trim();
+    job.category = category || job.category;
     job.subcategory = subcategory || "";
-    job.type = type || "job";
+    job.type = type || job.type;
 
     const imageFile = req.files?.image?.[0] || null;
     const galleryFiles = req.files?.gallery || [];
@@ -725,12 +671,12 @@ app.put(
       job.imageUrl = `/uploads/${imageFile.filename}`;
     }
 
-    if (galleryFiles.length > 0) {
+    if (galleryFiles.length) {
       job.gallery = galleryFiles.map(file => `/uploads/${file.filename}`);
     }
 
     res.json({
-      message: "Обявата е обновена успешно ✅",
+      message: "Обявата е обновена ✅",
       job
     });
   }
@@ -738,39 +684,85 @@ app.put(
 
 app.delete("/api/jobs/:id", (req, res) => {
   const jobId = Number(req.params.id);
-  const requesterEmail = req.query.email;
+  const requesterEmail = normalizeEmail(req.query.email || "");
 
-  const jobIndex = jobs.findIndex(j => j.id === jobId);
+  const job = jobs.find(j => Number(j.id) === jobId);
 
-  if (jobIndex === -1) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
   }
 
-  if (!requesterEmail || normalizeEmail(jobs[jobIndex].ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Нямаш право да изтриеш тази обява."
-    });
+  if (normalizeEmail(job.ownerEmail) !== requesterEmail) {
+    return res.status(403).json({ message: "Нямаш право да изтриеш тази обява." });
   }
 
-  const deletedJob = jobs[jobIndex];
-  jobs.splice(jobIndex, 1);
+  jobs = jobs.filter(j => Number(j.id) !== jobId);
+  applications = applications.filter(a => Number(a.jobId) !== jobId);
+  favorites = favorites.filter(f => Number(f.jobId) !== jobId);
+  completedProjects = completedProjects.filter(c => Number(c.jobId) !== jobId);
 
-  applications = applications.filter(app => app.jobId !== jobId);
-  inboxMessages = inboxMessages.filter(msg => msg.jobId !== jobId);
-  favorites = favorites.filter(item => item.jobId !== jobId);
-  completedProjects = completedProjects.filter(item => item.jobId !== jobId);
-  reports = reports.filter(item => !(item.targetType === "job" && Number(item.targetId) === jobId));
+  res.json({ message: "Обявата е изтрита ✅" });
+});
 
-  res.json({
-    message: "Обявата е изтрита успешно ✅",
-    job: deletedJob
-  });
+app.get("/jobs/recommended/:email", (req, res) => {
+  const email = normalizeEmail(req.params.email);
+  const user = users.find(u => normalizeEmail(u.email) === email);
+
+  if (!user) return res.json([]);
+
+  const skills = String(user.services || "")
+    .toLowerCase()
+    .split(",")
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  const cityText = String(user.workCities || "").toLowerCase();
+  const professionText = String(user.role || "").toLowerCase();
+
+  const scored = jobs
+    .filter(job => !job.isHidden)
+    .map(job => {
+      let aiScore = 0;
+      const aiReasons = [];
+
+      if (cityText && String(job.city || "").toLowerCase().includes(cityText)) {
+        aiScore += 20;
+        aiReasons.push("В твоя град");
+      }
+
+      if (
+        professionText &&
+        String(job.category || "").toLowerCase().includes(professionText)
+      ) {
+        aiScore += 15;
+        aiReasons.push("Съвпада по профил");
+      }
+
+      if (
+        skills.some(skill =>
+          String(job.subcategory || "").toLowerCase().includes(skill) ||
+          String(job.description || "").toLowerCase().includes(skill)
+        )
+      ) {
+        aiScore += 30;
+        aiReasons.push("Съвпада с умения");
+      }
+
+      if (job.budget) {
+        aiScore += 5;
+      }
+
+      return { ...job, aiScore, aiReasons };
+    })
+    .filter(job => job.aiScore > 0)
+    .sort((a, b) => b.aiScore - a.aiScore)
+    .slice(0, 6);
+
+  res.json(scored);
 });
 
 /* =========================
-   BOOST JOBS
+   BOOST
 ========================= */
 app.get("/api/boost-plans", (req, res) => {
   res.json(Object.values(BOOST_PLANS));
@@ -780,151 +772,34 @@ app.post("/api/jobs/:id/boost", (req, res) => {
   const jobId = Number(req.params.id);
   const { requesterEmail, days } = req.body;
 
-  const job = jobs.find(j => j.id === jobId);
+  const job = jobs.find(j => Number(j.id) === jobId);
 
   if (!job) {
     return res.status(404).json({ message: "Обявата не е намерена." });
   }
 
-  if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({ message: "Нямаш право да промотираш тази обява." });
+  if (normalizeEmail(requesterEmail) !== normalizeEmail(job.ownerEmail)) {
+    return res.status(403).json({ message: "Нямаш право да boost-неш тази обява." });
   }
 
-  const selectedPlan = getBoostPlan(days);
-
-  if (!selectedPlan) {
-    return res.status(400).json({
-      message: "Невалиден boost пакет. Избери 3, 7 или 30 дни."
-    });
+  const plan = getBoostPlan(days);
+  if (!plan) {
+    return res.status(400).json({ message: "Невалиден пакет." });
   }
 
   const now = new Date();
-  const currentExpire =
+  const baseDate =
     job.promotedUntil && new Date(job.promotedUntil) > now
       ? new Date(job.promotedUntil)
       : now;
 
-  const newExpire = new Date(
-    currentExpire.getTime() + selectedPlan.days * 24 * 60 * 60 * 1000
-  );
+  const nextExpire = new Date(baseDate.getTime() + plan.days * 24 * 60 * 60 * 1000);
 
   job.isPromoted = true;
-  job.promotedUntil = newExpire.toISOString();
+  job.promotedUntil = nextExpire.toISOString();
 
   res.json({
-    message: `Обявата е промотирана за ${selectedPlan.days} дни ⭐`,
-    planName: selectedPlan.name,
-    price: selectedPlan.price,
-    days: selectedPlan.days,
-    promotedUntil: job.promotedUntil,
-    job
-  });
-});
-
-app.put("/api/jobs/:id/main-image", (req, res) => {
-  const jobId = Number(req.params.id);
-  const { requesterEmail, imageUrl } = req.body;
-
-  const job = jobs.find(j => j.id === jobId);
-
-  if (!job) {
-    return res.status(404).json({ message: "Обявата не е намерена." });
-  }
-
-  if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({ message: "Нямаш право да редактираш тази обява." });
-  }
-
-  const allImages = [job.imageUrl, ...(job.gallery || [])].filter(Boolean);
-
-  if (!imageUrl || !allImages.includes(imageUrl)) {
-    return res.status(400).json({ message: "Снимката не е намерена в тази обява." });
-  }
-
-  const oldMain = job.imageUrl;
-  const filteredGallery = (job.gallery || []).filter(img => img !== imageUrl);
-
-  if (oldMain && oldMain !== imageUrl) {
-    filteredGallery.unshift(oldMain);
-  }
-
-  job.imageUrl = imageUrl;
-  job.gallery = filteredGallery;
-
-  res.json({
-    message: "Основната снимка е сменена успешно ✅",
-    job
-  });
-});
-
-app.delete("/api/jobs/:id/gallery-image", (req, res) => {
-  const jobId = Number(req.params.id);
-  const { requesterEmail, imageUrl } = req.body;
-
-  const job = jobs.find(j => j.id === jobId);
-
-  if (!job) {
-    return res.status(404).json({ message: "Обявата не е намерена." });
-  }
-
-  if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({ message: "Нямаш право да редактираш тази обява." });
-  }
-
-  if (!imageUrl) {
-    return res.status(400).json({ message: "Липсва снимка за изтриване." });
-  }
-
-  if (job.imageUrl === imageUrl) {
-    if (job.gallery && job.gallery.length > 0) {
-      job.imageUrl = job.gallery[0];
-      job.gallery = job.gallery.slice(1);
-    } else {
-      job.imageUrl = "";
-    }
-
-    return res.json({
-      message: "Основната снимка е изтрита успешно ✅",
-      job
-    });
-  }
-
-  const beforeLength = (job.gallery || []).length;
-  job.gallery = (job.gallery || []).filter(img => img !== imageUrl);
-
-  if (job.gallery.length === beforeLength) {
-    return res.status(404).json({ message: "Снимката не е намерена в галерията." });
-  }
-
-  res.json({
-    message: "Снимката е изтрита от галерията ✅",
-    job
-  });
-});
-
-app.put("/api/jobs/:id/reorder-gallery", (req, res) => {
-  const jobId = Number(req.params.id);
-  const { requesterEmail, orderedImages } = req.body;
-
-  const job = jobs.find(j => j.id === jobId);
-
-  if (!job) {
-    return res.status(404).json({ message: "Обявата не е намерена." });
-  }
-
-  if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({ message: "Нямаш право." });
-  }
-
-  if (!Array.isArray(orderedImages)) {
-    return res.status(400).json({ message: "Невалиден списък." });
-  }
-
-  const mainImage = job.imageUrl;
-  job.gallery = orderedImages.filter(img => img !== mainImage);
-
-  res.json({
-    message: "Редът на снимките е обновен ✅",
+    message: `Обявата е промотирана за ${plan.days} дни ⭐`,
     job
   });
 });
@@ -935,58 +810,43 @@ app.put("/api/jobs/:id/reorder-gallery", (req, res) => {
 app.get("/favorites/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
 
-  const userFavorites = favorites
-    .filter(item => normalizeEmail(item.userEmail) === email)
-    .map(item => jobs.find(j => j.id === item.jobId) || null)
-    .filter(Boolean)
-    .filter(isJobVisibleToPublic);
+  const items = favorites
+    .filter(f => normalizeEmail(f.userEmail) === email)
+    .map(f => jobs.find(j => Number(j.id) === Number(f.jobId)))
+    .filter(Boolean);
 
-  res.json(userFavorites);
+  res.json(items);
 });
 
 app.get("/favorites/check", (req, res) => {
-  const userEmail = req.query.email;
+  const email = normalizeEmail(req.query.email || "");
   const jobId = Number(req.query.jobId);
 
-  if (!userEmail || !jobId) {
-    return res.status(400).json({
-      message: "Липсват данни."
-    });
-  }
-
-  const exists = favorites.some(
-    item => normalizeEmail(item.userEmail) === normalizeEmail(userEmail) && item.jobId === jobId
+  const isFavorite = favorites.some(
+    f => normalizeEmail(f.userEmail) === email && Number(f.jobId) === jobId
   );
 
-  res.json({ isFavorite: exists });
+  res.json({ isFavorite });
 });
 
 app.post("/favorites/toggle", (req, res) => {
   const { userEmail, jobId } = req.body;
 
   if (!userEmail || !jobId) {
-    return res.status(400).json({
-      message: "Липсват данни."
-    });
+    return res.status(400).json({ message: "Липсват данни." });
   }
 
-  const job = jobs.find(j => j.id === Number(jobId));
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  const existingIndex = favorites.findIndex(
-    item => normalizeEmail(item.userEmail) === normalizeEmail(userEmail) && item.jobId === Number(jobId)
+  const index = favorites.findIndex(
+    f =>
+      normalizeEmail(f.userEmail) === normalizeEmail(userEmail) &&
+      Number(f.jobId) === Number(jobId)
   );
 
-  if (existingIndex >= 0) {
-    favorites.splice(existingIndex, 1);
+  if (index >= 0) {
+    favorites.splice(index, 1);
     return res.json({
-      message: "Обявата е премахната от любими 💔",
-      isFavorite: false
+      isFavorite: false,
+      message: "Премахнато от любими 💔"
     });
   }
 
@@ -997,667 +857,14 @@ app.post("/favorites/toggle", (req, res) => {
     createdAt: new Date().toLocaleString("bg-BG")
   });
 
-  return res.json({
-    message: "Обявата е добавена в любими ❤️",
-    isFavorite: true
-  });
-});
-
-/* =========================
-   POSTS / FEED
-========================= */
-app.get("/posts", (req, res) => {
-  const visiblePosts = posts.filter(isPostVisibleToPublic);
-  res.json(visiblePosts);
-});
-
-app.post("/posts", upload.single("image"), (req, res) => {
-  const { authorName, authorEmail, text } = req.body;
-
-  if (!authorName || !text) {
-    return res.status(400).json({
-      message: "Липсват данни за публикацията."
-    });
-  }
-
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
-
-  const newPost = {
-    id: getNextId(posts),
-    authorName,
-    authorEmail: normalizeEmail(authorEmail || ""),
-    text,
-    imageUrl,
-    likes: 0,
-    likedBy: [],
-    comments: [],
-    isHidden: false,
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  posts.unshift(newPost);
-
   res.json({
-    message: "Публикацията е създадена ✅",
-    post: newPost
-  });
-});
-
-app.post("/posts/:id/like", (req, res) => {
-  const postId = Number(req.params.id);
-  const { userEmail } = req.body;
-
-  const post = posts.find(p => p.id === postId);
-
-  if (!post) {
-    return res.status(404).json({
-      message: "Публикацията не е намерена."
-    });
-  }
-
-  if (!userEmail) {
-    return res.status(400).json({
-      message: "Липсва потребител."
-    });
-  }
-
-  if (!post.likedBy) {
-    post.likedBy = [];
-  }
-
-  const normalizedEmail = normalizeEmail(userEmail);
-  const alreadyLiked = post.likedBy.includes(normalizedEmail);
-
-  if (alreadyLiked) {
-    post.likedBy = post.likedBy.filter(email => email !== normalizedEmail);
-  } else {
-    post.likedBy.push(normalizedEmail);
-
-    if (post.authorEmail && normalizeEmail(post.authorEmail) !== normalizedEmail) {
-      createNotification({
-        userEmail: post.authorEmail,
-        type: "post_like",
-        title: "Нов лайк по публикация",
-        text: `${normalizedEmail} хареса твоя публикация.`,
-        link: "/feed-page"
-      });
-    }
-  }
-
-  post.likes = post.likedBy.length;
-
-  res.json({
-    message: alreadyLiked ? "Лайкът е премахнат 💔" : "Публикацията е харесана ❤️",
-    likes: post.likes,
-    liked: !alreadyLiked
-  });
-});
-
-app.post("/posts/:id/comments", (req, res) => {
-  const postId = Number(req.params.id);
-  const { authorName, authorEmail, text } = req.body;
-
-  const post = posts.find(p => p.id === postId);
-
-  if (!post) {
-    return res.status(404).json({
-      message: "Публикацията не е намерена."
-    });
-  }
-
-  if (!authorName || !authorEmail || !text) {
-    return res.status(400).json({
-      message: "Липсват данни за коментара."
-    });
-  }
-
-  if (!post.comments) {
-    post.comments = [];
-  }
-
-  const newComment = {
-    id: getNextId(post.comments),
-    authorName,
-    authorEmail: normalizeEmail(authorEmail),
-    text,
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  post.comments.push(newComment);
-
-  if (post.authorEmail && normalizeEmail(post.authorEmail) !== normalizeEmail(authorEmail)) {
-    createNotification({
-      userEmail: post.authorEmail,
-      type: "post_comment",
-      title: "Нов коментар по публикация",
-      text: `${authorName} коментира твоя публикация.`,
-      link: "/feed-page"
-    });
-  }
-
-  res.status(201).json({
-    message: "Коментарът е добавен ✅",
-    comment: newComment
+    isFavorite: true,
+    message: "Добавено в любими ❤️"
   });
 });
 
 /* =========================
-   REPORTS
-========================= */
-app.post("/report", (req, res) => {
-  const {
-    reporterEmail,
-    targetType,
-    targetId,
-    targetEmail,
-    reason,
-    note
-  } = req.body;
-
-  if (!reporterEmail || !targetType || !reason) {
-    return res.status(400).json({
-      message: "Липсват данни за сигнала."
-    });
-  }
-
-  if (!["job", "profile", "post"].includes(targetType)) {
-    return res.status(400).json({
-      message: "Невалиден тип сигнал."
-    });
-  }
-
-  const newReport = {
-    id: getNextId(reports),
-    reporterEmail: normalizeEmail(reporterEmail),
-    targetType,
-    targetId: targetId ? Number(targetId) : null,
-    targetEmail: targetEmail ? normalizeEmail(targetEmail) : "",
-    reason: reason.trim(),
-    note: note || "",
-    status: "open",
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  reports.unshift(newReport);
-
-  res.status(201).json({
-    message: "Сигналът е изпратен успешно ✅",
-    report: newReport
-  });
-});
-
-/* =========================
-   APPLICATIONS
-========================= */
-app.post("/apply", upload.single("cvFile"), (req, res) => {
-  const { jobId, name, email, message } = req.body;
-
-  if (!jobId || !name || !message) {
-    return res.status(400).json({
-      message: "Попълни всички задължителни полета!"
-    });
-  }
-
-  const job = jobs.find(j => j.id === Number(jobId));
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  if (!isJobVisibleToPublic(job)) {
-    return res.status(400).json({
-      message: "Не можеш да кандидатстваш по тази обява."
-    });
-  }
-
-  if (email && normalizeEmail(job.ownerEmail) === normalizeEmail(email)) {
-    return res.status(400).json({
-      message: "Не можеш да кандидатстваш по собствената си обява."
-    });
-  }
-
-  const alreadyApplied = applications.find(app =>
-    app.jobId === Number(jobId) && normalizeEmail(app.email) === normalizeEmail(email)
-  );
-
-  if (alreadyApplied) {
-    return res.status(400).json({
-      message: "Вече си изпратил кандидатура по тази обява."
-    });
-  }
-
-  const cvUrl = req.file ? `/uploads/${req.file.filename}` : "";
-
-  const application = {
-    id: getNextId(applications),
-    jobId: Number(jobId),
-    name,
-    email: normalizeEmail(email || ""),
-    message,
-    cvUrl,
-    createdAt: new Date().toLocaleString("bg-BG"),
-    status: "Чака одобрение"
-  };
-
-  applications.push(application);
-
-  createNotification({
-    userEmail: job.ownerEmail,
-    type: "application_new",
-    title: "Нова кандидатура",
-    text: `${name} кандидатства по "${job.title}".`,
-    link: "/applications-page"
-  });
-
-  res.json({
-    message: "Кандидатурата е изпратена ✅",
-    application
-  });
-});
-
-app.get("/applications/:jobId", (req, res) => {
-  const jobId = Number(req.params.jobId);
-  const requesterEmail = req.query.email;
-
-  const job = jobs.find(j => j.id === jobId);
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  if (!requesterEmail || normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Нямаш право да виждаш тези кандидатури."
-    });
-  }
-
-  const jobApplications = applications.filter(app => app.jobId === jobId);
-  res.json(jobApplications);
-});
-
-app.put("/applications/:applicationId/status", (req, res) => {
-  const applicationId = Number(req.params.applicationId);
-  const { requesterEmail, status } = req.body;
-
-  const validStatuses = ["Чака одобрение", "Одобрен", "Отказан"];
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({ message: "Невалиден статус." });
-  }
-
-  const application = applications.find(app => app.id === applicationId);
-  if (!application) {
-    return res.status(404).json({ message: "Кандидатурата не е намерена." });
-  }
-
-  const job = jobs.find(j => j.id === application.jobId);
-  if (!job) {
-    return res.status(404).json({ message: "Обявата не е намерена." });
-  }
-
-  if (!requesterEmail || normalizeEmail(requesterEmail) !== normalizeEmail(job.ownerEmail)) {
-    return res.status(403).json({ message: "Нямаш право да сменяш статуса." });
-  }
-
-  application.status = status;
-
-  if (application.email) {
-    createNotification({
-      userEmail: application.email,
-      type: "application_status",
-      title: "Промяна по кандидатура",
-      text: `Кандидатурата ти по "${job.title}" е със статус: ${status}.`,
-      link: `/job/${job.id}`
-    });
-  }
-
-  res.json({
-    message: "Статусът е обновен успешно ✅",
-    application
-  });
-});
-
-app.get("/my-applications/:email", (req, res) => {
-  const email = normalizeEmail(decodeURIComponent(req.params.email));
-
-  const userApplications = applications.filter(app => normalizeEmail(app.email) === email);
-
-  const enriched = userApplications.map(appItem => {
-    const job = jobs.find(j => j.id === appItem.jobId);
-
-    return {
-      id: appItem.id,
-      jobId: job?.id || appItem.jobId,
-      jobTitle: job?.title || "Неизвестна обява",
-      jobCity: job?.city || "",
-      jobCategory: job?.category || "",
-      jobSubcategory: job?.subcategory || "",
-      jobType: job?.type || "job",
-      message: appItem.message || "",
-      cvUrl: appItem.cvUrl || "",
-      createdAt: appItem.createdAt || "",
-      status: appItem.status || "Чака одобрение"
-    };
-  });
-
-  res.json(enriched);
-});
-
-/* =========================
-   COMPLETED PROJECTS
-========================= */
-app.post("/completed-projects", (req, res) => {
-  const {
-    requesterEmail,
-    jobId,
-    workerEmail,
-    workerName
-  } = req.body;
-
-  if (!requesterEmail || !jobId || !workerEmail || !workerName) {
-    return res.status(400).json({
-      message: "Липсват данни за завършения проект."
-    });
-  }
-
-  const job = jobs.find(j => j.id === Number(jobId));
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  if (normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Само авторът на обявата може да маркира проект като завършен."
-    });
-  }
-
-  const approvedApplication = applications.find(app =>
-    app.jobId === Number(jobId) &&
-    normalizeEmail(app.email) === normalizeEmail(workerEmail) &&
-    app.status === "Одобрен"
-  );
-
-  if (!approvedApplication) {
-    return res.status(400).json({
-      message: "Само одобрен кандидат може да бъде маркиран като завършен проект."
-    });
-  }
-
-  const exists = completedProjects.find(item =>
-    item.jobId === Number(jobId) &&
-    normalizeEmail(item.workerEmail) === normalizeEmail(workerEmail)
-  );
-
-  if (exists) {
-    return res.status(400).json({
-      message: "Този проект вече е маркиран като завършен."
-    });
-  }
-
-  const newCompletedProject = {
-    id: getNextId(completedProjects),
-    jobId: Number(jobId),
-    workerEmail: normalizeEmail(workerEmail),
-    workerName,
-    ownerEmail: normalizeEmail(requesterEmail),
-    jobTitle: job.title,
-    category: job.category,
-    subcategory: job.subcategory || "",
-    city: job.city,
-    completedAt: new Date().toLocaleString("bg-BG")
-  };
-
-  completedProjects.unshift(newCompletedProject);
-
-  createNotification({
-    userEmail: workerEmail,
-    type: "project_completed",
-    title: "Завършен проект",
-    text: `Проектът "${job.title}" е маркиран като завършен.`,
-    link: `/profile/${encodeURIComponent(workerEmail)}`
-  });
-
-  res.status(201).json({
-    message: "Проектът е маркиран като завършен ✅",
-    completedProject: newCompletedProject
-  });
-});
-
-app.get("/completed-projects/check", (req, res) => {
-  const jobId = Number(req.query.jobId);
-  const workerEmail = req.query.workerEmail;
-
-  if (!jobId || !workerEmail) {
-    return res.status(400).json({
-      message: "Липсват данни."
-    });
-  }
-
-  const exists = completedProjects.some(item =>
-    item.jobId === jobId && normalizeEmail(item.workerEmail) === normalizeEmail(workerEmail)
-  );
-
-  res.json({ exists });
-});
-
-app.get("/completed-projects/:email", (req, res) => {
-  const email = normalizeEmail(decodeURIComponent(req.params.email));
-  const items = completedProjects.filter(item => normalizeEmail(item.workerEmail) === email);
-  res.json(items);
-});
-
-/* =========================
-   REVIEWS / RATINGS
-========================= */
-app.post("/reviews", (req, res) => {
-  const {
-    requesterEmail,
-    jobId,
-    workerEmail,
-    workerName,
-    rating,
-    text
-  } = req.body;
-
-  if (!requesterEmail || !jobId || !workerEmail || !workerName || !rating) {
-    return res.status(400).json({
-      message: "Липсват данни за оценката."
-    });
-  }
-
-  const numericRating = Number(rating);
-
-  if (numericRating < 1 || numericRating > 5) {
-    return res.status(400).json({
-      message: "Оценката трябва да е между 1 и 5."
-    });
-  }
-
-  const job = jobs.find(j => j.id === Number(jobId));
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  if (normalizeEmail(job.ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Само авторът на обявата може да остави оценка."
-    });
-  }
-
-  const completedProject = completedProjects.find(item =>
-    item.jobId === Number(jobId) && normalizeEmail(item.workerEmail) === normalizeEmail(workerEmail)
-  );
-
-  if (!completedProject) {
-    return res.status(400).json({
-      message: "Можеш да оцениш само завършен проект."
-    });
-  }
-
-  const existingReview = reviews.find(item =>
-    item.jobId === Number(jobId) &&
-    normalizeEmail(item.workerEmail) === normalizeEmail(workerEmail) &&
-    normalizeEmail(item.reviewerEmail) === normalizeEmail(requesterEmail)
-  );
-
-  if (existingReview) {
-    return res.status(400).json({
-      message: "Вече си оставил оценка за тази обява."
-    });
-  }
-
-  const reviewerUser = users.find(u => normalizeEmail(u.email) === normalizeEmail(requesterEmail));
-
-  const newReview = {
-    id: getNextId(reviews),
-    jobId: Number(jobId),
-    workerEmail: normalizeEmail(workerEmail),
-    workerName,
-    reviewerEmail: normalizeEmail(requesterEmail),
-    reviewerName: reviewerUser?.name || requesterEmail,
-    rating: numericRating,
-    text: text || "",
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  reviews.unshift(newReview);
-
-  createNotification({
-    userEmail: workerEmail,
-    type: "review_new",
-    title: "Ново ревю",
-    text: `Получил/а си нова оценка ${numericRating}/5 за "${job.title}".`,
-    link: `/profile/${encodeURIComponent(workerEmail)}`
-  });
-
-  res.status(201).json({
-    message: "Оценката е записана успешно ✅",
-    review: newReview
-  });
-});
-
-app.get("/reviews/:email", (req, res) => {
-  const email = normalizeEmail(decodeURIComponent(req.params.email));
-
-  const userReviews = reviews.filter(item => normalizeEmail(item.workerEmail) === email);
-  const summary = getRatingSummaryByEmail(email);
-
-  res.json({
-    average: summary.average,
-    count: summary.count,
-    reviews: userReviews
-  });
-});
-
-app.get("/reviews/check", (req, res) => {
-  const requesterEmail = req.query.requesterEmail;
-  const jobId = Number(req.query.jobId);
-  const workerEmail = req.query.workerEmail;
-
-  if (!requesterEmail || !jobId || !workerEmail) {
-    return res.status(400).json({
-      message: "Липсват данни."
-    });
-  }
-
-  const exists = reviews.some(item =>
-    normalizeEmail(item.reviewerEmail) === normalizeEmail(requesterEmail) &&
-    item.jobId === jobId &&
-    normalizeEmail(item.workerEmail) === normalizeEmail(workerEmail)
-  );
-
-  res.json({ exists });
-});
-
-/* =========================
-   PORTFOLIO
-========================= */
-app.post("/portfolio", upload.single("image"), (req, res) => {
-  const {
-    ownerEmail,
-    title,
-    description,
-    link
-  } = req.body;
-
-  if (!ownerEmail || !title) {
-    return res.status(400).json({
-      message: "Заглавието е задължително."
-    });
-  }
-
-  const user = users.find(u => normalizeEmail(u.email) === normalizeEmail(ownerEmail));
-
-  if (!user) {
-    return res.status(404).json({
-      message: "Потребителят не е намерен."
-    });
-  }
-
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
-
-  const newPortfolioItem = {
-    id: getNextId(portfolioItems),
-    ownerEmail: normalizeEmail(ownerEmail),
-    title,
-    description: description || "",
-    link: link || "",
-    imageUrl,
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  portfolioItems.unshift(newPortfolioItem);
-
-  res.status(201).json({
-    message: "Портфолиото е добавено успешно ✅",
-    item: newPortfolioItem
-  });
-});
-
-app.get("/portfolio/:email", (req, res) => {
-  const email = normalizeEmail(decodeURIComponent(req.params.email));
-  const items = portfolioItems.filter(item => normalizeEmail(item.ownerEmail) === email);
-  res.json(items);
-});
-
-app.delete("/portfolio/:id", (req, res) => {
-  const portfolioId = Number(req.params.id);
-  const requesterEmail = req.query.email;
-
-  const itemIndex = portfolioItems.findIndex(item => item.id === portfolioId);
-
-  if (itemIndex === -1) {
-    return res.status(404).json({
-      message: "Елементът от портфолиото не е намерен."
-    });
-  }
-
-  if (!requesterEmail || normalizeEmail(portfolioItems[itemIndex].ownerEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Нямаш право да изтриеш този елемент."
-    });
-  }
-
-  const deletedItem = portfolioItems[itemIndex];
-  portfolioItems.splice(itemIndex, 1);
-
-  res.json({
-    message: "Елементът от портфолиото е изтрит ✅",
-    item: deletedItem
-  });
-});
-
-/* =========================
-   INTERNAL MESSAGES / INBOX
+   MESSAGES / INBOX
 ========================= */
 app.post("/messages/contact", (req, res) => {
   const {
@@ -1669,104 +876,67 @@ app.post("/messages/contact", (req, res) => {
     text
   } = req.body;
 
-  if (!jobId || !senderEmail || !senderName || !receiverEmail || !text) {
-    return res.status(400).json({
-      message: "Липсват данни за запитването."
-    });
+  if (!jobId || !senderEmail || !receiverEmail || !text) {
+    return res.status(400).json({ message: "Липсват данни за съобщението." });
   }
 
-  if (normalizeEmail(senderEmail) === normalizeEmail(receiverEmail)) {
-    return res.status(400).json({
-      message: "Не можеш да изпратиш запитване до себе си."
-    });
-  }
-
-  const job = jobs.find(j => j.id === Number(jobId));
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  const newMessage = {
+  const message = {
     id: getNextId(inboxMessages),
     jobId: Number(jobId),
     senderEmail: normalizeEmail(senderEmail),
-    senderName,
+    senderName: senderName || "Потребител",
     receiverEmail: normalizeEmail(receiverEmail),
-    subject: subject || `Запитване за обява: ${job.title}`,
+    subject: subject || "Ново съобщение",
     text,
     isRead: false,
     createdAt: new Date().toLocaleString("bg-BG")
   };
 
-  inboxMessages.unshift(newMessage);
+  inboxMessages.unshift(message);
 
   createNotification({
     userEmail: receiverEmail,
     type: "message_new",
     title: "Ново съобщение",
-    text: `${senderName} ти изпрати запитване за "${job.title}".`,
+    text: `${message.senderName} ти изпрати съобщение.`,
     link: "/inbox-page"
   });
 
-  res.status(201).json({
-    message: "Запитването е изпратено успешно ✅",
-    inboxMessage: newMessage
-  });
+  res.json({ message: "Изпратено ✅", inboxMessage: message });
 });
 
 app.get("/messages/inbox/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
 
-  const items = inboxMessages.filter(msg => normalizeEmail(msg.receiverEmail) === email);
+  const items = inboxMessages.filter(
+    msg => normalizeEmail(msg.receiverEmail) === email
+  );
 
-  const enriched = items.map(msg => {
-    const job = jobs.find(j => j.id === msg.jobId);
-
-    return {
-      ...msg,
-      jobTitle: job?.title || "Неизвестна обява"
-    };
-  });
-
-  res.json(enriched);
+  res.json(items);
 });
 
 app.get("/messages/sent/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
 
-  const items = inboxMessages.filter(msg => normalizeEmail(msg.senderEmail) === email);
+  const items = inboxMessages.filter(
+    msg => normalizeEmail(msg.senderEmail) === email
+  );
 
-  const enriched = items.map(msg => {
-    const job = jobs.find(j => j.id === msg.jobId);
-
-    return {
-      ...msg,
-      jobTitle: job?.title || "Неизвестна обява"
-    };
-  });
-
-  res.json(enriched);
+  res.json(items);
 });
 
 app.put("/messages/:id/read", (req, res) => {
   const messageId = Number(req.params.id);
   const { requesterEmail } = req.body;
 
-  const message = inboxMessages.find(msg => msg.id === messageId);
+  const message = inboxMessages.find(m => Number(m.id) === messageId);
 
   if (!message) {
-    return res.status(404).json({
-      message: "Съобщението не е намерено."
-    });
+    return res.status(404).json({ message: "Съобщението не е намерено." });
   }
 
-  if (!requesterEmail || normalizeEmail(requesterEmail) !== normalizeEmail(message.receiverEmail)) {
-    return res.status(403).json({
-      message: "Нямаш право да маркираш това съобщение."
-    });
+  if (normalizeEmail(requesterEmail) !== normalizeEmail(message.receiverEmail)) {
+    return res.status(403).json({ message: "Нямаш право." });
   }
 
   message.isRead = true;
@@ -1778,17 +948,141 @@ app.put("/messages/:id/read", (req, res) => {
 });
 
 /* =========================
+   APPLICATIONS
+========================= */
+app.post("/apply", upload.single("cvFile"), (req, res) => {
+  const { jobId, name, email, message } = req.body;
+
+  if (!jobId || !name || !message) {
+    return res.status(400).json({ message: "Попълни всички задължителни полета." });
+  }
+
+  const job = jobs.find(j => Number(j.id) === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  const alreadyApplied = applications.find(
+    a =>
+      Number(a.jobId) === Number(jobId) &&
+      normalizeEmail(a.email) === normalizeEmail(email)
+  );
+
+  if (alreadyApplied) {
+    return res.status(400).json({ message: "Вече си кандидатствал." });
+  }
+
+  const appItem = {
+    id: getNextId(applications),
+    jobId: Number(jobId),
+    name,
+    email: normalizeEmail(email),
+    message,
+    cvUrl: req.file ? `/uploads/${req.file.filename}` : "",
+    status: "Чака одобрение",
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  applications.push(appItem);
+
+  createNotification({
+    userEmail: job.ownerEmail,
+    type: "application_new",
+    title: "Нова кандидатура",
+    text: `${name} кандидатства по "${job.title}".`,
+    link: "/applications-page"
+  });
+
+  res.json({
+    message: "Кандидатурата е изпратена ✅",
+    application: appItem
+  });
+});
+
+app.get("/applications/:jobId", (req, res) => {
+  const jobId = Number(req.params.jobId);
+  const requesterEmail = normalizeEmail(req.query.email || "");
+
+  const job = jobs.find(j => Number(j.id) === jobId);
+
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  if (normalizeEmail(job.ownerEmail) !== requesterEmail) {
+    return res.status(403).json({ message: "Нямаш право да виждаш кандидатурите." });
+  }
+
+  res.json(applications.filter(a => Number(a.jobId) === jobId));
+});
+
+app.get("/my-applications/:email", (req, res) => {
+  const email = normalizeEmail(decodeURIComponent(req.params.email));
+
+  const items = applications
+    .filter(a => normalizeEmail(a.email) === email)
+    .map(a => {
+      const job = jobs.find(j => Number(j.id) === Number(a.jobId));
+      return {
+        ...a,
+        jobTitle: job?.title || "Неизвестна обява",
+        jobCity: job?.city || "",
+        jobCategory: job?.category || "",
+        jobSubcategory: job?.subcategory || "",
+        jobType: job?.type || "job"
+      };
+    });
+
+  res.json(items);
+});
+
+app.put("/applications/:applicationId/status", (req, res) => {
+  const applicationId = Number(req.params.applicationId);
+  const { requesterEmail, status } = req.body;
+
+  const appItem = applications.find(a => Number(a.id) === applicationId);
+
+  if (!appItem) {
+    return res.status(404).json({ message: "Кандидатурата не е намерена." });
+  }
+
+  const job = jobs.find(j => Number(j.id) === Number(appItem.jobId));
+
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  if (normalizeEmail(requesterEmail) !== normalizeEmail(job.ownerEmail)) {
+    return res.status(403).json({ message: "Нямаш право." });
+  }
+
+  appItem.status = status || appItem.status;
+
+  createNotification({
+    userEmail: appItem.email,
+    type: "application_status",
+    title: "Промяна по кандидатура",
+    text: `Кандидатурата ти по "${job.title}" е със статус: ${appItem.status}.`,
+    link: `/job/${job.id}`
+  });
+
+  res.json({
+    message: "Статусът е обновен ✅",
+    application: appItem
+  });
+});
+
+/* =========================
    NOTIFICATIONS
 ========================= */
 app.get("/notifications/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
-  const items = notifications.filter(n => normalizeEmail(n.userEmail) === email);
-  res.json(items);
+  res.json(notifications.filter(n => normalizeEmail(n.userEmail) === email));
 });
 
 app.get("/notifications/unread-count/:email", (req, res) => {
   const email = normalizeEmail(decodeURIComponent(req.params.email));
-
   const unreadCount = notifications.filter(
     n => normalizeEmail(n.userEmail) === email && !n.isRead
   ).length;
@@ -1811,26 +1105,18 @@ app.put("/notifications/:id/read", (req, res) => {
   const notificationId = Number(req.params.id);
   const { requesterEmail } = req.body;
 
-  const notification = notifications.find(n => n.id === notificationId);
+  const item = notifications.find(n => Number(n.id) === notificationId);
 
-  if (!notification) {
-    return res.status(404).json({
-      message: "Известието не е намерено."
-    });
+  if (!item) {
+    return res.status(404).json({ message: "Известието не е намерено." });
   }
 
-  if (!requesterEmail || normalizeEmail(notification.userEmail) !== normalizeEmail(requesterEmail)) {
-    return res.status(403).json({
-      message: "Нямаш право да маркираш това известие."
-    });
+  if (normalizeEmail(requesterEmail) !== normalizeEmail(item.userEmail)) {
+    return res.status(403).json({ message: "Нямаш право." });
   }
 
-  notification.isRead = true;
-
-  res.json({
-    message: "Известието е маркирано като прочетено ✅",
-    notification
-  });
+  item.isRead = true;
+  res.json({ message: "Известието е прочетено ✅", notification: item });
 });
 
 app.put("/notifications/read-all/:email", (req, res) => {
@@ -1842,562 +1128,438 @@ app.put("/notifications/read-all/:email", (req, res) => {
     }
   });
 
-  res.json({
-    message: "Всички известия са маркирани като прочетени ✅"
-  });
+  res.json({ message: "Всички известия са маркирани като прочетени ✅" });
 });
 
 /* =========================
-   USERS / AUTH / PROFILE
+   POSTS / FEED
 ========================= */
-app.post("/register", upload.single("profileImage"), (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    role,
-    description,
-    phone,
-    showPhone,
-    contactName,
-    companyId,
-    manager,
-    profession,
-    coverImage,
-    services,
-    workCities,
-    workingHours,
-    website,
-    facebook,
-    instagram,
-    youtube,
-    videoUrl,
-    faq
-  } = req.body;
+app.get("/posts", (req, res) => {
+  res.json(posts);
+});
 
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({
-      message: "Попълни всички задължителни полета за регистрация."
-    });
+app.post("/posts", upload.single("image"), (req, res) => {
+  const { authorName, authorEmail, text } = req.body;
+
+  if (!authorName || !text) {
+    return res.status(400).json({ message: "Липсват данни за публикацията." });
   }
 
-  const normalizedEmail = normalizeEmail(email);
-  const existingUser = users.find(user => normalizeEmail(user.email) === normalizedEmail);
-
-  if (existingUser) {
-    return res.status(400).json({
-      message: "Вече има потребител с този имейл."
-    });
-  }
-
-  const profileImage = req.file ? `/uploads/${req.file.filename}` : "";
-
-  const newUser = {
-    id: getNextId(users),
-    name,
-    email: normalizedEmail,
-    password,
-    role,
-    description: description || "",
-    phone: phone || "",
-    showPhone: showPhone === "true" || showPhone === true,
-    profileImage,
-    contactName: contactName || "",
-    companyId: companyId || "",
-    manager: manager || "",
-    profession: profession || "",
-    coverImage: coverImage || "",
-    services: services || "",
-    workCities: workCities || "",
-    workingHours: workingHours || "",
-    website: website || "",
-    facebook: facebook || "",
-    instagram: instagram || "",
-    youtube: youtube || "",
-    videoUrl: videoUrl || "",
-    faq: faq || ""
+  const post = {
+    id: getNextId(posts),
+    authorName,
+    authorEmail: normalizeEmail(authorEmail || ""),
+    text,
+    imageUrl: req.file ? `/uploads/${req.file.filename}` : "",
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    createdAt: new Date().toLocaleString("bg-BG")
   };
 
-  users.push(newUser);
-
-  res.status(201).json({
-    message: "Регистрацията е успешна ✅",
-    user: publicUser(newUser)
-  });
-});
-
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "Въведи имейл и парола."
-    });
-  }
-
-  const normalizedEmail = normalizeEmail(email);
-  const user = users.find(
-    u => normalizeEmail(u.email) === normalizedEmail && u.password === password
-  );
-
-  if (!user) {
-    return res.status(401).json({
-      message: "Невалиден имейл или парола."
-    });
-  }
+  posts.unshift(post);
 
   res.json({
-    message: "Входът е успешен ✅",
-    user: publicUser(user)
-  });
-});
-
-app.put(
-  "/api/profile/:email",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "coverImageFile", maxCount: 1 }
-  ]),
-  (req, res) => {
-    const currentEmail = normalizeEmail(decodeURIComponent(req.params.email));
-    const {
-      name,
-      email,
-      description,
-      phone,
-      showPhone,
-      coverImage,
-      services,
-      workCities,
-      workingHours,
-      website,
-      facebook,
-      instagram,
-      youtube,
-      videoUrl,
-      faq
-    } = req.body;
-
-    const user = users.find(u => normalizeEmail(u.email) === currentEmail);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "Потребителят не е намерен."
-      });
-    }
-
-    const nextEmail = email ? normalizeEmail(email) : currentEmail;
-
-    if (nextEmail !== currentEmail) {
-      const existingUser = users.find(u => normalizeEmail(u.email) === nextEmail);
-      if (existingUser) {
-        return res.status(400).json({
-          message: "Вече има потребител с този имейл."
-        });
-      }
-
-      updateEmailAcrossCollections(currentEmail, nextEmail);
-    }
-
-    user.name = name || user.name;
-    user.email = nextEmail;
-    user.description = description || "";
-    user.phone = phone || "";
-    user.showPhone = showPhone === "true" || showPhone === true;
-    user.services = services || "";
-    user.workCities = workCities || "";
-    user.workingHours = workingHours || "";
-    user.website = website || "";
-    user.facebook = facebook || "";
-    user.instagram = instagram || "";
-    user.youtube = youtube || "";
-    user.videoUrl = videoUrl || "";
-    user.faq = faq || "";
-
-    if (req.files?.profileImage?.[0]) {
-      user.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
-    }
-
-    if (req.files?.coverImageFile?.[0]) {
-      user.coverImage = `/uploads/${req.files.coverImageFile[0].filename}`;
-    } else {
-      user.coverImage = coverImage || "";
-    }
-
-    res.json({
-      message: "Профилът е обновен ✅",
-      user: publicUser(user)
-    });
-  }
-);
-
-app.get("/api/profile/:email", (req, res) => {
-  const email = normalizeEmail(decodeURIComponent(req.params.email));
-
-  const user = users.find(u => normalizeEmail(u.email) === email);
-
-  const userPosts = posts
-    .filter(p => normalizeEmail(p.authorEmail) === email)
-    .filter(isPostVisibleToPublic);
-
-  const userJobs = jobs
-    .filter(j => normalizeEmail(j.ownerEmail) === email)
-    .filter(job => job.isHidden !== true);
-
-  const ratingInfo = getRatingSummaryByEmail(email);
-  const userReviews = reviews.filter(item => normalizeEmail(item.workerEmail) === email);
-  const userCompletedProjects = completedProjects.filter(item => normalizeEmail(item.workerEmail) === email);
-  const userPortfolio = portfolioItems.filter(item => normalizeEmail(item.ownerEmail) === email);
-
-  res.json({
-    user: user
-      ? publicUser(user)
-      : {
-          name: userPosts[0]?.authorName || "Неизвестен потребител",
-          email,
-          role: "personal",
-          description: "",
-          phone: "",
-          showPhone: false,
-          profileImage: "",
-          contactName: "",
-          companyId: "",
-          manager: "",
-          profession: "",
-          coverImage: "",
-          services: "",
-          workCities: "",
-          workingHours: "",
-          website: "",
-          facebook: "",
-          instagram: "",
-          youtube: "",
-          videoUrl: "",
-          faq: ""
-        },
-    posts: userPosts,
-    jobs: userJobs,
-    rating: ratingInfo,
-    reviews: userReviews,
-    completedProjects: userCompletedProjects,
-    portfolio: userPortfolio,
-    banners: {
-      sidebar: getPublicBannersByPlacement("profile-sidebar")
-    }
-  });
-});
-
-/* =========================
-   ADMIN API
-========================= */
-app.get("/api/admin/stats", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const totalJobs = jobs.length;
-  const visibleJobs = jobs.filter(job => job.isHidden !== true && job.isApproved !== false).length;
-  const hiddenJobs = jobs.filter(job => job.isHidden === true).length;
-  const totalApplications = applications.length;
-  const activeProfiles = users.filter(user => user.role !== "admin").length;
-  const totalPosts = posts.length;
-  const totalReports = reports.length;
-  const activeBanners = banners.filter(item => item.isActive).length;
-
-  res.json({
-    totalJobs,
-    visibleJobs,
-    hiddenJobs,
-    totalApplications,
-    activeProfiles,
-    totalPosts,
-    totalReports,
-    activeBanners
-  });
-});
-
-app.get("/api/admin/jobs", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const result = [...jobs]
-    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
-    .map(job => ({
-      ...job,
-      reportCount: getReportCountForTarget("job", r => Number(r.targetId) === Number(job.id))
-    }));
-
-  res.json(result);
-});
-
-app.put("/api/admin/jobs/:id/moderation", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const jobId = Number(req.params.id);
-  const { isApproved, isHidden, adminNote } = req.body;
-
-  const job = jobs.find(j => Number(j.id) === jobId);
-
-  if (!job) {
-    return res.status(404).json({
-      message: "Обявата не е намерена."
-    });
-  }
-
-  if (typeof isApproved === "boolean") {
-    job.isApproved = isApproved;
-  }
-
-  if (typeof isHidden === "boolean") {
-    job.isHidden = isHidden;
-  }
-
-  if (typeof adminNote === "string") {
-    job.adminNote = adminNote;
-  }
-
-  res.json({
-    message: "Обявата е обновена от admin ✅",
-    job
-  });
-});
-
-app.get("/api/admin/posts", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const result = [...posts]
-    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
-    .map(post => ({
-      ...post,
-      reportCount: getReportCountForTarget("post", r => Number(r.targetId) === Number(post.id))
-    }));
-
-  res.json(result);
-});
-
-app.put("/api/admin/posts/:id/moderation", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const postId = Number(req.params.id);
-  const { isHidden } = req.body;
-
-  const post = posts.find(p => Number(p.id) === postId);
-
-  if (!post) {
-    return res.status(404).json({
-      message: "Публикацията не е намерена."
-    });
-  }
-
-  if (typeof isHidden === "boolean") {
-    post.isHidden = isHidden;
-  }
-
-  res.json({
-    message: "Публикацията е обновена от admin ✅",
+    message: "Публикацията е създадена ✅",
     post
   });
 });
 
-app.get("/api/admin/reports", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
+app.post("/posts/:id/like", (req, res) => {
+  const postId = Number(req.params.id);
+  const { userEmail } = req.body;
 
-  const enriched = [...reports]
-    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
-    .map(item => {
-      let targetLabel = "Unknown target";
-
-      if (item.targetType === "job") {
-        const job = jobs.find(j => Number(j.id) === Number(item.targetId));
-        targetLabel = job ? `Обява: ${job.title}` : `Обява #${item.targetId}`;
-      }
-
-      if (item.targetType === "profile") {
-        targetLabel = `Профил: ${item.targetEmail}`;
-      }
-
-      if (item.targetType === "post") {
-        const post = posts.find(p => Number(p.id) === Number(item.targetId));
-        targetLabel = post ? `Публикация от ${post.authorName || post.authorEmail}` : `Пост #${item.targetId}`;
-      }
-
-      return {
-        ...item,
-        targetLabel
-      };
-    });
-
-  res.json(enriched);
-});
-
-app.put("/api/admin/reports/:id/status", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const reportId = Number(req.params.id);
-  const { status } = req.body;
-
-  if (!["open", "resolved", "dismissed"].includes(status)) {
-    return res.status(400).json({
-      message: "Невалиден статус."
-    });
+  const post = posts.find(p => Number(p.id) === postId);
+  if (!post) {
+    return res.status(404).json({ message: "Публикацията не е намерена." });
   }
 
-  const report = reports.find(r => Number(r.id) === reportId);
+  const normalized = normalizeEmail(userEmail);
+  const alreadyLiked = post.likedBy.includes(normalized);
 
-  if (!report) {
-    return res.status(404).json({
-      message: "Сигналът не е намерен."
-    });
+  if (alreadyLiked) {
+    post.likedBy = post.likedBy.filter(x => x !== normalized);
+  } else {
+    post.likedBy.push(normalized);
   }
 
-  report.status = status;
+  post.likes = post.likedBy.length;
 
   res.json({
-    message: "Статусът на сигнала е обновен ✅",
+    message: alreadyLiked ? "Лайкът е премахнат 💔" : "Публикацията е харесана ❤️",
+    likes: post.likes,
+    liked: !alreadyLiked
+  });
+});
+
+app.post("/posts/:id/comments", (req, res) => {
+  const postId = Number(req.params.id);
+  const { authorName, authorEmail, text } = req.body;
+
+  const post = posts.find(p => Number(p.id) === postId);
+  if (!post) {
+    return res.status(404).json({ message: "Публикацията не е намерена." });
+  }
+
+  const comment = {
+    id: getNextId(post.comments),
+    authorName,
+    authorEmail: normalizeEmail(authorEmail),
+    text,
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  post.comments.push(comment);
+
+  res.status(201).json({
+    message: "Коментарът е добавен ✅",
+    comment
+  });
+});
+
+/* =========================
+   COMPLETED PROJECTS
+========================= */
+app.post("/completed-projects", (req, res) => {
+  const { requesterEmail, jobId, workerEmail, workerName } = req.body;
+
+  const job = jobs.find(j => Number(j.id) === Number(jobId));
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  if (normalizeEmail(requesterEmail) !== normalizeEmail(job.ownerEmail)) {
+    return res.status(403).json({ message: "Нямаш право." });
+  }
+
+  const item = {
+    id: getNextId(completedProjects),
+    jobId: Number(jobId),
+    workerEmail: normalizeEmail(workerEmail),
+    workerName: workerName || "Потребител",
+    ownerEmail: normalizeEmail(requesterEmail),
+    jobTitle: job.title,
+    category: job.category,
+    subcategory: job.subcategory || "",
+    city: job.city,
+    completedAt: new Date().toLocaleString("bg-BG")
+  };
+
+  completedProjects.unshift(item);
+
+  createNotification({
+    userEmail: workerEmail,
+    type: "project_completed",
+    title: "Завършен проект",
+    text: `Проектът "${job.title}" е маркиран като завършен.`,
+    link: `/profile/${encodeURIComponent(workerEmail)}`
+  });
+
+  res.json({
+    message: "Проектът е маркиран като завършен ✅",
+    completedProject: item
+  });
+});
+
+app.get("/completed-projects/:email", (req, res) => {
+  const email = normalizeEmail(decodeURIComponent(req.params.email));
+  res.json(completedProjects.filter(c => normalizeEmail(c.workerEmail) === email));
+});
+
+app.get("/completed-projects/check", (req, res) => {
+  const jobId = Number(req.query.jobId);
+  const workerEmail = normalizeEmail(req.query.workerEmail || "");
+
+  const exists = completedProjects.some(
+    c => Number(c.jobId) === jobId && normalizeEmail(c.workerEmail) === workerEmail
+  );
+
+  res.json({ exists });
+});
+
+/* =========================
+   PORTFOLIO
+========================= */
+app.post("/portfolio", upload.single("image"), (req, res) => {
+  const { ownerEmail, title, description, link } = req.body;
+
+  if (!ownerEmail || !title) {
+    return res.status(400).json({ message: "Липсват данни." });
+  }
+
+  const item = {
+    id: getNextId(portfolioItems),
+    ownerEmail: normalizeEmail(ownerEmail),
+    title,
+    description: description || "",
+    link: link || "",
+    imageUrl: req.file ? `/uploads/${req.file.filename}` : "",
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  portfolioItems.unshift(item);
+
+  res.json({
+    message: "Портфолиото е добавено ✅",
+    item
+  });
+});
+
+app.get("/portfolio/:email", (req, res) => {
+  const email = normalizeEmail(decodeURIComponent(req.params.email));
+  res.json(portfolioItems.filter(p => normalizeEmail(p.ownerEmail) === email));
+});
+
+app.delete("/portfolio/:id", (req, res) => {
+  const portfolioId = Number(req.params.id);
+  const requesterEmail = normalizeEmail(req.query.email || "");
+
+  const item = portfolioItems.find(p => Number(p.id) === portfolioId);
+  if (!item) {
+    return res.status(404).json({ message: "Елементът не е намерен." });
+  }
+
+  if (normalizeEmail(item.ownerEmail) !== requesterEmail) {
+    return res.status(403).json({ message: "Нямаш право." });
+  }
+
+  portfolioItems = portfolioItems.filter(p => Number(p.id) !== portfolioId);
+
+  res.json({ message: "Елементът е изтрит ✅" });
+});
+
+/* =========================
+   REPORTS
+========================= */
+app.post("/reports", (req, res) => {
+  const {
+    reporterEmail,
+    targetType,
+    targetId,
+    targetEmail,
+    reason
+  } = req.body;
+
+  if (!reporterEmail || !targetType || !reason) {
+    return res.status(400).json({ message: "Липсват данни за доклада." });
+  }
+
+  const report = {
+    id: getNextId(reports),
+    reporterEmail: normalizeEmail(reporterEmail),
+    targetType: targetType || "general",
+    targetId: targetId || "",
+    targetEmail: targetEmail ? normalizeEmail(targetEmail) : "",
+    reason: reason || "",
+    status: "pending",
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  reports.unshift(report);
+
+  res.json({
+    message: "Докладът е изпратен ✅",
     report
   });
 });
 
-app.get("/api/admin/banners", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const result = [...banners].sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
-  res.json(result);
-});
-
-app.get("/api/banners/public", (req, res) => {
-  const placement = String(req.query.placement || "").trim();
-
-  const result = banners.filter(item => {
-    if (!item.isActive) return false;
-    if (placement && item.placement !== placement) return false;
-    return true;
-  });
-
-  res.json(result);
-});
-
-app.post("/api/admin/banners", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const {
-    title,
-    text,
-    buttonText,
-    buttonHref,
-    placement,
-    isActive
-  } = req.body;
-
-  if (!title || !text || !placement) {
-    return res.status(400).json({
-      message: "Попълни заглавие, текст и позиция."
-    });
-  }
-
-  const newBanner = {
-    id: getNextId(banners),
-    title: title.trim(),
-    text: text.trim(),
-    buttonText: buttonText || "Отвори",
-    buttonHref: buttonHref || "/",
-    placement: placement.trim(),
-    isActive: isActive === true || isActive === "true",
-    createdAt: new Date().toLocaleString("bg-BG")
-  };
-
-  banners.unshift(newBanner);
-
-  res.status(201).json({
-    message: "Банерът е добавен успешно ✅",
-    banner: newBanner
-  });
-});
-
-app.put("/api/admin/banners/:id", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const bannerId = Number(req.params.id);
-  const banner = banners.find(item => Number(item.id) === bannerId);
-
-  if (!banner) {
-    return res.status(404).json({
-      message: "Банерът не е намерен."
-    });
-  }
-
-  const {
-    title,
-    text,
-    buttonText,
-    buttonHref,
-    placement,
-    isActive
-  } = req.body;
-
-  if (typeof title === "string") banner.title = title;
-  if (typeof text === "string") banner.text = text;
-  if (typeof buttonText === "string") banner.buttonText = buttonText;
-  if (typeof buttonHref === "string") banner.buttonHref = buttonHref;
-  if (typeof placement === "string") banner.placement = placement;
-  if (typeof isActive === "boolean") banner.isActive = isActive;
-
+/* =========================
+   ADMIN STATS
+========================= */
+app.get("/api/admin/stats", requireAdmin, (req, res) => {
   res.json({
-    message: "Банерът е обновен успешно ✅",
-    banner
+    jobs: jobs.length,
+    applications: applications.length,
+    activeProfiles: users.filter(u => !u.isBlocked).length,
+    posts: posts.length,
+    pendingReports: reports.filter(r => r.status === "pending").length,
+    ads: ads.length
   });
-});
-
-app.delete("/api/admin/banners/:id", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const bannerId = Number(req.params.id);
-  const index = banners.findIndex(item => Number(item.id) === bannerId);
-
-  if (index === -1) {
-    return res.status(404).json({
-      message: "Банерът не е намерен."
-    });
-  }
-
-  const removed = banners[index];
-  banners.splice(index, 1);
-
-  res.json({
-    message: "Банерът е изтрит успешно ✅",
-    banner: removed
-  });
-});
-
-app.get("/api/admin/users", (req, res) => {
-  const adminEmail = requireAdmin(req, res);
-  if (!adminEmail) return;
-
-  const result = [...users]
-    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
-    .map(user => ({
-      ...publicUser(user),
-      jobsCount: jobs.filter(job => normalizeEmail(job.ownerEmail) === normalizeEmail(user.email)).length,
-      postsCount: posts.filter(post => normalizeEmail(post.authorEmail) === normalizeEmail(user.email)).length,
-      reviewsCount: reviews.filter(review => normalizeEmail(review.workerEmail) === normalizeEmail(user.email)).length
-    }));
-
-  res.json(result);
 });
 
 /* =========================
-   START SERVER
+   ADMIN JOBS
 ========================= */
-const PORT = process.env.PORT || 3000;
+app.get("/api/admin/jobs", requireAdmin, (req, res) => {
+  res.json({ jobs });
+});
 
+app.put("/api/admin/jobs/:id/toggle-visibility", requireAdmin, (req, res) => {
+  const job = jobs.find(j => Number(j.id) === Number(req.params.id));
+
+  if (!job) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  job.isHidden = !job.isHidden;
+
+  res.json({
+    message: job.isHidden ? "Обявата е скрита ✅" : "Обявата е показана ✅",
+    job
+  });
+});
+
+app.delete("/api/admin/jobs/:id", requireAdmin, (req, res) => {
+  const jobId = Number(req.params.id);
+
+  const exists = jobs.some(j => Number(j.id) === jobId);
+  if (!exists) {
+    return res.status(404).json({ message: "Обявата не е намерена." });
+  }
+
+  jobs = jobs.filter(j => Number(j.id) !== jobId);
+  favorites = favorites.filter(f => Number(f.jobId) !== jobId);
+  applications = applications.filter(a => Number(a.jobId) !== jobId);
+  completedProjects = completedProjects.filter(c => Number(c.jobId) !== jobId);
+
+  res.json({ message: "Обявата е изтрита ✅" });
+});
+
+app.put("/api/admin/jobs/bulk-hide", requireAdmin, (req, res) => {
+  const ids = Array.isArray(req.body.ids) ? req.body.ids.map(Number) : [];
+
+  jobs.forEach(job => {
+    if (ids.includes(Number(job.id))) {
+      job.isHidden = true;
+    }
+  });
+
+  res.json({ message: "Избраните обяви са скрити ✅" });
+});
+
+app.delete("/api/admin/jobs/bulk-delete", requireAdmin, (req, res) => {
+  const ids = Array.isArray(req.body.ids) ? req.body.ids.map(Number) : [];
+
+  jobs = jobs.filter(j => !ids.includes(Number(j.id)));
+  favorites = favorites.filter(f => !ids.includes(Number(f.jobId)));
+  applications = applications.filter(a => !ids.includes(Number(a.jobId)));
+  completedProjects = completedProjects.filter(c => !ids.includes(Number(c.jobId)));
+
+  res.json({ message: "Избраните обяви са изтрити ✅" });
+});
+
+/* =========================
+   ADMIN USERS
+========================= */
+app.get("/api/admin/users", requireAdmin, (req, res) => {
+  res.json({ users: users.map(publicUser) });
+});
+
+app.put("/api/admin/users/:email/toggle-block", requireAdmin, (req, res) => {
+  const email = normalizeEmail(decodeURIComponent(req.params.email));
+  const user = users.find(u => normalizeEmail(u.email) === email);
+
+  if (!user) {
+    return res.status(404).json({ message: "Потребителят не е намерен." });
+  }
+
+  if (isAdminEmail(user.email)) {
+    return res.status(400).json({ message: "Админ профилът не може да бъде блокиран." });
+  }
+
+  user.isBlocked = !user.isBlocked;
+
+  res.json({
+    message: user.isBlocked ? "Профилът е блокиран ✅" : "Профилът е отблокиран ✅",
+    user: publicUser(user)
+  });
+});
+
+/* =========================
+   ADMIN POSTS
+========================= */
+app.get("/api/admin/posts", requireAdmin, (req, res) => {
+  res.json({ posts });
+});
+
+app.delete("/api/admin/posts/:id", requireAdmin, (req, res) => {
+  const postId = Number(req.params.id);
+  const exists = posts.some(p => Number(p.id) === postId);
+
+  if (!exists) {
+    return res.status(404).json({ message: "Публикацията не е намерена." });
+  }
+
+  posts = posts.filter(p => Number(p.id) !== postId);
+
+  res.json({ message: "Публикацията е изтрита ✅" });
+});
+
+/* =========================
+   ADMIN REPORTS
+========================= */
+app.get("/api/admin/reports", requireAdmin, (req, res) => {
+  res.json({ reports });
+});
+
+app.put("/api/admin/reports/:id/resolve", requireAdmin, (req, res) => {
+  const report = reports.find(r => Number(r.id) === Number(req.params.id));
+
+  if (!report) {
+    return res.status(404).json({ message: "Докладът не е намерен." });
+  }
+
+  report.status = "resolved";
+
+  res.json({
+    message: "Докладът е маркиран като решен ✅",
+    report
+  });
+});
+
+/* =========================
+   ADMIN ADS
+========================= */
+app.get("/api/admin/ads", requireAdmin, (req, res) => {
+  res.json({ ads });
+});
+
+app.post("/api/admin/ads", upload.single("image"), (req, res) => {
+  const requesterEmail = String(
+    req.body?.requesterEmail ||
+    req.headers["x-admin-email"] ||
+    req.query?.requesterEmail ||
+    ""
+  ).trim().toLowerCase();
+
+  console.log("CREATE AD requesterEmail:", requesterEmail);
+  console.log("CREATE AD body:", req.body);
+
+  if (requesterEmail !== "admin@tursimajstor.bg") {
+    return res.status(403).json({ message: "Нямаш достъп." });
+  }
+
+  const { title, text, link, type } = req.body;
+
+  if (!title || !text) {
+    return res.status(400).json({
+      message: "Заглавието и текстът са задължителни."
+    });
+  }
+
+  const ad = {
+    id: getNextId(ads),
+    title: title.trim(),
+    text: text.trim(),
+    link: link ? link.trim() : "",
+    type: type || "primary",
+    imageUrl: req.file ? `/uploads/${req.file.filename}` : "",
+    isActive: true,
+    createdAt: new Date().toLocaleString("bg-BG")
+  };
+
+  ads.unshift(ad);
+
+  res.json({
+    message: "Рекламата е създадена ✅",
+    ad
+  });
+});
+
+/* =========================
+   START
+========================= */
 app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Admin login: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
 });
